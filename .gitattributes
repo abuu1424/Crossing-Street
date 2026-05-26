@@ -1,10 +1,3 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# .gitattributes
-# Đảm bảo line ending đúng khi clone trên Mac và Windows
-# Mac/Linux dùng LF, Windows dùng CRLF
-# ─────────────────────────────────────────────────────────────────────────────
-
-# Mặc định: normalize tất cả text file
 * text=auto
 
 # Source code → LF (chuẩn Unix, VS2022 handle được)
