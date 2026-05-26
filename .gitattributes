@@ -1,2 +1,44 @@
-# Auto detect text files and perform LF normalization
+# ─────────────────────────────────────────────────────────────────────────────
+# .gitattributes
+# Đảm bảo line ending đúng khi clone trên Mac và Windows
+# Mac/Linux dùng LF, Windows dùng CRLF
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Mặc định: normalize tất cả text file
 * text=auto
+
+# Source code → LF (chuẩn Unix, VS2022 handle được)
+*.cpp       text eol=lf
+*.h         text eol=lf
+*.hpp       text eol=lf
+*.c         text eol=lf
+*.txt       text eol=lf
+*.md        text eol=lf
+*.json      text eol=lf
+
+# CMake
+CMakeLists.txt  text eol=lf
+*.cmake         text eol=lf
+
+# Script
+*.sh        text eol=lf
+*.bat       text eol=crlf
+
+# Assets — binary, không convert
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.bmp       binary
+*.tga       binary
+*.wav       binary
+*.ogg       binary
+*.flac      binary
+*.ttf       binary
+*.otf       binary
+
+# Save files
+*.txt       text eol=lf
+
+# Không track file build
+build/      export-ignore
+build_win/  export-ignore
