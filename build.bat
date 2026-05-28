@@ -23,20 +23,6 @@ echo ║   CrossingGame — Windows Build   ║
 echo ╚══════════════════════════════════╝
 echo.
 
-REM ── Kiểm tra vcpkg ───────────────────────────────────────────────────────────
-if not exist "%VCPKG_TOOLCHAIN%" (
-    echo [ERROR] Khong tim thay vcpkg tai: %VCPKG_ROOT%
-    echo.
-    echo Huong dan cai vcpkg:
-    echo   1. git clone https://github.com/microsoft/vcpkg
-    echo   2. .\vcpkg\bootstrap-vcpkg.bat
-    echo   3. .\vcpkg\vcpkg install sfml:x64-windows
-    echo   4. .\vcpkg\vcpkg integrate install
-    echo   5. Sua VCPKG_ROOT trong build.bat cho dung duong dan
-    pause
-    exit /b 1
-)
-
 REM ── Clean nếu có arg "clean" ──────────────────────────────────────────────────
 if "%1"=="clean" (
     echo [INFO] Cleaning build directory...
