@@ -1,19 +1,10 @@
 #!/bin/bash
-# ─────────────────────────────────────────────────────────────────────────────
-# build.sh — Build script cho Mac
-# Cách dùng:
-#   chmod +x build.sh   (chỉ cần chạy 1 lần)
-#   ./build.sh          (build bình thường)
-#   ./build.sh clean    (xóa build cũ rồi build lại)
-#   ./build.sh run      (build rồi chạy game luôn)
-# ─────────────────────────────────────────────────────────────────────────────
 
 set -e  # Dừng ngay nếu có lỗi
 
 PROJECT_NAME="CrossingGame"
 BUILD_DIR="build"
-SFML_PREFIX="/opt/homebrew"  # Homebrew Apple Silicon
-# Intel Mac thì đổi thành: SFML_PREFIX="/usr/local"
+SFML_PREFIX="/opt/homebrew"
 
 # Màu terminal
 RED='\033[0;31m'

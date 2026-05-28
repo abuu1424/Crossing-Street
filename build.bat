@@ -1,19 +1,9 @@
 @echo off
 
-REM Cách dùng:
-REM   build.bat          (build bình thường)
-REM   build.bat clean    (xóa build cũ rồi build lại)
-REM   build.bat run      (build rồi chạy game luôn)
-
 setlocal enabledelayedexpansion
 
 set PROJECT_NAME=CrossingGame
 set BUILD_DIR=build_win
-
-REM ── Đường dẫn vcpkg — SỬA CHỖ NÀY cho đúng máy ────────────────────────────
-set VCPKG_ROOT=C:\vcpkg
-REM Nếu vcpkg ở chỗ khác thì đổi lại, ví dụ:
-REM set VCPKG_ROOT=C:\Users\YourName\vcpkg
 
 set VCPKG_TOOLCHAIN=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake
 
@@ -66,7 +56,6 @@ echo.
 echo [OK] Build thành công → %BUILD_DIR%\Release\%PROJECT_NAME%.exe
 cd ..
 
-REM ── Chạy game nếu có arg "run" ────────────────────────────────────────────────
 if "%1"=="run" goto :run
 if "%2"=="run" goto :run
 goto :end

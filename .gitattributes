@@ -1,6 +1,5 @@
 * text=auto
 
-# Source code → LF (chuẩn Unix, VS2022 handle được)
 *.cpp       text eol=lf
 *.h         text eol=lf
 *.hpp       text eol=lf
