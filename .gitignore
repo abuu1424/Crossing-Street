@@ -1,0 +1,6 @@
+build/
+build_win/
+*.o
+*.exe
+*.out
+.DS_Store
