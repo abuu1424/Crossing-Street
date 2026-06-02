@@ -12,7 +12,7 @@ const int Lane_H = 80;
 const int Safe_Zone_H = 80;
 
 //Player
-const float Player_Speed = 5;
+const float Player_Speed = 200.f;
 const float Player_W = 48.f;
 const float Player_H = 64.f;
 
