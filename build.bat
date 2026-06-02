@@ -61,7 +61,8 @@ echo.
 echo [OK] Build thành công → %BUILD_DIR%\Release\%PROJECT_NAME%.exe
 cd ..
 
-REM ── Chạy game nếu có arg "run"
+REM ── Chạy game nếu có arg "run"git pull --no-rebase
+
 if "%1"=="run" goto :run
 if "%2"=="run" goto :run
 goto :end
