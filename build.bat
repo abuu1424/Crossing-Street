@@ -1,15 +1,21 @@
 @echo off
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 987f500c4a52d8f3846affe4aa496ccd3bac8855
 setlocal enabledelayedexpansion
 
 set PROJECT_NAME=CrossingGame
 set BUILD_DIR=build_win
 
+<<<<<<< HEAD
 REM
 set VCPKG_ROOT=C:\vcpkg
 
 
+=======
+>>>>>>> 987f500c4a52d8f3846affe4aa496ccd3bac8855
 set VCPKG_TOOLCHAIN=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake
 
 echo.
@@ -61,8 +67,11 @@ echo.
 echo [OK] Build thành công → %BUILD_DIR%\Release\%PROJECT_NAME%.exe
 cd ..
 
+<<<<<<< HEAD
 REM ── Chạy game nếu có arg "run"git pull --no-rebase
 
+=======
+>>>>>>> 987f500c4a52d8f3846affe4aa496ccd3bac8855
 if "%1"=="run" goto :run
 if "%2"=="run" goto :run
 goto :end
