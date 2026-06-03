@@ -1,8 +1,8 @@
 #pragma once
 
 //Window
-const int Win_W = 1920;
-const int Win_H = 1080;
+const int Win_W = 800;
+const int Win_H = 600;
 const int FPS = 60;
 
 //Game
@@ -23,3 +23,13 @@ const float Frame_Time = 0.12f;
 const char Save_Path[] = "saves/save.txt";
 const char Score_Path[] = "saves/highscore.txt";
 const char Front_Path[] = "assets/front/font.ttf";
+
+//Era
+enum class Era
+{
+    Prehistoric = 0,
+    Ancient = 1,
+    Medieval = 2,
+    Modern = 3,
+    Future = 4
+};
