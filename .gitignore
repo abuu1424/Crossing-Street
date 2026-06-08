@@ -3,4 +3,18 @@ build_win/
 *.o
 *.exe
 *.out
+# macOS
 .DS_Store
+
+# CLion
+.idea/
+cmake-build-*/
+
+# Visual Studio
+.vs/
+*.VC.db
+*.VC.opendb
+
+# Build
+out/
+bin/
