@@ -1,20 +1,35 @@
+# Build
 build/
 build_win/
+cmake-build-*/
+out/
+bin/
+Debug/
+Release/
+x64/
+
+# Compiled files
 *.o
+*.obj
 *.exe
 *.out
+*.dll
+*.lib
+*.pdb
+*.ilk
+
 # macOS
 .DS_Store
 
-# CLion
+# CLion / JetBrains
 .idea/
-cmake-build-*/
 
 # Visual Studio
 .vs/
 *.VC.db
 *.VC.opendb
+*.vsidx
 
-# Build
-out/
-bin/
+# Local libraries / package managers
+SFML-*/
+vcpkg/
