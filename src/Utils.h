@@ -1,5 +1,5 @@
 #pragma once
-
+#include <SFML/Graphics.hpp>
 //Window
 const int W = static_cast<int>(sf::VideoMode::getDesktopMode().width);
 const int H = static_cast<int>(sf::VideoMode::getDesktopMode().height);
