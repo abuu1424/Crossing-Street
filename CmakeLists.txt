@@ -27,7 +27,8 @@ file(GLOB_RECURSE SOURCES
 )
 
 # ── Tạo executable ────────────────────────────────────────────────────────────
-add_executable(CrossingGame ${SOURCES})
+add_executable(CrossingGame ${SOURCES}
+        src/core/CPEOPLE.h)
 
 # ── Include paths ─────────────────────────────────────────────────────────────
 target_include_directories(CrossingGame PRIVATE
