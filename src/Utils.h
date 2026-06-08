@@ -1,8 +1,8 @@
 #pragma once
 
 //Window
-const int Win_W = 800;
-const int Win_H = 600;
+const int Win_W = 1280;
+const int Win_H = 720;
 const int FPS = 60;
 
 //Game
