@@ -72,10 +72,24 @@ include CMakeFiles/CrossingGame.dir/flags.make
 CMakeFiles/CrossingGame.dir/codegen:
 .PHONY : CMakeFiles/CrossingGame.dir/codegen
 
+CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o: CMakeFiles/CrossingGame.dir/flags.make
+CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o: /Users/phangiahuy290407gmail.com/Documents/bài\ tập/file\ pdf/bài\ tập/hk3/oop/Crossing\ Street/src/core/Animation.cpp
+CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o: CMakeFiles/CrossingGame.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o -MF CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o.d -o CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o -c "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/core/Animation.cpp"
+
+CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/core/Animation.cpp" > CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.i
+
+CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/core/Animation.cpp" -o CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.s
+
 CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o: CMakeFiles/CrossingGame.dir/flags.make
 CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o: /Users/phangiahuy290407gmail.com/Documents/bài\ tập/file\ pdf/bài\ tập/hk3/oop/Crossing\ Street/src/core/CGAME.cpp
 CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o: CMakeFiles/CrossingGame.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o -MF CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o.d -o CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o -c "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/core/CGAME.cpp"
 
 CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.i: cmake_force
@@ -89,7 +103,7 @@ CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.s: cmake_force
 CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.o: CMakeFiles/CrossingGame.dir/flags.make
 CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.o: /Users/phangiahuy290407gmail.com/Documents/bài\ tập/file\ pdf/bài\ tập/hk3/oop/Crossing\ Street/src/core/CPEOPLE.cpp
 CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.o: CMakeFiles/CrossingGame.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.o -MF CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.o.d -o CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.o -c "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/core/CPEOPLE.cpp"
 
 CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.i: cmake_force
@@ -103,7 +117,7 @@ CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.s: cmake_force
 CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.o: CMakeFiles/CrossingGame.dir/flags.make
 CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.o: /Users/phangiahuy290407gmail.com/Documents/bài\ tập/file\ pdf/bài\ tập/hk3/oop/Crossing\ Street/src/core/CTRAFFICLIGHT.cpp
 CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.o: CMakeFiles/CrossingGame.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.o -MF CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.o.d -o CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.o -c "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/core/CTRAFFICLIGHT.cpp"
 
 CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.i: cmake_force
@@ -117,7 +131,7 @@ CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.s: cmake_force
 CMakeFiles/CrossingGame.dir/src/main.cpp.o: CMakeFiles/CrossingGame.dir/flags.make
 CMakeFiles/CrossingGame.dir/src/main.cpp.o: /Users/phangiahuy290407gmail.com/Documents/bài\ tập/file\ pdf/bài\ tập/hk3/oop/Crossing\ Street/src/main.cpp
 CMakeFiles/CrossingGame.dir/src/main.cpp.o: CMakeFiles/CrossingGame.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/CrossingGame.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/CrossingGame.dir/src/main.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/CrossingGame.dir/src/main.cpp.o -MF CMakeFiles/CrossingGame.dir/src/main.cpp.o.d -o CMakeFiles/CrossingGame.dir/src/main.cpp.o -c "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/main.cpp"
 
 CMakeFiles/CrossingGame.dir/src/main.cpp.i: cmake_force
@@ -131,7 +145,7 @@ CMakeFiles/CrossingGame.dir/src/main.cpp.s: cmake_force
 CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CDINOSOUR.cpp.o: CMakeFiles/CrossingGame.dir/flags.make
 CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CDINOSOUR.cpp.o: /Users/phangiahuy290407gmail.com/Documents/bài\ tập/file\ pdf/bài\ tập/hk3/oop/Crossing\ Street/src/obstacles/lv1/CDINOSOUR.cpp
 CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CDINOSOUR.cpp.o: CMakeFiles/CrossingGame.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CDINOSOUR.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CDINOSOUR.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CDINOSOUR.cpp.o -MF CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CDINOSOUR.cpp.o.d -o CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CDINOSOUR.cpp.o -c "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/obstacles/lv1/CDINOSOUR.cpp"
 
 CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CDINOSOUR.cpp.i: cmake_force
@@ -145,7 +159,7 @@ CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CDINOSOUR.cpp.s: cmake_force
 CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CMAMMOTH.cpp.o: CMakeFiles/CrossingGame.dir/flags.make
 CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CMAMMOTH.cpp.o: /Users/phangiahuy290407gmail.com/Documents/bài\ tập/file\ pdf/bài\ tập/hk3/oop/Crossing\ Street/src/obstacles/lv1/CMAMMOTH.cpp
 CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CMAMMOTH.cpp.o: CMakeFiles/CrossingGame.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CMAMMOTH.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CMAMMOTH.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CMAMMOTH.cpp.o -MF CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CMAMMOTH.cpp.o.d -o CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CMAMMOTH.cpp.o -c "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/obstacles/lv1/CMAMMOTH.cpp"
 
 CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CMAMMOTH.cpp.i: cmake_force
@@ -159,7 +173,7 @@ CMakeFiles/CrossingGame.dir/src/obstacles/lv1/CMAMMOTH.cpp.s: cmake_force
 CMakeFiles/CrossingGame.dir/src/obstacles/lv4/CVEHICLE.cpp.o: CMakeFiles/CrossingGame.dir/flags.make
 CMakeFiles/CrossingGame.dir/src/obstacles/lv4/CVEHICLE.cpp.o: /Users/phangiahuy290407gmail.com/Documents/bài\ tập/file\ pdf/bài\ tập/hk3/oop/Crossing\ Street/src/obstacles/lv4/CVEHICLE.cpp
 CMakeFiles/CrossingGame.dir/src/obstacles/lv4/CVEHICLE.cpp.o: CMakeFiles/CrossingGame.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/CrossingGame.dir/src/obstacles/lv4/CVEHICLE.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/CrossingGame.dir/src/obstacles/lv4/CVEHICLE.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/CrossingGame.dir/src/obstacles/lv4/CVEHICLE.cpp.o -MF CMakeFiles/CrossingGame.dir/src/obstacles/lv4/CVEHICLE.cpp.o.d -o CMakeFiles/CrossingGame.dir/src/obstacles/lv4/CVEHICLE.cpp.o -c "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/obstacles/lv4/CVEHICLE.cpp"
 
 CMakeFiles/CrossingGame.dir/src/obstacles/lv4/CVEHICLE.cpp.i: cmake_force
@@ -173,7 +187,7 @@ CMakeFiles/CrossingGame.dir/src/obstacles/lv4/CVEHICLE.cpp.s: cmake_force
 CMakeFiles/CrossingGame.dir/src/ui/HUD.cpp.o: CMakeFiles/CrossingGame.dir/flags.make
 CMakeFiles/CrossingGame.dir/src/ui/HUD.cpp.o: /Users/phangiahuy290407gmail.com/Documents/bài\ tập/file\ pdf/bài\ tập/hk3/oop/Crossing\ Street/src/ui/HUD.cpp
 CMakeFiles/CrossingGame.dir/src/ui/HUD.cpp.o: CMakeFiles/CrossingGame.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/CrossingGame.dir/src/ui/HUD.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/CrossingGame.dir/src/ui/HUD.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/CrossingGame.dir/src/ui/HUD.cpp.o -MF CMakeFiles/CrossingGame.dir/src/ui/HUD.cpp.o.d -o CMakeFiles/CrossingGame.dir/src/ui/HUD.cpp.o -c "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/ui/HUD.cpp"
 
 CMakeFiles/CrossingGame.dir/src/ui/HUD.cpp.i: cmake_force
@@ -187,7 +201,7 @@ CMakeFiles/CrossingGame.dir/src/ui/HUD.cpp.s: cmake_force
 CMakeFiles/CrossingGame.dir/src/ui/Menu.cpp.o: CMakeFiles/CrossingGame.dir/flags.make
 CMakeFiles/CrossingGame.dir/src/ui/Menu.cpp.o: /Users/phangiahuy290407gmail.com/Documents/bài\ tập/file\ pdf/bài\ tập/hk3/oop/Crossing\ Street/src/ui/Menu.cpp
 CMakeFiles/CrossingGame.dir/src/ui/Menu.cpp.o: CMakeFiles/CrossingGame.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/CrossingGame.dir/src/ui/Menu.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/CrossingGame.dir/src/ui/Menu.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/CrossingGame.dir/src/ui/Menu.cpp.o -MF CMakeFiles/CrossingGame.dir/src/ui/Menu.cpp.o.d -o CMakeFiles/CrossingGame.dir/src/ui/Menu.cpp.o -c "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/ui/Menu.cpp"
 
 CMakeFiles/CrossingGame.dir/src/ui/Menu.cpp.i: cmake_force
@@ -200,6 +214,7 @@ CMakeFiles/CrossingGame.dir/src/ui/Menu.cpp.s: cmake_force
 
 # Object files for target CrossingGame
 CrossingGame_OBJECTS = \
+"CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o" \
 "CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o" \
 "CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.o" \
 "CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.o" \
@@ -213,6 +228,7 @@ CrossingGame_OBJECTS = \
 # External object files for target CrossingGame
 CrossingGame_EXTERNAL_OBJECTS =
 
+CrossingGame: CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o
 CrossingGame: CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o
 CrossingGame: CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.o
 CrossingGame: CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.o
@@ -228,7 +244,7 @@ CrossingGame: /opt/homebrew/lib/libsfml-window.2.6.2.dylib
 CrossingGame: /opt/homebrew/lib/libsfml-audio.2.6.2.dylib
 CrossingGame: /opt/homebrew/lib/libsfml-system.2.6.2.dylib
 CrossingGame: CMakeFiles/CrossingGame.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable CrossingGame"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX executable CrossingGame"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/CrossingGame.dir/link.txt --verbose=$(VERBOSE)
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold "Copying assets to build directory..."
 	/opt/homebrew/bin/cmake -E copy_directory /Users/phangiahuy290407gmail.com/Documents/bài\ tập/file\ pdf/bài\ tập/hk3/oop/Crossing\ Street/assets /Users/phangiahuy290407gmail.com/Documents/bài\ tập/file\ pdf/bài\ tập/hk3/oop/Crossing\ Street/build/assets

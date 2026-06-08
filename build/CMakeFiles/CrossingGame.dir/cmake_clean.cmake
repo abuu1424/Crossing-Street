@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o"
+  "CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o.d"
   "CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o"
   "CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o.d"
   "CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.o"

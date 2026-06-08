@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/core/Animation.cpp" "CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o" "gcc" "CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o.d"
   "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/core/CGAME.cpp" "CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o" "gcc" "CMakeFiles/CrossingGame.dir/src/core/CGAME.cpp.o.d"
   "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/core/CPEOPLE.cpp" "CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.o" "gcc" "CMakeFiles/CrossingGame.dir/src/core/CPEOPLE.cpp.o.d"
   "/Users/phangiahuy290407gmail.com/Documents/bài tập/file pdf/bài tập/hk3/oop/Crossing Street/src/core/CTRAFFICLIGHT.cpp" "CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.o" "gcc" "CMakeFiles/CrossingGame.dir/src/core/CTRAFFICLIGHT.cpp.o.d"

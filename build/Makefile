@@ -129,6 +129,30 @@ CrossingGame/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/CrossingGame.dir/build.make CMakeFiles/CrossingGame.dir/build
 .PHONY : CrossingGame/fast
 
+src/core/Animation.o: src/core/Animation.cpp.o
+.PHONY : src/core/Animation.o
+
+# target to build an object file
+src/core/Animation.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CrossingGame.dir/build.make CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.o
+.PHONY : src/core/Animation.cpp.o
+
+src/core/Animation.i: src/core/Animation.cpp.i
+.PHONY : src/core/Animation.i
+
+# target to preprocess a source file
+src/core/Animation.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CrossingGame.dir/build.make CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.i
+.PHONY : src/core/Animation.cpp.i
+
+src/core/Animation.s: src/core/Animation.cpp.s
+.PHONY : src/core/Animation.s
+
+# target to generate assembly for a file
+src/core/Animation.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CrossingGame.dir/build.make CMakeFiles/CrossingGame.dir/src/core/Animation.cpp.s
+.PHONY : src/core/Animation.cpp.s
+
 src/core/CGAME.o: src/core/CGAME.cpp.o
 .PHONY : src/core/CGAME.o
 
@@ -354,6 +378,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... CrossingGame"
+	@echo "... src/core/Animation.o"
+	@echo "... src/core/Animation.i"
+	@echo "... src/core/Animation.s"
 	@echo "... src/core/CGAME.o"
 	@echo "... src/core/CGAME.i"
 	@echo "... src/core/CGAME.s"
