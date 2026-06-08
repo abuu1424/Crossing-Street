@@ -8,6 +8,6 @@ protected:
 	int mDirection; // 1 = phai, -1 = trai
 	bool mIsAlive;
 public:
-	CANIMAL(float speed = 150, int direction = 1);
+	CANIMAL(float speed = 150.f, int direction = 1);
 	virtual ~CANIMAL() = default;
 };
