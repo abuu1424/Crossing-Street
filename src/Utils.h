@@ -1,8 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 //Window
-const int W = static_cast<int>(sf::VideoMode::getDesktopMode().width);
-const int H = static_cast<int>(sf::VideoMode::getDesktopMode().height);
+const int Win_W = static_cast<int>(sf::VideoMode::getDesktopMode().width);
+const int Win_H = static_cast<int>(sf::VideoMode::getDesktopMode().height);
 const int FPS = 60;
 
 //Game
@@ -22,7 +22,7 @@ const float Frame_Time = 0.12f;
 //File path
 const char Save_Path[] = "saves/save.txt";
 const char Score_Path[] = "saves/highscore.txt";
-const char Front_Path[] = "assets/front/font.ttf";
+const char Font_Path[] = "assets/front/font.ttf";
 
 //Era
 enum class Era
