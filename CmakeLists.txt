@@ -53,8 +53,10 @@ add_custom_command(TARGET CrossingGame POST_BUILD
 )
 
 if(APPLE)
-    target_compile_options(CrossingGame PRIVATE -w)
+    set(CMAKE_PREFIX_PATH "/opt/homebrew/opt/sfml@2")
 endif()
+
+find_package(SFML 2.5 COMPONENTS graphics window system audio REQUIRED)
 
 if(WIN32)
     add_custom_command(TARGET CrossingGame POST_BUILD
