@@ -17,27 +17,22 @@ CPEOPLE::CPEOPLE()
     loadSprite("assets/sprites/lv1_sp/player/player.png");
 }
 
-bool CPEOPLE::loadSprite(const std::string& texturePath)
-{
-    if (!mTexture.loadFromFile(texturePath))
-    {
-        return false;
-    }
-
-    mSprite.setTexture(mTexture);
-
-    const int frameW = 32;
-    const int frameH = 48;
-
-    mSprite.setTextureRect(sf::IntRect(0, 0, frameW, frameH));
+bool CPEOPLE::loadSprite(const std::string& texturePath) {
+    delete mAnim;
+    mAnim = new Animation(
+        mSprite,
+        texturePath,
+        64, 64,   // frameW, frameH
+        4, 4,     // 4 cột, 4 hàng = 16 frame
+        Frame_Time
+    );
 
     mSprite.setScale(
-        Player_W / static_cast<float>(frameW),
-        Player_H / static_cast<float>(frameH)
+        Player_W / 64.f,
+        Player_H / 64.f
     );
 
     mSprite.setPosition(mPosition);
-
     return true;
 }
 
@@ -102,6 +97,10 @@ void CPEOPLE::Move(float dt)
     }
 
     mSprite.setPosition(mPosition);
+}
+
+void CPEOPLE::update(float dt) {
+    if (mAnim) mAnim->update(dt);
 }
 
 void CPEOPLE::setPosition(float x, float y)

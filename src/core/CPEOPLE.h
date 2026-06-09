@@ -25,6 +25,7 @@ public:
     bool loadSprite(const std::string& texturePath);
 
     void Move(float dt);
+    void update(float dt);
 
     void setPosition(float x, float y);
     sf::Vector2f getPosition() const;
@@ -38,6 +39,7 @@ public:
     void setFinish(bool finish);
 
     void Draw(sf::RenderWindow& window);
+
 };
 
 #endif // CROSSINGGAME_CPEOPLE_H

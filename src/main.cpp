@@ -32,6 +32,7 @@ int main ()
         }
         // Update
         player.Move(dt);
+        player.update(dt);
 
         //Render
         window.clear(sf::Color(20, 22, 48));
