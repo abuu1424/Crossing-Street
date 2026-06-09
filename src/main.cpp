@@ -1,5 +1,6 @@
 #include<SFML/Graphics.hpp>
 #include "Utils.h"
+#include"CPEOPLE.h"
 
 int main ()
 {
@@ -14,6 +15,7 @@ int main ()
     window.setFramerateLimit(60);
 
     sf::Clock clock;
+    CPEOPLE player;
 
     while (window.isOpen())
     {
@@ -29,9 +31,11 @@ int main ()
                     window.close();
         }
         // Update
+        player.Move(dt);
 
         //Render
         window.clear(sf::Color(20, 22, 48));
+        player.Draw(window);
         window.display();
     }
     return 0;

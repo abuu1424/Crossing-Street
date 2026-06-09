@@ -4,12 +4,14 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <string>
+#include"Animation.h"
 #include "Utils.h"
 
 class CPEOPLE
 {
     sf::Sprite mSprite;
     sf::Texture mTexture;
+    Animation* mAnim = nullptr;
 
     sf::Vector2f mPosition;
 

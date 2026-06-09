@@ -14,7 +14,7 @@ CPEOPLE::CPEOPLE()
 
     mSprite.setPosition(mPosition);
 
-    loadSprite("assets/sprites/player/player.png");
+    loadSprite("assets/sprites/lv1_sp/player/player.png");
 }
 
 bool CPEOPLE::loadSprite(const std::string& texturePath)
