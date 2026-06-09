@@ -20,6 +20,10 @@ class CPEOPLE
 public:
     CPEOPLE();
 
+    bool loadSprite(const std::string& texturePath);
+
+    void Move(float dt);
+
     void setPosition(float x, float y);
     sf::Vector2f getPosition() const;
 
@@ -31,7 +35,7 @@ public:
     void setDead(bool dead);
     void setFinish(bool finish);
 
-    void draw(sf::RenderWindow& window);
+    void Draw(sf::RenderWindow& window);
 };
 
 #endif // CROSSINGGAME_CPEOPLE_H
