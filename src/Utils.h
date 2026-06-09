@@ -16,7 +16,7 @@ const float Player_Speed = 200.f;
 const float Player_W = 48.f;
 const float Player_H = 64.f;
 //Animal
-const float ANIMAL_W = 80.f;   // ← thiếu, thêm vào
+const float ANIMAL_W = 80.f;
 const float ANIMAL_H = 64.f;
 const float BASE_SPEED = 150.f;
 const float FRAME_TIME = 0.12f;

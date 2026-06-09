@@ -11,7 +11,7 @@ protected:
 public:
 	CANIMAL(float speed = 150.f, float direction = 1.f);
 	virtual ~CANIMAL() = default;
-	virtual void Move(float dt);   // <-- wrap around o day
+	virtual void Move(float dt); 
     virtual void Draw(sf::RenderWindow& w);
     virtual void update(float dt);
 
