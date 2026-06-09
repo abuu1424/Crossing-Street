@@ -1,8 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 //Window
-const int Win_W = static_cast<int>(sf::VideoMode::getDesktopMode().width);
-const int Win_H = static_cast<int>(sf::VideoMode::getDesktopMode().height);
+const int Win_W =  1280;
+const int Win_H = 720;
 const int FPS = 60;
 
 //Game

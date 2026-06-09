@@ -52,6 +52,9 @@ if(APPLE)
     target_compile_options(CrossingGame PRIVATE -w)
 endif()
 
+file(COPY ${CMAKE_SOURCE_DIR}/assets
+        DESTINATION ${CMAKE_BINARY_DIR})
+
 # ── Copy assets vào build ─────────────────────────────────────────────────────
 add_custom_command(TARGET CrossingGame POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory

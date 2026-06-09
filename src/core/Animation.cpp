@@ -1,18 +1,18 @@
 #include "Animation.h"
-Animation::Animation(sf::Sprite& sprite, const std::string& path,
-int fw, int fh, int cols, int rows,
-float frameTime, bool loop)
-: mSprite(sprite), mFrameTime(frameTime),
-mElapsed(0), mCurrentFrame(0), mLoop(loop)
+// Constructor mới
+Animation::Animation(sf::Sprite& sprite, sf::Texture& texture,
+                     int fw, int fh, int cols, int rows,
+                     float frameTime, bool loop)
+    : mSprite(sprite), mFrameTime(frameTime),
+      mElapsed(0), mCurrentFrame(0), mLoop(loop)
 {
-    mTexture.loadFromFile(path);
-    mSprite.setTexture(mTexture);
-    // Tao danh sach frame theo thu tu trai->phai, tren->duoi
+    mSprite.setTexture(texture);
     for (int row = 0; row < rows; row++)
         for (int col = 0; col < cols; col++)
-            mFrames.push_back(sf::IntRect(col * fw, row * fh, fw, fh));
+            mFrames.push_back(sf::IntRect(col*fw, row*fh, fw, fh));
     mSprite.setTextureRect(mFrames[0]);
 }
+
 void Animation::update(float dt) {
     mElapsed += dt;
     if (mElapsed >= mFrameTime) {

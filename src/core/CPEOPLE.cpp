@@ -9,7 +9,7 @@ CPEOPLE::CPEOPLE()
 
     mPosition = sf::Vector2f(
         Win_W / 2.f - Player_W / 2.f,
-        Win_H - Safe_Zone_H + (Safe_Zone_H - Player_H) / 2.f
+        Win_H / 2.f - Player_H / 2.f
     );
 
     mSprite.setPosition(mPosition);
@@ -17,90 +17,66 @@ CPEOPLE::CPEOPLE()
     loadSprite("assets/sprites/lv1_sp/player/player.png");
 }
 
+CPEOPLE::~CPEOPLE()
+{
+    delete mAnim;
+}
+
+//Load Sprite
 bool CPEOPLE::loadSprite(const std::string& texturePath) {
+    if (!mTexture.loadFromFile(texturePath)) {
+        printf("FAILED: %s\n", texturePath.c_str());
+        return false;
+    }
     delete mAnim;
     mAnim = new Animation(
-        mSprite,
-        texturePath,
+        mSprite, mTexture,
         64, 64,   // frameW, frameH
-        4, 4,     // 4 cột, 4 hàng = 16 frame
+        4, 1,     // 4 cột, 1 hàng
         Frame_Time
     );
-
-    mSprite.setScale(
-        Player_W / 64.f,
-        Player_H / 64.f
-    );
-
+    mSprite.setScale(Player_W / 64.f, Player_H / 64.f);
     mSprite.setPosition(mPosition);
     return true;
 }
 
-void CPEOPLE::Move(float dt)
-{
-    if (mIsDead || mIsFinish)
-    {
-        return;
+void CPEOPLE::update(float dt) {
+    if (!mAnim) return;
+
+    if (mIsMoving) {
+        mAnim->update(dt);
+        // Đổi sang đúng hàng
+        sf::IntRect rect = mSprite.getTextureRect();
+        rect.top = mRow * 64;
+        mSprite.setTextureRect(rect);
+    } else {
+        // Đứng yên — hiện fram đầu tiên
+        mSprite.setTextureRect(sf::IntRect(0, mRow * 64, 64, 64));
     }
-
-    sf::Vector2f direction(0.f, 0.f);
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-    {
-        direction.y -= 1.f;
-    }
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-    {
-        direction.y += 1.f;
-    }
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-    {
-        direction.x -= 1.f;
-    }
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-    {
-        direction.x += 1.f;
-    }
-
-    float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-
-    if (length != 0.f)
-    {
-        direction.x /= length;
-        direction.y /= length;
-    }
-
-    mPosition.x += direction.x * mSpeed * dt;
-    mPosition.y += direction.y * mSpeed * dt;
-
-    if (mPosition.x < 0.f)
-    {
-        mPosition.x = 0.f;
-    }
-
-    if (mPosition.x > Win_W - Player_W)
-    {
-        mPosition.x = Win_W - Player_W;
-    }
-
-    if (mPosition.y < 0.f)
-    {
-        mPosition.y = 0.f;
-    }
-
-    if (mPosition.y > Win_H - Player_H)
-    {
-        mPosition.y = Win_H - Player_H;
-    }
-
-    mSprite.setPosition(mPosition);
 }
 
-void CPEOPLE::update(float dt) {
-    if (mAnim) mAnim->update(dt);
+// Move
+void CPEOPLE::Move(float dt) {
+    if (mIsDead || mIsFinish) return;
+
+    sf::Vector2f dir(0.f, 0.f);
+    mIsMoving = false;
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+        dir.y -= 1.f; mRow = 3; mIsMoving = true;
+    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+        dir.y += 1.f; mRow = 0; mIsMoving = true;
+    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+        dir.x -= 1.f; mRow = 1; mIsMoving = true;
+    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+        dir.x += 1.f; mRow = 2; mIsMoving = true;
+    }
+
+    mPosition.x += dir.x * mSpeed * dt;
+    mPosition.y += dir.y * mSpeed * dt;
+    mPosition.x = std::max(0.f, std::min(mPosition.x, (float)Win_W - Player_W));
+    mPosition.y = std::max(0.f, std::min(mPosition.y, (float)Win_H - Player_H));
+    mSprite.setPosition(mPosition);
 }
 
 void CPEOPLE::setPosition(float x, float y)

@@ -1,14 +1,10 @@
-#include<SFML/Graphics.hpp>
+#include <SFML/Graphics.hpp>
 #include "Utils.h"
-#include"CPEOPLE.h"
+#include "CPEOPLE.h"
 
-int main ()
-{
-    const int W = static_cast<int>(sf::VideoMode::getDesktopMode().width);
-    const int H = static_cast<int>(sf::VideoMode::getDesktopMode().height);
-
+int main() {
     sf::RenderWindow window(
-        sf::VideoMode::getDesktopMode(),
+        sf::VideoMode(Win_W, Win_H),
         "Crossing Street",
         sf::Style::Default
     );
@@ -17,24 +13,23 @@ int main ()
     sf::Clock clock;
     CPEOPLE player;
 
-    while (window.isOpen())
-    {
+    while (window.isOpen()) {
         float dt = clock.restart().asSeconds();
-        //Nút bấm cơ bản
+
         sf::Event event;
-        while (window.pollEvent(event))
-        {
+        while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
             if (event.type == sf::Event::KeyPressed)
                 if (event.key.code == sf::Keyboard::Escape)
                     window.close();
         }
-        // Update
+
+
+        //Update
         player.Move(dt);
         player.update(dt);
 
-        //Render
         window.clear(sf::Color(20, 22, 48));
         player.Draw(window);
         window.display();
