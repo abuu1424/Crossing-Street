@@ -22,7 +22,7 @@ const float Frame_Time = 0.12f;
 //File path
 const char Save_Path[] = "saves/save.txt";
 const char Score_Path[] = "saves/highscore.txt";
-const char Font_Path[] = "assets/front/font.ttf";
+const char Font_Path[] = "assets/font/font.ttf";
 
 //Era
 enum class Era

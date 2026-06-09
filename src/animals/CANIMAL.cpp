@@ -1,20 +1,19 @@
 #include "CANIMAL.h"
-#include "../Utils.h"
+#include "Utils.h"
 CANIMAL::CANIMAL(float speed, float direction)
     : mSpeed(speed), mDirection(direction),
      mSprite(mTexture) {}
  
 void CANIMAL::Move(float dt) {
-    mSprite.move(sf::Vector2f(mSpeed * mDirection * dt, 0.f));
+    mSprite.move(mSpeed * mDirection * dt, 0.f);
+
     sf::FloatRect bounds = mSprite.getGlobalBounds();
- 
-    // Wrap around: bay ra ngoai man hinh thi xuat hien lai phia doi dien
-    if (mDirection > 0.f &&  bounds.position.x > WIN_W) {
-        // Bay sang phai, ra khoi man hinh ben phai → xuat hien ben trai
-       mSprite.setPosition(sf::Vector2f(-ANIMAL_W, mSprite.getPosition().y));
+
+    if (mDirection > 0.f && bounds.left > Win_W) {
+        mSprite.setPosition(-bounds.width, mSprite.getPosition().y);
     }
-    else if (mDirection < 0.f && bounds.position.x + bounds.size.x < 0.f) {
-        mSprite.setPosition(sf::Vector2f(WIN_W, mSprite.getPosition().y));
+    else if (mDirection < 0.f && bounds.left + bounds.width < 0.f) {
+        mSprite.setPosition((float)Win_W, mSprite.getPosition().y);
     }
 }
  
