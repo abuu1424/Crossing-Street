@@ -55,6 +55,7 @@ void CVEHICLE::Draw(sf::RenderWindow& w) {
     w.draw(mSprite);
 }
 
+//Kiểm tra có đụng xe hoặc chạm người, là hàm tính toán khoảng cách xung quanh vật
 sf::FloatRect CVEHICLE::getBounds() const {
     return mSprite.getGlobalBounds();
 }
