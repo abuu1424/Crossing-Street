@@ -14,6 +14,7 @@ public:
 	virtual void Move(float dt); 
     virtual void Draw(sf::RenderWindow& w);
     virtual void update(float dt);
+	bool loadSprite(const std::string& texturePath, float x, float y);
 
     sf::FloatRect getBounds() const { return mSprite.getGlobalBounds(); }
 };
