@@ -9,14 +9,12 @@ bool CDINOSOUR::loadSprite(const std::string& path, float x, float y) {
         return false;
     }
 
-    // 2 cột x 2 hàng, mỗi frame 16x16
     delete mAnim;
     mAnim = new Animation(mSprite, mTexture,
         32, 32,   // frameW, frameH
         2, 2,
         Frame_Time
     );
-    // Scale lên 96x64 trên màn hình
     mSprite.setScale(3.f, 3.f);
     mSprite.setPosition(x, y);
     return true;

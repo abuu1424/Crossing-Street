@@ -23,7 +23,6 @@ int main() {
     dino2.loadSprite("assets/sprites/lv1_sp/dino/dino2.png", 600, 300);
     dino3.loadSprite("assets/sprites/lv1_sp/dino/dino3.png", 300, 400);
 
-
     while (window.isOpen()) {
         float dt = clock.restart().asSeconds();
 
@@ -45,8 +44,7 @@ int main() {
         dino1.Move(dt); dino1.update(dt);
         dino2.Move(dt); dino2.update(dt);
         dino3.Move(dt); dino3.update(dt);
-
-
+        //window
         window.clear(sf::Color(20, 22, 48));
         //Dino
         dino1.Draw(window);
