@@ -21,6 +21,23 @@ void CANIMAL::Draw(sf::RenderWindow& w) {
     w.draw(mSprite);
 }
 
+bool CANIMAL::loadSprite(const std::string& texturePath, float x, float y) {
+    if (!mTexture.loadFromFile(texturePath)) {
+        printf("FAILED: %s\n", texturePath.c_str());
+        return false;
+    }
+    mSprite.setTexture(mTexture);
+    mSprite.setTextureRect(sf::IntRect(0, 0,
+        mTexture.getSize().x,
+        mTexture.getSize().y));
+    mSprite.setScale(
+        ANIMAL_W / static_cast<float>(mTexture.getSize().x),
+        ANIMAL_H / static_cast<float>(mTexture.getSize().y)
+    );
+    mSprite.setPosition(x, y);
+    return true;
+}
+
 void CANIMAL::update(float dt) {
     // Subclass override de goi mAnim.update(dt)
 }
