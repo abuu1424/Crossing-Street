@@ -27,13 +27,8 @@ file(GLOB_RECURSE SOURCES
 )
 
 # ── Tạo executable ────────────────────────────────────────────────────────────
-<<<<<<< HEAD
-add_executable(CrossingGame ${SOURCES} "src/animals/CBIRD.h" "src/animals/CBIRD.cpp")
-=======
-add_executable(CrossingGame ${SOURCES}
-        src/vehicle/CVEHICLE.cpp
-        src/vehicle/CVEHICLE.h)
->>>>>>> 6ad5d866474980a65ac1b7f4fdb219557ea1fd8b
+
+add_executable(CrossingGame ${SOURCES})
 
 # ── Include paths ─────────────────────────────────────────────────────────────
 target_include_directories(CrossingGame PRIVATE

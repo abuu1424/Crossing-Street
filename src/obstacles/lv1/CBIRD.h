@@ -1,10 +1,10 @@
 #pragma once
-#include "CANIMAL.h"
+#include "../../animals/CANIMAL.h"
 #include "Animation.h"
 
 class CBIRD : public CANIMAL {
-    Animation mAnim; 
-
+private:
+    Animation mAnim;
 public:
     CBIRD(float direction = 1.f);
 

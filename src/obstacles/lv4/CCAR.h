@@ -1,7 +1,7 @@
 #ifndef CROSSINGGAME_CCAR_H
 #define CROSSINGGAME_CCAR_H
 
-#include "CVEHICLE.h"
+#include "../../vehicle/CVEHICLE.h"
 #include "Animation.h"
 
 class CCAR : public CVEHICLE {

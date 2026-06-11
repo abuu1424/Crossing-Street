@@ -1,10 +1,11 @@
 #ifndef CROSSINGGAME_CTRUCK_H
 #define CROSSINGGAME_CTRUCK_H
 
-#include "CVEHICLE.h"
+#include "../../vehicle/CVEHICLE.h"
 #include "Animation.h"
 
 class CTRUCK : public CVEHICLE {
+private:
     Animation mTruckAnim;
 
 public:
