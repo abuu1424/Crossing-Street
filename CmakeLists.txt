@@ -24,11 +24,15 @@ file(GLOB_RECURSE SOURCES
         "src/animals/*.cpp"
         "src/levels/*.cpp"
         "src/ui/*.cpp"
+        "src/obstacles/lv1/animal_lv1/*.cpp"
+        "src/obstacles/lv1/traffic/*.cpp"
 )
 
 # ── Tạo executable ────────────────────────────────────────────────────────────
 
-add_executable(CrossingGame ${SOURCES})
+add_executable(CrossingGame ${SOURCES}
+        src/obstacles/lv1/traffic/CTRAFFIC_LV1.cpp
+        src/obstacles/lv1/traffic/CTRAFFIC_LV1.h)
 
 # ── Include paths ─────────────────────────────────────────────────────────────
 target_include_directories(CrossingGame PRIVATE
@@ -40,6 +44,8 @@ target_include_directories(CrossingGame PRIVATE
         src/obstacles/lv3
         src/obstacles/lv4
         src/obstacles/lv5
+        src/obstacles/lv1/animal_lv1
+        src/obstacles/lv1/traffic
         src/vehicle
         src/animals
         src/levels

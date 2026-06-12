@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "Animation.h"
 #include "Utils.h"
+
 class CANIMAL {
 protected:
 	sf::Texture mTexture;

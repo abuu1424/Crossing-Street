@@ -1,11 +1,11 @@
-#include"CCAR.h"
+#include "CMAMMOTH.h"
 
-CCAR::CCAR(float speed, float direction)
-{
-    CVEHICLE(speed, direction);
-}
+#include "CMAMMOTH.h"
 
-bool CCAR::loadSprite(const std::string& path, float x, float y) {
+CMAMMOTH::CMAMMOTH(float speed, float direction)
+    : CVEHICLE(speed, direction) {}
+
+bool CMAMMOTH::loadSprite(const std::string& path, float x, float y) {
     if (!mTexture.loadFromFile(path)) {
         printf("FAILED: %s\n", path.c_str());
         return false;
@@ -22,7 +22,7 @@ bool CCAR::loadSprite(const std::string& path, float x, float y) {
     return true;
 }
 
-void CCAR::update(float dt) {
+void CMAMMOTH::update(float dt) {
     if (mAnim && !mIsStopped)
         mAnim->update(dt);
 }

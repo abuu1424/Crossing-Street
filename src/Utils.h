@@ -37,3 +37,7 @@ enum class Era
     Modern = 3,
     Future = 4
 };
+
+//TRAFFIC LIGHT
+const float Green_Time = 5.f;   // giây đèn xanh
+const float Red_Time   = 3.f;   // giây đèn đỏ

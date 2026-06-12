@@ -1,18 +1,9 @@
-#ifndef CROSSINGGAME_CTRUCK_H
-#define CROSSINGGAME_CTRUCK_H
-
-#include "../../vehicle/CVEHICLE.h"
-#include "Animation.h"
+#pragma once
+#include "CVEHICLE.h"
 
 class CTRUCK : public CVEHICLE {
-private:
-    Animation mTruckAnim;
-
 public:
-    CTRUCK(float direction = 1.f);
-
+    CTRUCK(float speed = 150.f, float direction = 1.f);
+    bool loadSprite(const std::string& path, float x, float y) override;
     void update(float dt) override;
-    void Draw(sf::RenderWindow& w) override;
 };
-
-#endif

@@ -1,18 +1,26 @@
 #include "CTRUCK.h"
 
-CTRUCK::CTRUCK(float direction)
-    : CVEHICLE(100.f, direction),
-    mTruckAnim(mSprite,
-        "assets/sprites/obstacles/modern/truck.png", 96, 48, 4, 1, FRAME_TIME) {
-    if (direction < 0.f)
-        mSprite.setScale(-1.f, 1.f);
+CTRUCK::CTRUCK(float speed, float direction)
+    : CVEHICLE(speed, direction) {}
+
+bool CTRUCK::loadSprite(const std::string& path, float x, float y) {
+    if (!mTexture.loadFromFile(path)) {
+        printf("FAILED: %s\n", path.c_str());
+        return false;
+    }
+
+    delete mAnim;
+    mAnim = new Animation(mSprite, mTexture,
+        32, 32,   // frameW, frameH
+        2, 2,
+        Frame_Time
+    );
+    mSprite.setScale(4.f, 3.f);
+    mSprite.setPosition(x, y);
+    return true;
 }
 
 void CTRUCK::update(float dt) {
-    mTruckAnim.update(dt);
-    Move(dt);
-}
-
-void CTRUCK::Draw(sf::RenderWindow& w) {
-    w.draw(mSprite);
+    if (mAnim && !mIsStopped)
+        mAnim->update(dt);
 }
