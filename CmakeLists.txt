@@ -32,12 +32,14 @@ file(GLOB_RECURSE SOURCES
 
 add_executable(CrossingGame ${SOURCES}
         src/obstacles/lv1/traffic/CTRAFFIC_LV1.cpp
-        src/obstacles/lv1/traffic/CTRAFFIC_LV1.h)
+        src/obstacles/lv1/traffic/CTRAFFIC_LV1.h
+        src/levels/LevelConfig.cpp)
 
 # ── Include paths ─────────────────────────────────────────────────────────────
 target_include_directories(CrossingGame PRIVATE
         src
         src/core
+        src/core/CGAME.h
         src/obstacles
         src/obstacles/lv1
         src/obstacles/lv2
