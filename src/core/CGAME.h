@@ -39,6 +39,11 @@ class CGAME {
     void handleCollision();
     void checkFinish();
 
+    //Bảng DEAD
+    sf::Font mFont;
+    sf::Text mDeadText;
+    sf::RectangleShape mDeadBox;
+
 public:
     explicit CGAME(sf::RenderWindow& window);
     ~CGAME();

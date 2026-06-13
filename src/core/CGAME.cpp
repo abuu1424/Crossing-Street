@@ -7,6 +7,17 @@ const float SPAWN_Y = 590.f;
 
 CGAME::CGAME(sf::RenderWindow& window) : mWindow(window) {
     loadLevel(1);
+    mFont.loadFromFile("assets/font/pixel_operator/PixelOperator.ttf");
+
+    mDeadBox.setSize(sf::Vector2f(300.f, 120.f));
+    mDeadBox.setFillColor(sf::Color(0, 0, 0, 180));
+    mDeadBox.setPosition(640.f, 360.f);
+
+    mDeadText.setFont(mFont);
+    mDeadText.setString("DEAD");
+    mDeadText.setCharacterSize(48);
+    mDeadText.setFillColor(sf::Color::Red);
+    mDeadText.setPosition(490.f, 300.f);
 }
 
 CGAME::~CGAME() {
@@ -180,6 +191,10 @@ void CGAME::render() {
     for (auto* ani : mAnimals)   ani->Draw(mWindow);
     if (mTraffic) mTraffic->Draw(mWindow);
     mPlayer.Draw(mWindow);
+    if (mPlayer.isDead()) {
+        mWindow.draw(mDeadBox);
+        mWindow.draw(mDeadText);
+    }
     mWindow.display();
 }
 
