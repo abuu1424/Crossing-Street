@@ -13,6 +13,23 @@ CGAME::~CGAME() {
     clearEntities();
 }
 
+sf::FloatRect shrinkBox(sf::FloatRect r, float amount)
+{
+    r.left += amount;
+    r.top += amount;
+    r.width -= amount * 2;
+    r.height -= amount * 2;
+    return r;
+}
+
+bool sameLane(sf::FloatRect playerBox, sf::FloatRect objectBox)
+{
+    float playerCenterY = playerBox.top + playerBox.height / 2.f;
+    float objectCenterY = objectBox.top + objectBox.height / 2.f;
+
+    return std::abs(playerCenterY - objectCenterY) < 40.f;
+}
+
 void CGAME::clearEntities() {
     for (auto* d : mDinos)  delete d;
     for (auto* b : mBirds)  delete b;
@@ -105,16 +122,22 @@ void CGAME::handleEvents() {
 void CGAME::handleCollision() {
     if (mPlayer.isDead() || mPlayer.isFinish()) return;
 
-    sf::FloatRect pb = mPlayer.getBounds();
+    sf::FloatRect pb = shrinkBox(mPlayer.getBounds(), 8.f);
+
     for (auto* obs : mObstacles) {
-        if (pb.intersects(obs->getBounds())) {
+        sf::FloatRect ob = shrinkBox(obs->getBounds(), 8.f);
+
+        if (sameLane(pb, ob) && pb.intersects(ob)) {
             mPlayer.setDead(true);
             printf("DEAD\n");
             return;
         }
     }
+
     for (auto* ani : mAnimals) {
-        if (pb.intersects(ani->getBounds())) {
+        sf::FloatRect ab = shrinkBox(ani->getBounds(), 8.f);
+
+        if (sameLane(pb, ab) && pb.intersects(ab)) {
             mPlayer.setDead(true);
             printf("DEAD\n");
             return;

@@ -6,15 +6,7 @@
 #include "CDINOSOUR.h"
 #include "CBIRD.h"
 #include "CTRAFFIC_LV1.h"
-
-struct LaneConfig {
-    float speed;
-    float direction;
-    float y;
-    std::string spritePath;
-    int   count;
-    float spacing;
-};
+#include "LevelConfig.h"
 
 class CGAME {
     sf::RenderWindow&        mWindow;

@@ -1,5 +1,17 @@
 #include "LevelConfig.h"
 
+LevelConfig getLevel(int level)
+{
+    switch(level)
+    {
+    case 1:
+        return getLevel1();
+
+    default:
+        return getLevel1();
+    }
+}
+
 LevelConfig getLevel1() {
     return {
         1,

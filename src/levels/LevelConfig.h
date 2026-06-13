@@ -33,8 +33,4 @@ struct LevelConfig {
 
 // Khai báo 5 level
 LevelConfig getLevel1();
-LevelConfig getLevel2();
-LevelConfig getLevel3();
-LevelConfig getLevel4();
-LevelConfig getLevel5();
 LevelConfig getLevel(int level);
