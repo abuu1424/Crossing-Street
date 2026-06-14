@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "Utils.h"
-#include "CPEOPLE.h"
+#include "CGAME.h"
 
 int main() {
     sf::RenderWindow window(
@@ -8,31 +8,10 @@ int main() {
         "Crossing Street",
         sf::Style::Default
     );
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(FPS);
 
-    sf::Clock clock;
-    CPEOPLE player;
+    CGAME game(window);
+    game.run();
 
-    while (window.isOpen()) {
-        float dt = clock.restart().asSeconds();
-
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
-            if (event.type == sf::Event::KeyPressed)
-                if (event.key.code == sf::Keyboard::Escape)
-                    window.close();
-        }
-
-
-        //Update
-        player.Move(dt);
-        player.update(dt);
-
-        window.clear(sf::Color(20, 22, 48));
-        player.Draw(window);
-        window.display();
-    }
     return 0;
 }

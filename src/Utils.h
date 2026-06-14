@@ -15,14 +15,18 @@ const int Safe_Zone_H = 80;
 const float Player_Speed = 200.f;
 const float Player_W = 48.f;
 const float Player_H = 64.f;
-
+//Animal
+const float ANIMAL_W = 80.f;
+const float ANIMAL_H = 64.f;
+const float BASE_SPEED = 150.f;
+const float FRAME_TIME = 0.12f;
 //Animation
 const float Frame_Time = 0.12f;
 
 //File path
 const char Save_Path[] = "saves/save.txt";
 const char Score_Path[] = "saves/highscore.txt";
-const char Font_Path[] = "assets/front/font.ttf";
+const char Font_Path[] = "assets/font/font.ttf";
 
 //Era
 enum class Era
@@ -33,3 +37,7 @@ enum class Era
     Modern = 3,
     Future = 4
 };
+
+//TRAFFIC LIGHT
+const float Green_Time = 5.f;   // giây đèn xanh
+const float Red_Time   = 3.f;   // giây đèn đỏ
