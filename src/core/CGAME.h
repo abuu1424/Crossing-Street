@@ -38,11 +38,16 @@ class CGAME {
     void clearEntities();
     void handleCollision();
     void checkFinish();
+    void setupUI();
 
     //Bảng DEAD
     sf::Font mFont;
     sf::Text mDeadText;
     sf::RectangleShape mDeadBox;
+    // Bảng VICTORY
+    sf::RectangleShape mVictoryBox;
+    sf::Text mVictoryTitle;
+    sf::Text mVictorySubText;
 
 public:
     explicit CGAME(sf::RenderWindow& window);

@@ -6,22 +6,55 @@ const float SPAWN_X = Win_W / 2.f - Player_W / 2.f;
 const float SPAWN_Y = 590.f;
 
 CGAME::CGAME(sf::RenderWindow& window) : mWindow(window) {
+    setupUI();
     loadLevel(1);
-    mFont.loadFromFile("assets/font/pixel_operator/PixelOperator.ttf");
-
-    mDeadBox.setSize(sf::Vector2f(300.f, 120.f));
-    mDeadBox.setFillColor(sf::Color(0, 0, 0, 180));
-    mDeadBox.setPosition(640.f, 360.f);
-
-    mDeadText.setFont(mFont);
-    mDeadText.setString("DEAD");
-    mDeadText.setCharacterSize(48);
-    mDeadText.setFillColor(sf::Color::Red);
-    mDeadText.setPosition(490.f, 300.f);
 }
 
 CGAME::~CGAME() {
     clearEntities();
+}
+void CGAME::setupUI() {
+    mFont.loadFromFile("assets/font/pixel_operator/PixelOperator.ttf");
+
+    // Bảng DEAD
+    float boxW = 400.f, boxH = 150.f;
+    mDeadBox.setSize(sf::Vector2f(boxW, boxH));
+    mDeadBox.setFillColor(sf::Color(0, 0, 0, 180));
+    mDeadBox.setOrigin(boxW / 2.f, boxH / 2.f);
+    mDeadBox.setPosition(Win_W / 2.f, Win_H / 2.f);
+
+    mDeadText.setFont(mFont);
+    mDeadText.setString("YOU DIED!\nPress R to restart");
+    mDeadText.setCharacterSize(36);
+    mDeadText.setFillColor(sf::Color::Red);
+    sf::FloatRect db = mDeadText.getLocalBounds();
+    mDeadText.setOrigin(db.left + db.width/2.f, db.top + db.height/2.f);
+    mDeadText.setPosition(Win_W / 2.f, Win_H / 2.f);
+
+    // Bảng VICTORY
+    float vboxW = 500.f, vboxH = 200.f;
+    mVictoryBox.setSize(sf::Vector2f(vboxW, vboxH));
+    mVictoryBox.setFillColor(sf::Color(0, 0, 0, 200));
+    mVictoryBox.setOutlineColor(sf::Color(255, 215, 0));  // viền vàng
+    mVictoryBox.setOutlineThickness(3.f);
+    mVictoryBox.setOrigin(vboxW / 2.f, vboxH / 2.f);
+    mVictoryBox.setPosition(Win_W / 2.f, Win_H / 2.f);
+
+    mVictoryTitle.setFont(mFont);
+    mVictoryTitle.setString("VICTORY!");
+    mVictoryTitle.setCharacterSize(52);
+    mVictoryTitle.setFillColor(sf::Color(255, 215, 0));  // chữ vàng
+    sf::FloatRect vt = mVictoryTitle.getLocalBounds();
+    mVictoryTitle.setOrigin(vt.left + vt.width/2.f, vt.top + vt.height/2.f);
+    mVictoryTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 40.f);
+
+    mVictorySubText.setFont(mFont);
+    mVictorySubText.setString("You escaped through time!\nPress R to play again");
+    mVictorySubText.setCharacterSize(20);
+    mVictorySubText.setFillColor(sf::Color::White);
+    sf::FloatRect vs = mVictorySubText.getLocalBounds();
+    mVictorySubText.setOrigin(vs.left + vs.width/2.f, vs.top + vs.height/2.f);
+    mVictorySubText.setPosition(Win_W / 2.f, Win_H / 2.f + 40.f);
 }
 
 sf::FloatRect shrinkBox(sf::FloatRect r, float amount)
@@ -114,6 +147,7 @@ void CGAME::reset() {
     mPlayer.setFinish(false);
     mLevelCleared = false;
     mPlayer.setPosition(SPAWN_X, SPAWN_Y);
+    loadLevel(1);
 }
 
 void CGAME::handleEvents() {
@@ -157,17 +191,19 @@ void CGAME::handleCollision() {
 }
 
 void CGAME::checkFinish() {
-    if (!mPlayer.isDead() && !mLevelCleared
-        && mPlayer.getPosition().y < 80.f) {
-        mLevelCleared = true;
-        printf("LEVEL %d CLEAR!\n", mCurrentLevel);
+    if (mPlayer.isDead() || mPlayer.isFinish() || mLevelCleared)
+        return;
 
-        if (mCurrentLevel < 5)
-            loadLevel(mCurrentLevel + 1);  // sang level tiếp
-        else {
+    if (mPlayer.getPosition().y < 80.f) {
+        mLevelCleared = true;
+
+        if (mCurrentLevel == 1) {
             mPlayer.setFinish(true);
             printf("VICTORY!\n");
+            return;
         }
+
+        loadLevel(mCurrentLevel + 1);
     }
 }
 
@@ -194,6 +230,12 @@ void CGAME::render() {
     if (mPlayer.isDead()) {
         mWindow.draw(mDeadBox);
         mWindow.draw(mDeadText);
+    }
+    if (mPlayer.isFinish())
+    {
+        mWindow.draw(mVictoryBox);
+        mWindow.draw(mVictoryTitle);
+        mWindow.draw(mVictorySubText);
     }
     mWindow.display();
 }
