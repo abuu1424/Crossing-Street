@@ -47,8 +47,14 @@ void Menu::setupButton(MenuButton& btn,
                        const std::string& texPath,
                        const std::string& label,
                        float x, float y) {
-    if (!btn.texture.loadFromFile(texPath))
-        printf("FAILED btn: %s\n", texPath.c_str());
+    if (!btn.texture.loadFromFile(texPath)) {
+        printf("No img, using fallback: %s\n", texPath.c_str());
+
+        // Tạo texture màu tạm thời 300x60
+        sf::Image img;
+        img.create(300, 60, sf::Color(60, 60, 80, 220));
+        btn.texture.loadFromImage(img);
+    }
 
     btn.sprite.setTexture(btn.texture);
 
