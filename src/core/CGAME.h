@@ -38,6 +38,10 @@ class CGAME {
     bool                     mLevelCleared = false;
     int                      mCurrentLevel = 1;
 
+    // HUD
+    HUD                      mHUD;
+	int     	             mScore = 0;
+	float                    mlevelTime = 0.f;
     // Helpers
     void loadLevel(int level);
     void clearEntities();

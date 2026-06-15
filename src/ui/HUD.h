@@ -7,7 +7,7 @@ class HUD {
 private:
     sf::Font mFont;
 
-    sf::RectangleShape mBackground;
+    sf::RectangleShape mBar;
 
     sf::Text mLevelText;
     sf::Text mScoreText;

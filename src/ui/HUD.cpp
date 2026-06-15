@@ -1,4 +1,4 @@
-#include "HUD.h"
+﻿#include "HUD.h"
 #include "Utils.h"
 
 #include <iostream>
@@ -8,16 +8,16 @@
 HUD::HUD()
     : mLoaded(false)
 {
-    mLoaded = mFont.loadFromFile(FONT_PATH);
+    mLoaded = mFont.loadFromFile(Font_Path);
 
     if (!mLoaded) {
-        std::cerr << "Cannot load HUD font from: " << FONT_PATH << std::endl;
+        std::cerr << "Cannot load HUD font from: " << Font_Path << std::endl;
         return;
     }
 
-    mBackground.setSize(sf::Vector2f(static_cast<float>(WIN_W), 52.f));
-    mBackground.setPosition(0.f, 0.f);
-    mBackground.setFillColor(sf::Color(0, 0, 0, 160));
+    mBar.setSize(sf::Vector2f(static_cast<float>(Win_W), 52.f));
+    mBar.setPosition(0.f, 0.f);
+    mBar.setFillColor(sf::Color(0, 0, 0, 160));
 
     setupText(mLevelText, 24, 24.f, 12.f);
     setupText(mScoreText, 24, 260.f, 12.f);
@@ -68,13 +68,15 @@ void HUD::update(int level, int score, float timeSeconds)
     mTimeText.setString("Time: " + formatTime(timeSeconds));
 }
 
-void HUD::draw(sf::RenderWindow& window)
-{
+void HUD::draw(sf::RenderWindow& window) {
+    // Luôn vẽ thanh nền để biết HUD có được gọi draw hay không
+    window.draw(mBar);
+   
+
     if (!mLoaded) {
         return;
     }
 
-    window.draw(mBackground);
     window.draw(mLevelText);
     window.draw(mScoreText);
     window.draw(mTimeText);

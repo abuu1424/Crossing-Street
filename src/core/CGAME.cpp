@@ -1,11 +1,16 @@
 #include "CGAME.h"
 #include "LevelConfig.h"
 #include <cstdio>
+#include <cmath>
 
 const float SPAWN_X = Win_W / 2.f - Player_W / 2.f;
 const float SPAWN_Y = 590.f;
 
-CGAME::CGAME(sf::RenderWindow& window) : mWindow(window) {
+CGAME::CGAME(sf::RenderWindow& window)
+    : mWindow(window),
+    mScore(0),
+    mlevelTime(0.f)
+{
     setupUI();
     loadLevel(1);
 }
@@ -87,18 +92,24 @@ void CGAME::clearEntities() {
 
 void CGAME::loadLevel(int level) {
     clearEntities();
-    mLevelCleared = false;
-    mCurrentLevel = level;
 
     LevelConfig cfg = getLevel(level);  // lấy config theo level
 
+    mLevelCleared = false;
+    mCurrentLevel = cfg.level;
+    mlevelTime = 0.f;
+
+    mHUD.update(mCurrentLevel, mScore, mlevelTime);
+
     // Background
-    if (!mBgTexture.loadFromFile(cfg.backgroundPath))
+    if (!mBgTexture.loadFromFile(cfg.backgroundPath)) {
         printf("FAILED background\n");
+    }
+
     mBgSprite.setTexture(mBgTexture);
     mBgSprite.setScale(
-        (float)Win_W / mBgTexture.getSize().x,
-        (float)Win_H / mBgTexture.getSize().y
+        static_cast<float>(Win_W) / mBgTexture.getSize().x,
+        static_cast<float>(Win_H) / mBgTexture.getSize().y
     );
 
     // Player
@@ -106,33 +117,39 @@ void CGAME::loadLevel(int level) {
     mPlayer.setFinish(false);
     mPlayer.setPosition(SPAWN_X, SPAWN_Y);
 
-    // Spawn xe theo config
+    // Spawn vật cản theo config
     for (auto& lane : cfg.lanes) {
         for (int i = 0; i < lane.count; i++) {
             auto* d = new CDINOSOUR(lane.speed, lane.direction);
+
             float x = lane.direction > 0
                 ? i * lane.spacing
                 : Win_W - i * lane.spacing;
+
             d->loadSprite(lane.spritePath, x, lane.y);
+
             mDinos.push_back(d);
             mObstacles.push_back(d);
         }
     }
 
-    // Spawn động vật
+    // Spawn động vật bay theo config
     for (auto& ani : cfg.animals) {
         for (int i = 0; i < ani.count; i++) {
             auto* b = new CBIRD(ani.speed, ani.direction);
+
             float x = ani.direction > 0
                 ? i * ani.spacing
                 : Win_W - i * ani.spacing;
+
             b->loadSprite(ani.spritePath, x, ani.y);
+
             mBirds.push_back(b);
             mAnimals.push_back(b);
         }
     }
 
-    // Traffic light
+    // Traffic light theo config
     mTraffic = new CTRAFFIC_LV1(mObstacles);
     mTraffic->loadSprite(
         cfg.trafficRedPath,
@@ -141,13 +158,17 @@ void CGAME::loadLevel(int level) {
         cfg.trafficY
     );
 }
-
 void CGAME::reset() {
+    mScore = 0;
+    mlevelTime = 0.f;
+    mLevelCleared = false;
+
     mPlayer.setDead(false);
     mPlayer.setFinish(false);
-    mLevelCleared = false;
     mPlayer.setPosition(SPAWN_X, SPAWN_Y);
+
     loadLevel(1);
+    mHUD.update(mCurrentLevel, mScore, mlevelTime);
 }
 
 void CGAME::handleEvents() {
@@ -209,68 +230,109 @@ void CGAME::checkFinish() {
 
 void CGAME::update(float dt) {
     if (!mPlayer.isDead() && !mPlayer.isFinish()) {
+        mlevelTime += dt;
+
         mPlayer.Move(dt);
         mPlayer.update(dt);
-    }
-    for (auto* obs : mObstacles) { obs->Move(dt); obs->update(dt); }
-    for (auto* ani : mAnimals)   { ani->Move(dt); ani->update(dt); }
-    if (mTraffic) mTraffic->update(dt);
 
-    handleCollision();
-    checkFinish();
+        for (auto* obs : mObstacles) {
+            obs->Move(dt);
+            obs->update(dt);
+        }
+
+        for (auto* ani : mAnimals) {
+            ani->Move(dt);
+            ani->update(dt);
+        }
+
+        if (mTraffic) {
+            mTraffic->update(dt);
+        }
+
+        handleCollision();
+        checkFinish();
+    }
+
+    mHUD.update(mCurrentLevel, mScore, mlevelTime);
 }
 
 void CGAME::render() {
     mWindow.clear();
+
     mWindow.draw(mBgSprite);
-    for (auto* obs : mObstacles) obs->Draw(mWindow);
-    for (auto* ani : mAnimals)   ani->Draw(mWindow);
-    if (mTraffic) mTraffic->Draw(mWindow);
+
+    for (auto* obs : mObstacles) {
+        obs->Draw(mWindow);
+    }
+
+    for (auto* ani : mAnimals) {
+        ani->Draw(mWindow);
+    }
+
+    if (mTraffic) {
+        mTraffic->Draw(mWindow);
+    }
+
     mPlayer.Draw(mWindow);
+
+    mHUD.draw(mWindow);
+
     if (mPlayer.isDead()) {
         mWindow.draw(mDeadBox);
         mWindow.draw(mDeadText);
     }
-    if (mPlayer.isFinish())
-    {
+
+    if (mPlayer.isFinish()) {
         mWindow.draw(mVictoryBox);
         mWindow.draw(mVictoryTitle);
         mWindow.draw(mVictorySubText);
     }
+
     mWindow.display();
 }
-
 void CGAME::run() {
     sf::Clock clock;
     MenuResult menuResult = MenuResult::NONE;
 
     while (mWindow.isOpen()) {
         float dt = clock.restart().asSeconds();
-        //Menu
+
+        // Menu
         if (mInMenu) {
             sf::Event event;
+
             while (mWindow.pollEvent(event)) {
-                if (event.type == sf::Event::Closed)
+                if (event.type == sf::Event::Closed) {
                     mWindow.close();
+                }
+
                 mMenu.handleEvent(event, mWindow, menuResult);
             }
+
             if (menuResult == MenuResult::NEW_GAME) {
                 mInMenu = false;
-                loadLevel(1);
-            } else if (menuResult == MenuResult::QUIT) {
+                reset();
+                menuResult = MenuResult::NONE;
+            }
+            else if (menuResult == MenuResult::QUIT) {
                 mWindow.close();
             }
             else if (menuResult == MenuResult::SETTING) {
                 menuResult = MenuResult::NONE;
             }
+
             // LOAD_GAME xử lý sau khi có save/load
+
             mMenu.update(dt, mWindow);
+
             mWindow.clear();
             mMenu.draw(mWindow);
             mWindow.display();
+
             continue;
         }
-        //Game
+
+        // Game
         handleEvents();
         update(dt);
         render();
