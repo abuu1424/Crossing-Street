@@ -8,7 +8,7 @@
 #include "CTRAFFIC_LV1.h"
 #include "LevelConfig.h"
 #include "Menu.h"
-
+#include "HUD.h"
 class CGAME {
     sf::RenderWindow&        mWindow;
 
