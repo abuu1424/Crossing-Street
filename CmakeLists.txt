@@ -25,7 +25,7 @@ file(GLOB_RECURSE SOURCES
         "src/levels/*.cpp"
         "src/ui/*.cpp"
         "src/obstacles/lv1/animal_lv1/*.cpp"
-        "src/obstacles/lv1/traffic/*.cpp"
+        "src/obstacles/lv1/traffic_lv1/*.cpp"
 )
 
 # ── Tạo executable ────────────────────────────────────────────────────────────
@@ -34,8 +34,8 @@ add_executable(CrossingGame ${SOURCES}
         src/main.cpp
         src/core/CGAME.cpp
         src/levels/LevelConfig.cpp
-        src/obstacles/lv1/traffic/CTRAFFIC_LV1.cpp
-        src/obstacles/lv1/traffic/CTRAFFIC_LV1.h
+        src/obstacles/lv1/traffic_lv1/CTRAFFIC_LV1.cpp
+        src/obstacles/lv1/traffic_lv1/CTRAFFIC_LV1.h
         src/levels/LevelConfig.cpp "src/obstacles/lv2/animal_lv2/CEAGLE.cpp" "src/obstacles/lv2/animal_lv2/CEAGLE.h")
 
 # ── Include paths ─────────────────────────────────────────────────────────────
@@ -49,7 +49,15 @@ target_include_directories(CrossingGame PRIVATE
         src/obstacles/lv4
         src/obstacles/lv5
         src/obstacles/lv1/animal_lv1
-        src/obstacles/lv1/traffic
+        src/obstacles/lv1/traffic_lv1
+        src/obstacles/lv2/animal_lv2
+        src/obstacles/lv2/traffic_lv2
+        src/obstacles/lv3/animal_lv3
+        src/obstacles/lv3/traffic_lv3
+        src/obstacles/lv4/car_lv4
+        src/obstacles/lv4/traffic_lv4
+        src/obstacles/lv5/car_lv5
+        src/obstacles/lv5/traffic_lv5
         src/vehicle
         src/animals
         src/levels

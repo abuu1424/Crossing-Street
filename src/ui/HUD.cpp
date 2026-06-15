@@ -1,6 +1,5 @@
 ﻿#include "HUD.h"
 #include "Utils.h"
-
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -59,13 +58,16 @@ bool HUD::isLoaded() const
 
 void HUD::update(int level, int score, float timeSeconds)
 {
-    if (!mLoaded) {
-        return;
-    }
-
+    if (!mLoaded) return;
+    float remaining = Level_Time_Limit - timeSeconds;
+    if (remaining < 0.f) remaining = 0.f;
     mLevelText.setString("Level: " + std::to_string(level));
     mScoreText.setString("Score: " + std::to_string(score));
-    mTimeText.setString("Time: " + formatTime(timeSeconds));
+    mTimeText.setString("Time: " + formatTime(remaining));
+    if (remaining <= 10.f)
+        mTimeText.setFillColor(sf::Color::Red);
+    else
+        mTimeText.setFillColor(sf::Color::White);
 }
 
 void HUD::draw(sf::RenderWindow& window) {

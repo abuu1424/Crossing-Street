@@ -26,7 +26,7 @@ const float Frame_Time = 0.12f;
 //File path
 const char Save_Path[] = "saves/save.txt";
 const char Score_Path[] = "saves/highscore.txt";
-const char Font_Path[] = "assets/font/font.ttf";
+const char Font_Path[] = "assets/font/pixel_operator/PixelOperator.ttf";
 
 //Era
 enum class Era
@@ -41,3 +41,6 @@ enum class Era
 //TRAFFIC LIGHT
 const float Green_Time = 5.f;   // giây đèn xanh
 const float Red_Time   = 3.f;   // giây đèn đỏ
+
+//TIME SET
+const float Level_Time_Limit = 30.f;

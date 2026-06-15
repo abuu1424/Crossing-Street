@@ -231,7 +231,11 @@ void CGAME::checkFinish() {
 void CGAME::update(float dt) {
     if (!mPlayer.isDead() && !mPlayer.isFinish()) {
         mlevelTime += dt;
-
+        if (mlevelTime >= Level_Time_Limit)
+        {
+            mPlayer.setDead(true);
+            printf("You ran out of time");
+        }
         mPlayer.Move(dt);
         mPlayer.update(dt);
 
