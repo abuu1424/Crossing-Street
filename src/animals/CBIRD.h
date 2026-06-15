@@ -3,7 +3,7 @@
 #include "Animation.h"
 
 class CBIRD : public CANIMAL {
-    Animation mAnim; 
+    Animation mAnim;
 
 public:
     CBIRD(float direction = 1.f);
