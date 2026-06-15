@@ -242,8 +242,35 @@ void CGAME::render() {
 
 void CGAME::run() {
     sf::Clock clock;
+    MenuResult menuResult = MenuResult::NONE;
+
     while (mWindow.isOpen()) {
         float dt = clock.restart().asSeconds();
+        //Menu
+        if (mInMenu) {
+            sf::Event event;
+            while (mWindow.pollEvent(event)) {
+                if (event.type == sf::Event::Closed)
+                    mWindow.close();
+                mMenu.handleEvent(event, mWindow, menuResult);
+            }
+            if (menuResult == MenuResult::NEW_GAME) {
+                mInMenu = false;
+                loadLevel(1);
+            } else if (menuResult == MenuResult::QUIT) {
+                mWindow.close();
+            }
+            else if (menuResult == MenuResult::SETTING) {
+                menuResult = MenuResult::NONE;
+            }
+            // LOAD_GAME xử lý sau khi có save/load
+            mMenu.update(dt, mWindow);
+            mWindow.clear();
+            mMenu.draw(mWindow);
+            mWindow.display();
+            continue;
+        }
+        //Game
         handleEvents();
         update(dt);
         render();

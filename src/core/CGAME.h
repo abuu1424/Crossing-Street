@@ -7,6 +7,7 @@
 #include "CBIRD.h"
 #include "CTRAFFIC_LV1.h"
 #include "LevelConfig.h"
+#include "Menu.h"
 
 class CGAME {
     sf::RenderWindow&        mWindow;
@@ -14,6 +15,10 @@ class CGAME {
     // Background
     sf::Texture              mBgTexture;
     sf::Sprite               mBgSprite;
+
+    //Menu
+    bool mInMenu = true;
+    Menu mMenu;
 
     // Player
     CPEOPLE                  mPlayer;
