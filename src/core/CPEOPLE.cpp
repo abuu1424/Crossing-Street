@@ -56,19 +56,24 @@ void CPEOPLE::update(float dt) {
 }
 
 // Move
-void CPEOPLE::Move(float dt) {
+void CPEOPLE::Move(float dt)
+{
     if (mIsDead || mIsFinish) return;
 
     sf::Vector2f dir(0.f, 0.f);
     mIsMoving = false;
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) ||
+        sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
         dir.y -= 1.f; mRow = 3; mIsMoving = true;
-    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) ||
+        sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
         dir.y += 1.f; mRow = 0; mIsMoving = true;
-    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) ||
+        sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
         dir.x -= 1.f; mRow = 1; mIsMoving = true;
-    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) ||
+        sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
         dir.x += 1.f; mRow = 2; mIsMoving = true;
     }
 

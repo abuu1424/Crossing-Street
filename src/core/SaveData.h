@@ -3,34 +3,39 @@
 #include <vector>
 
 struct SaveSlot {
-    int         slot;       // slot số mấy
-    int         level;      // level đang chơi
-    int         score;      // điểm hiện tại
-    std::string dateTime;   // ngày giờ lưu
-    bool        isEmpty = true;
+    int slot = 0;
+    int level = 1;
+    int score = 0;
+    float playerX = 0.f;
+    float playerY = 0.f;
+    std::string dateTime = "";
+    std::string saveName = "";
+    bool isEmpty = true;
 };
 
 class SaveData {
+private:
     static const int MAX_SLOTS = 3;
     static const std::string SAVE_DIR;
 
-public:
-    // Lưu game vào slot
-    static bool save(int slot, int level, int score);
-
-    // Tải game từ slot
-    static bool load(int slot, int& level, int& score);
-
-    // Xóa slot
-    static bool deleteSlot(int slot);
-
-    // Đọc thông tin tất cả slot
-    static std::vector<SaveSlot> getAllSlots();
-
-    // Kiểm tra slot có dữ liệu không
-    static bool hasData(int slot);
-
-private:
+    static bool isValidSlot(int slot);
     static std::string getFilePath(int slot);
     static std::string getCurrentDateTime();
+
+public:
+    static bool save(
+        int slot,
+        int level,
+        int score,
+        float playerX,
+        float playerY,
+        const std::string& saveName
+    );
+
+    static bool load(int slot, int& level, int& score);
+    static bool load(int slot, int& level, int& score, float& playerX, float& playerY);
+
+    static bool deleteSlot(int slot);
+    static bool hasData(int slot);
+    static std::vector<SaveSlot> getAllSlots();
 };

@@ -60,6 +60,28 @@ void CGAME::setupUI() {
     sf::FloatRect vs = mVictorySubText.getLocalBounds();
     mVictorySubText.setOrigin(vs.left + vs.width/2.f, vs.top + vs.height/2.f);
     mVictorySubText.setPosition(Win_W / 2.f, Win_H / 2.f + 40.f);
+
+    // Bảng nhập tên save
+    float sboxW = 450.f, sboxH = 180.f;
+    mSaveBox.setSize(sf::Vector2f(sboxW, sboxH));
+    mSaveBox.setFillColor(sf::Color(20, 20, 30, 230));
+    mSaveBox.setOutlineColor(sf::Color(100, 200, 255));
+    mSaveBox.setOutlineThickness(2.f);
+    mSaveBox.setOrigin(sboxW / 2.f, sboxH / 2.f);
+    mSaveBox.setPosition(Win_W / 2.f, Win_H / 2.f);
+
+    mSaveTitle.setFont(mFont);
+    mSaveTitle.setString("Enter save name:");
+    mSaveTitle.setCharacterSize(24);
+    mSaveTitle.setFillColor(sf::Color::White);
+    sf::FloatRect stb = mSaveTitle.getLocalBounds();
+    mSaveTitle.setOrigin(stb.left + stb.width/2.f, stb.top + stb.height/2.f);
+    mSaveTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 40.f);
+
+    mSaveInput.setFont(mFont);
+    mSaveInput.setCharacterSize(28);
+    mSaveInput.setFillColor(sf::Color(255, 215, 0));
+    mSaveInput.setPosition(Win_W / 2.f - 180.f, Win_H / 2.f);
 }
 
 sf::FloatRect shrinkBox(sf::FloatRect r, float amount)
@@ -158,6 +180,7 @@ void CGAME::loadLevel(int level) {
         cfg.trafficY
     );
 }
+
 void CGAME::reset() {
     mScore = 0;
     mlevelTime = 0.f;
@@ -173,21 +196,125 @@ void CGAME::reset() {
 
 void CGAME::handleEvents() {
     sf::Event event;
+
     while (mWindow.pollEvent(event)) {
-        if (event.type == sf::Event::Closed)
+        if (event.type == sf::Event::Closed) {
             mWindow.close();
-        if (event.type == sf::Event::KeyPressed) {
-            if (event.key.code == sf::Keyboard::Escape)
-                mWindow.close();
-            if (event.key.code == sf::Keyboard::R)
-                reset();
         }
-        if (event.key.code == sf::Keyboard::F1) saveGame(1);
-        if (event.key.code == sf::Keyboard::F2) saveGame(2);
-        if (event.key.code == sf::Keyboard::F3) saveGame(3);
-        if (event.key.code == sf::Keyboard::F4) loadGame(1);
-        if (event.key.code == sf::Keyboard::F5) loadGame(2);
-        if (event.key.code == sf::Keyboard::F6) loadGame(3);
+
+        // Đang nhập tên save
+        if (mEnteringSaveName) {
+            if (event.type == sf::Event::TextEntered) {
+                if (event.text.unicode >= 32 &&
+                    event.text.unicode < 128 &&
+                    mCurrentSaveName.size() < 20)
+                {
+                    mCurrentSaveName += static_cast<char>(event.text.unicode);
+                }
+            }
+
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::BackSpace &&
+                    !mCurrentSaveName.empty())
+                {
+                    mCurrentSaveName.pop_back();
+                }
+                else if (event.key.code == sf::Keyboard::Enter) {
+                    if (mCurrentSaveName.empty()) {
+                        mCurrentSaveName =
+                            "Save Slot " + std::to_string(mSaveSlotPending);
+                    }
+
+                    saveGame(mSaveSlotPending);
+
+                    mEnteringSaveName = false;
+                    mSaveSlotPending = 0;
+                    mCurrentSaveName.clear();
+                }
+                else if (event.key.code == sf::Keyboard::Escape) {
+                    mEnteringSaveName = false;
+                    mSaveSlotPending = 0;
+                    mCurrentSaveName.clear();
+                }
+            }
+
+            continue;
+        }
+
+        // Bình thường
+        if (event.type == sf::Event::KeyPressed) {
+            if (event.key.code == sf::Keyboard::Escape) {
+                mWindow.close();
+            }
+            else if (event.key.code == sf::Keyboard::R) {
+                reset();
+            }
+
+            // Save F1
+            else if (event.key.code == sf::Keyboard::F1) {
+                if (SaveData::hasData(1)) {
+                    auto slots = SaveData::getAllSlots();
+                    mCurrentSaveName = slots[0].saveName.empty()
+                        ? "Save Slot 1"
+                        : slots[0].saveName;
+
+                    saveGame(1);
+                    mCurrentSaveName.clear();
+                }
+                else {
+                    mEnteringSaveName = true;
+                    mSaveSlotPending = 1;
+                    mCurrentSaveName.clear();
+                }
+            }
+
+            // Save F2
+            else if (event.key.code == sf::Keyboard::F2) {
+                if (SaveData::hasData(2)) {
+                    auto slots = SaveData::getAllSlots();
+                    mCurrentSaveName = slots[1].saveName.empty()
+                        ? "Save Slot 2"
+                        : slots[1].saveName;
+
+                    saveGame(2);
+                    mCurrentSaveName.clear();
+                }
+                else {
+                    mEnteringSaveName = true;
+                    mSaveSlotPending = 2;
+                    mCurrentSaveName.clear();
+                }
+            }
+
+            // Save F3
+            else if (event.key.code == sf::Keyboard::F3) {
+                if (SaveData::hasData(3)) {
+                    auto slots = SaveData::getAllSlots();
+                    mCurrentSaveName = slots[2].saveName.empty()
+                        ? "Save Slot 3"
+                        : slots[2].saveName;
+
+                    saveGame(3);
+                    mCurrentSaveName.clear();
+                }
+                else {
+                    mEnteringSaveName = true;
+                    mSaveSlotPending = 3;
+                    mCurrentSaveName.clear();
+                }
+            }
+
+            // Load F4 F5 F6
+            else if (event.key.code == sf::Keyboard::F4) {
+                loadGame(1);
+            }
+            else if (event.key.code == sf::Keyboard::F5) {
+                loadGame(2);
+            }
+            else if (event.key.code == sf::Keyboard::F6) {
+                loadGame(3);
+            }
+        }
     }
 }
 
@@ -236,6 +363,7 @@ void CGAME::checkFinish() {
 }
 
 void CGAME::update(float dt) {
+    if (mEnteringSaveName) return;
     if (!mPlayer.isDead() && !mPlayer.isFinish()) {
         mlevelTime += dt;
         if (mlevelTime >= Level_Time_Limit)
@@ -298,9 +426,18 @@ void CGAME::render() {
         mWindow.draw(mVictoryTitle);
         mWindow.draw(mVictorySubText);
     }
+    if (mEnteringSaveName)
+    {
+        mSaveInput.setString(mCurrentSaveName + "_");
+
+        mWindow.draw(mSaveBox);
+        mWindow.draw(mSaveTitle);
+        mWindow.draw(mSaveInput);
+    }
 
     mWindow.display();
 }
+
 void CGAME::run() {
     sf::Clock clock;
     MenuResult menuResult = MenuResult::NONE;
@@ -332,7 +469,24 @@ void CGAME::run() {
                 menuResult = MenuResult::NONE;
             }
 
-            // LOAD_GAME xử lý sau khi có save/load
+            // LOAD_GAME
+            else if (menuResult == MenuResult::LOAD_SLOT_1)
+            {
+                if (loadGame(1)) mInMenu = false;
+                menuResult = MenuResult::NONE;
+            }
+            else if (menuResult == MenuResult::LOAD_SLOT_2) {
+                if (loadGame(2)) {
+                    mInMenu = false;
+                }
+                menuResult = MenuResult::NONE;
+            }
+            else if (menuResult == MenuResult::LOAD_SLOT_3) {
+                if (loadGame(3)) {
+                    mInMenu = false;
+                }
+                menuResult = MenuResult::NONE;
+            }
 
             mMenu.update(dt, mWindow);
 
@@ -352,16 +506,34 @@ void CGAME::run() {
 
 //Save Game
 void CGAME::saveGame(int slot) {
-    SaveData::save(slot, mCurrentLevel, mScore);
-}
+                sf::Vector2f pos = mPlayer.getPosition();
+
+                std::string name = mCurrentSaveName.empty()
+                    ? "Save Slot " + std::to_string(slot)
+                    : mCurrentSaveName;
+
+                SaveData::save(
+                    slot,
+                    mCurrentLevel,
+                    mScore,
+                    pos.x,
+                    pos.y,
+                    name
+                );
+            }
 
 bool CGAME::loadGame(int slot)
 {
     int level = 1, score = 0;
-    if (!SaveData::load(slot, level, score))
+    float playerX = SPAWN_X; float playerY = SPAWN_Y;
+    if (!SaveData::load(slot, level, score, playerX, playerY))
         return false;
 
     mScore = score;
     loadLevel(level);
+    mPlayer.setDead(false);
+    mPlayer.setFinish(false);
+    mPlayer.setPosition(playerX, playerY);
+    mHUD.update(mCurrentLevel, mScore, mlevelTime);
     return true;
 }

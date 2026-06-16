@@ -61,6 +61,15 @@ class CGAME {
     sf::Text mVictoryTitle;
     sf::Text mVictorySubText;
 
+    //Bảng nhập tên file save
+    bool mEnteringSaveName = false;
+    std::string mCurrentSaveName;
+    int mSaveSlotPending = 0;
+
+    sf::RectangleShape mSaveBox;
+    sf::Text mSaveTitle;
+    sf::Text mSaveInput;
+
 public:
     explicit CGAME(sf::RenderWindow& window);
     ~CGAME();

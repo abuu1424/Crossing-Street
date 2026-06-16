@@ -2,8 +2,23 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <string>
+#include "SaveData.h"
+#include <vector>
 
-enum class MenuResult { NONE, NEW_GAME, LOAD_GAME, QUIT, SETTING };
+enum class MenuResult {
+    NONE,
+    NEW_GAME,
+    LOAD_SLOT_1,
+    LOAD_SLOT_2,
+    LOAD_SLOT_3,
+    QUIT,
+    SETTING
+};
+
+enum class MenuScreen {
+    MAIN,
+    LOAD
+};
 
 struct MenuButton {
     sf::Sprite      sprite;
@@ -30,6 +45,14 @@ class Menu {
     MenuButton           mBtnQuit;
     MenuButton           mBtnSetting;
 
+    // Load menu
+    MenuScreen           mScreen = MenuScreen::MAIN;
+    std::vector<SaveSlot> mSaveSlots;
+
+    sf::Text             mLoadTitle;
+    sf::Text             mSlotTexts[3];
+    sf::Text             mBackText;
+
     // Nhạc nền
     sf::Music            mMusic;
 
@@ -42,6 +65,13 @@ class Menu {
                       sf::Vector2f mousePos,
                       float dt);
     void drawButton(sf::RenderWindow& w, MenuButton& btn);
+
+    void setupLoadMenu();
+    void refreshSaveSlots();
+    void drawLoadMenu(sf::RenderWindow& window);
+    void handleLoadEvent(const sf::Event& event,
+                         sf::RenderWindow& window,
+                         MenuResult& result);
 
 public:
     Menu();
