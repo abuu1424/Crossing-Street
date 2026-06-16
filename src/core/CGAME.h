@@ -9,6 +9,9 @@
 #include "LevelConfig.h"
 #include "Menu.h"
 #include "HUD.h"
+#include "SaveData.h"
+
+
 class CGAME {
     sf::RenderWindow&        mWindow;
 
@@ -67,4 +70,8 @@ public:
     void update(float dt);
     void render();
     void reset();
+
+    //Save game
+    void saveGame(int slot);
+    bool loadGame(int slot);
 };

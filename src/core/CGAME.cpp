@@ -182,6 +182,12 @@ void CGAME::handleEvents() {
             if (event.key.code == sf::Keyboard::R)
                 reset();
         }
+        if (event.key.code == sf::Keyboard::F1) saveGame(1);
+        if (event.key.code == sf::Keyboard::F2) saveGame(2);
+        if (event.key.code == sf::Keyboard::F3) saveGame(3);
+        if (event.key.code == sf::Keyboard::F4) loadGame(1);
+        if (event.key.code == sf::Keyboard::F5) loadGame(2);
+        if (event.key.code == sf::Keyboard::F6) loadGame(3);
     }
 }
 
@@ -200,7 +206,8 @@ void CGAME::handleCollision() {
         }
     }
 
-    for (auto* ani : mAnimals) {
+    for (auto* ani : mAnimals)
+    {
         sf::FloatRect ab = shrinkBox(ani->getBounds(), 8.f);
 
         if (sameLane(pb, ab) && pb.intersects(ab)) {
@@ -341,4 +348,20 @@ void CGAME::run() {
         update(dt);
         render();
     }
+}
+
+//Save Game
+void CGAME::saveGame(int slot) {
+    SaveData::save(slot, mCurrentLevel, mScore);
+}
+
+bool CGAME::loadGame(int slot)
+{
+    int level = 1, score = 0;
+    if (!SaveData::load(slot, level, score))
+        return false;
+
+    mScore = score;
+    loadLevel(level);
+    return true;
 }

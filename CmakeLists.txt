@@ -18,6 +18,7 @@ find_package(SFML 2.5 COMPONENTS graphics window system audio REQUIRED)
 
 # ── Thu thập source files ─────────────────────────────────────────────────────
 file(GLOB_RECURSE SOURCES
+        "save/*cpp"
         "src/*.cpp"
         "src/core/*.cpp"
         "src/obstacles/*.cpp"
@@ -36,7 +37,9 @@ add_executable(CrossingGame ${SOURCES}
         src/levels/LevelConfig.cpp
         src/obstacles/lv1/traffic_lv1/CTRAFFIC_LV1.cpp
         src/obstacles/lv1/traffic_lv1/CTRAFFIC_LV1.h
-        src/levels/LevelConfig.cpp "src/obstacles/lv2/animal_lv2/CEAGLE.cpp" "src/obstacles/lv2/animal_lv2/CEAGLE.h")
+        src/levels/LevelConfig.cpp "src/obstacles/lv2/animal_lv2/CEAGLE.cpp" "src/obstacles/lv2/animal_lv2/CEAGLE.h"
+        src/core/SaveData.h
+        "src/core/SaveData.cpp")
 
 # ── Include paths ─────────────────────────────────────────────────────────────
 target_include_directories(CrossingGame PRIVATE
@@ -62,6 +65,7 @@ target_include_directories(CrossingGame PRIVATE
         src/animals
         src/levels
         src/ui
+        save
 )
 
 # ── Link SFML ─────────────────────────────────────────────────────────────────
