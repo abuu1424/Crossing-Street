@@ -25,6 +25,7 @@ struct LevelConfig {
     std::string backgroundPath;
     std::string trafficRedPath;
     std::string trafficGreenPath;
+    std::string musicPath;
     float       trafficX;
     float       trafficY;
     std::vector<LaneConfig>   lanes;

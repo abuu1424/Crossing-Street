@@ -12,7 +12,6 @@ CGAME::CGAME(sf::RenderWindow& window)
     mlevelTime(0.f)
 {
     setupUI();
-    loadLevel(1);
 }
 
 CGAME::~CGAME() {
@@ -20,6 +19,14 @@ CGAME::~CGAME() {
 }
 void CGAME::setupUI() {
     mFont.loadFromFile("assets/font/pixel_operator/PixelOperator.ttf");
+
+    //Sound
+    //S_Victory
+    if (mVictoryBuffer.loadFromFile("assets/sounds/victory/vt1.ogg")) mVictorySound.setBuffer(mVictoryBuffer);
+    else printf("Failed to load victory sound");
+    //S_Dead
+    if (mDeadBuffer.loadFromFile("assets/sounds/dead/dead.ogg")) mDeadSound.setBuffer(mDeadBuffer);
+    else printf("Failed to load dead sound");
 
     // Bảng DEAD
     float boxW = 400.f, boxH = 150.f;
@@ -167,6 +174,16 @@ void CGAME::loadLevel(int level) {
         static_cast<float>(Win_H) / mBgTexture.getSize().y
     );
 
+    //Music
+    mLevelMusic.stop();
+    if (mLevelMusic.openFromFile(cfg.musicPath))
+    {
+        mLevelMusic.setLoop(true);
+        mLevelMusic.setVolume(70.f);
+        mLevelMusic.play();
+    }
+    else printf("Failed to load music background");
+
     // Player
     mPlayer.setDead(false);
     mPlayer.setFinish(false);
@@ -215,6 +232,10 @@ void CGAME::loadLevel(int level) {
 }
 
 void CGAME::reset() {
+    mDeadSound.stop();
+    mVictorySound.stop();
+    mLevelMusic.stop();
+
     mScore = 0;
     mlevelTime = 0.f;
     mLevelCleared = false;
@@ -387,6 +408,8 @@ void CGAME::handleCollision() {
 
         if (sameLane(pb, ob) && pb.intersects(ob)) {
             mPlayer.setDead(true);
+            mLevelMusic.stop();
+            mDeadSound.play();
             printf("DEAD\n");
             return;
         }
@@ -413,6 +436,8 @@ void CGAME::checkFinish() {
 
         if (mCurrentLevel == 1) {
             mPlayer.setFinish(true);
+            mLevelMusic.stop();
+            mVictorySound.play();
             printf("VICTORY!\n");
             return;
         }
@@ -423,11 +448,14 @@ void CGAME::checkFinish() {
 
 void CGAME::update(float dt) {
     if (mEnteringSaveName) return;
+    if (mShowQuitConfirm) return;
     if (!mPlayer.isDead() && !mPlayer.isFinish()) {
         mlevelTime += dt;
         if (mlevelTime >= Level_Time_Limit)
         {
             mPlayer.setDead(true);
+            mLevelMusic.stop();
+            mDeadSound.play();
             printf("You ran out of time");
         }
         mPlayer.Move(dt);

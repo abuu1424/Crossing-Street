@@ -79,6 +79,17 @@ class CGAME {
     bool mYesHovered = false;
     bool mNoHovered  = false;
 
+    //Sound
+    //Victory
+    sf::SoundBuffer mVictoryBuffer;
+    sf::Sound mVictorySound;
+    //Dead
+    sf::SoundBuffer mDeadBuffer;
+    sf::Sound mDeadSound;
+
+    //Music
+    sf::Music mLevelMusic;
+
 public:
     explicit CGAME(sf::RenderWindow& window);
     ~CGAME();

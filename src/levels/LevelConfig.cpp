@@ -18,6 +18,7 @@ LevelConfig getLevel1() {
         "assets/background/lv1_bg/bg_lv1.png",
         "assets/sprites/lv1_sp/traffic/torch.png",
         "assets/sprites/lv1_sp/traffic/torch1.png",
+        "assets/sounds/lv1_sd/music_bg1.ogg",
         10, 160,
         // Làn xe
         {
