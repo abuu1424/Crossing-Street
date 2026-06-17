@@ -14,9 +14,20 @@ HUD::HUD()
         return;
     }
 
-    mBar.setSize(sf::Vector2f(static_cast<float>(Win_W), 52.f));
-    mBar.setPosition(0.f, 0.f);
-    mBar.setFillColor(sf::Color(0, 0, 0, 160));
+    if (!mBarTexture.loadFromFile("assets/ui/hud/hud_bg.png")) {
+        std::cerr << "Cannot load HUD background!" << std::endl;
+    }
+    mBarSprite.setTexture(mBarTexture);
+    
+    // Cắt bỏ viền trong suốt, lấy đúng thanh bar
+    mBarSprite.setTextureRect(sf::IntRect(0, 412, 1024, 200));
+    mBarSprite.setPosition(0.f, 0.f);
+    
+    // Chỉnh lại kích thước hiển thị
+    float targetHeight = 80.f; // Độ dày mới của HUD
+    float scaleX = static_cast<float>(Win_W) / 1024.f;
+    float scaleY = targetHeight / 200.f;
+    mBarSprite.setScale(scaleX, scaleY);
 
     setupText(mLevelText, 24, 24.f, 12.f);
     setupText(mScoreText, 24, 260.f, 12.f);
@@ -72,8 +83,8 @@ void HUD::update(int level, int score, float timeSeconds)
 
 void HUD::draw(sf::RenderWindow& window) {
     // Luôn vẽ thanh nền để biết HUD có được gọi draw hay không
-    window.draw(mBar);
-   
+    window.draw(mBarSprite);
+
 
     if (!mLoaded) {
         return;
