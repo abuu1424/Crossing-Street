@@ -70,6 +70,15 @@ class CGAME {
     sf::Text mSaveTitle;
     sf::Text mSaveInput;
 
+    //Bảng Exit
+    bool mShowQuitConfirm = false;
+    sf::RectangleShape mQuitBox;
+    sf::Text mQuitTitle;
+    sf::Text mYesText;
+    sf::Text mNoText;
+    bool mYesHovered = false;
+    bool mNoHovered  = false;
+
 public:
     explicit CGAME(sf::RenderWindow& window);
     ~CGAME();

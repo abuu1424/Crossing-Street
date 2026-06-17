@@ -82,6 +82,39 @@ void CGAME::setupUI() {
     mSaveInput.setCharacterSize(28);
     mSaveInput.setFillColor(sf::Color(255, 215, 0));
     mSaveInput.setPosition(Win_W / 2.f - 180.f, Win_H / 2.f);
+
+    //Bảng Quit
+    float qboxW = 400.f, qboxH = 180.f;
+    mQuitBox.setSize(sf::Vector2f(qboxW, qboxH));
+    mQuitBox.setFillColor(sf::Color(20, 20, 30, 230));
+    mQuitBox.setOutlineColor(sf::Color(255, 100, 100));
+    mQuitBox.setOutlineThickness(2.f);
+    mQuitBox.setOrigin(qboxW / 2.f, qboxH / 2.f);
+    mQuitBox.setPosition(Win_W / 2.f, Win_H / 2.f);
+
+    mQuitTitle.setFont(mFont);
+    mQuitTitle.setString("Quit the game?");
+    mQuitTitle.setCharacterSize(28);
+    mQuitTitle.setFillColor(sf::Color::White);
+    sf::FloatRect qt = mQuitTitle.getLocalBounds();
+    mQuitTitle.setOrigin(qt.left + qt.width/2.f, qt.top + qt.height/2.f);
+    mQuitTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 40.f);
+
+    mYesText.setFont(mFont);
+    mYesText.setString("YES");
+    mYesText.setCharacterSize(28);
+    mYesText.setFillColor(sf::Color(255, 100, 100));
+    sf::FloatRect yt = mYesText.getLocalBounds();
+    mYesText.setOrigin(yt.left + yt.width/2.f, yt.top + yt.height/2.f);
+    mYesText.setPosition(Win_W / 2.f - 70.f, Win_H / 2.f + 30.f);
+
+    mNoText.setFont(mFont);
+    mNoText.setString("NO");
+    mNoText.setCharacterSize(28);
+    mNoText.setFillColor(sf::Color(150, 255, 150));
+    sf::FloatRect nt = mNoText.getLocalBounds();
+    mNoText.setOrigin(nt.left + nt.width/2.f, nt.top + nt.height/2.f);
+    mNoText.setPosition(Win_W / 2.f + 70.f, Win_H / 2.f + 30.f);
 }
 
 sf::FloatRect shrinkBox(sf::FloatRect r, float amount)
@@ -202,7 +235,33 @@ void CGAME::handleEvents() {
             mWindow.close();
         }
 
-        // Đang nhập tên save
+        //Bảng QUIT
+        if (mShowQuitConfirm) {
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Escape) {
+                    mShowQuitConfirm = false;  // ESC lần nữa để hủy quit
+                }
+                else if (event.key.code == sf::Keyboard::Y) {
+                    mWindow.close();
+                }
+                else if (event.key.code == sf::Keyboard::N) {
+                    mShowQuitConfirm = false;
+                }
+            }
+            if (event.type == sf::Event::MouseButtonPressed
+                && event.mouseButton.button == sf::Mouse::Left) {
+                sf::Vector2f mouse = mWindow.mapPixelToCoords(
+                    sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+
+                if (mYesText.getGlobalBounds().contains(mouse))
+                    mWindow.close();
+                else if (mNoText.getGlobalBounds().contains(mouse))
+                    mShowQuitConfirm = false;
+            }
+            continue;
+        }
+
+        //Đang nhập tên save
         if (mEnteringSaveName) {
             if (event.type == sf::Event::TextEntered) {
                 if (event.text.unicode >= 32 &&
@@ -228,12 +287,12 @@ void CGAME::handleEvents() {
                     saveGame(mSaveSlotPending);
 
                     mEnteringSaveName = false;
-                    mSaveSlotPending = 0;
+                    mSaveSlotPending  = 0;
                     mCurrentSaveName.clear();
                 }
                 else if (event.key.code == sf::Keyboard::Escape) {
                     mEnteringSaveName = false;
-                    mSaveSlotPending = 0;
+                    mSaveSlotPending  = 0;
                     mCurrentSaveName.clear();
                 }
             }
@@ -241,10 +300,10 @@ void CGAME::handleEvents() {
             continue;
         }
 
-        // Bình thường
+        //Bình thường
         if (event.type == sf::Event::KeyPressed) {
             if (event.key.code == sf::Keyboard::Escape) {
-                mWindow.close();
+                mShowQuitConfirm = true;
             }
             else if (event.key.code == sf::Keyboard::R) {
                 reset();
@@ -263,7 +322,7 @@ void CGAME::handleEvents() {
                 }
                 else {
                     mEnteringSaveName = true;
-                    mSaveSlotPending = 1;
+                    mSaveSlotPending  = 1;
                     mCurrentSaveName.clear();
                 }
             }
@@ -281,7 +340,7 @@ void CGAME::handleEvents() {
                 }
                 else {
                     mEnteringSaveName = true;
-                    mSaveSlotPending = 2;
+                    mSaveSlotPending  = 2;
                     mCurrentSaveName.clear();
                 }
             }
@@ -299,7 +358,7 @@ void CGAME::handleEvents() {
                 }
                 else {
                     mEnteringSaveName = true;
-                    mSaveSlotPending = 3;
+                    mSaveSlotPending  = 3;
                     mCurrentSaveName.clear();
                 }
             }
@@ -433,6 +492,13 @@ void CGAME::render() {
         mWindow.draw(mSaveBox);
         mWindow.draw(mSaveTitle);
         mWindow.draw(mSaveInput);
+    }
+    if (mShowQuitConfirm)
+    {
+        mWindow.draw(mQuitBox);
+        mWindow.draw(mQuitTitle);
+        mWindow.draw(mYesText);
+        mWindow.draw(mNoText);
     }
 
     mWindow.display();
