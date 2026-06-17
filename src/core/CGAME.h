@@ -5,6 +5,7 @@
 #include "CPEOPLE.h"
 #include "CDINOSOUR.h"
 #include "CBIRD.h"
+#include "CMAMMOTH.h"
 #include "CTRAFFIC_LV1.h"
 #include "LevelConfig.h"
 #include "Menu.h"
