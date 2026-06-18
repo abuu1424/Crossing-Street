@@ -86,17 +86,10 @@ void HUD::draw(sf::RenderWindow& window) {
 }
 
 sf::FloatRect HUD::getPauseIconBounds() const {
-    sf::FloatRect spriteBounds = mHudSprite.getGlobalBounds();
-
-    float xRatio = 1425.f / 1536.f;   // giữa box pause trên ảnh gốc
-    float yRatio = 495.f  / 1024.f;
-    float wRatio = 150.f  / 1536.f;   // chiều rộng box pause
-    float hRatio = 130.f  / 1024.f;   // chiều cao box pause
-
-    float x = spriteBounds.left + spriteBounds.width  * xRatio - (spriteBounds.width * wRatio / 2.f);
-    float y = spriteBounds.top  + spriteBounds.height * yRatio - (spriteBounds.height * hRatio / 2.f);
-    float w = spriteBounds.width  * wRatio;
-    float h = spriteBounds.height * hRatio;
-
-    return sf::FloatRect(x, y, w, h);
+    return sf::FloatRect(
+        780.f,  // x
+        20.f,   // y
+        90.f,   // width
+        80.f    // height
+    );
 }

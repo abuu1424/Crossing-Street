@@ -287,64 +287,81 @@ void CGAME::handleEvents() {
     while (mWindow.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
             mWindow.close();
-        }
-
-        //Bảng PAUSE
-        if (mPaused) {
-            if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::P)
-                    mPaused = false;
-                else if (event.key.code == sf::Keyboard::Escape)
-                    mShowQuitConfirm = true;
-            }
-            if (event.type == sf::Event::MouseButtonPressed
-                && event.mouseButton.button == sf::Mouse::Left) {
-                sf::Vector2f mouse = mWindow.mapPixelToCoords(
-                    sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-                if (mPauseBox.getGlobalBounds().contains(mouse))
-                    mPaused = false;
-            }
             continue;
         }
 
-        //Bảng QUIT confirm
+        sf::Vector2f mouse;
+        if (event.type == sf::Event::MouseButtonPressed) {
+            mouse = mWindow.mapPixelToCoords(
+                sf::Vector2i(event.mouseButton.x, event.mouseButton.y)
+            );
+        }
+
+        // Bảng QUIT confirm
         if (mShowQuitConfirm) {
             if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::Escape)
+                if (event.key.code == sf::Keyboard::Escape ||
+                    event.key.code == sf::Keyboard::N) {
                     mShowQuitConfirm = false;
-                else if (event.key.code == sf::Keyboard::Y)
+                }
+                else if (event.key.code == sf::Keyboard::Y) {
                     mWindow.close();
-                else if (event.key.code == sf::Keyboard::N)
-                    mShowQuitConfirm = false;
+                }
             }
-            if (event.type == sf::Event::MouseButtonPressed
-                && event.mouseButton.button == sf::Mouse::Left) {
-                sf::Vector2f mouse = mWindow.mapPixelToCoords(
-                    sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 
-                if (mYesText.getGlobalBounds().contains(mouse))
+            if (event.type == sf::Event::MouseButtonPressed &&
+                event.mouseButton.button == sf::Mouse::Left) {
+
+                if (mYesText.getGlobalBounds().contains(mouse)) {
                     mWindow.close();
-                else if (mNoText.getGlobalBounds().contains(mouse))
+                }
+                else if (mNoText.getGlobalBounds().contains(mouse)) {
                     mShowQuitConfirm = false;
+                }
             }
+
             continue;
         }
 
-        //Đang nhập tên save
+        // Bảng PAUSE
+        if (mPaused) {
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::P) {
+                    mPaused = false;
+                }
+                else if (event.key.code == sf::Keyboard::Escape) {
+                    mPaused = false;
+                    mShowQuitConfirm = true;
+                }
+            }
+
+            if (event.type == sf::Event::MouseButtonPressed &&
+                event.mouseButton.button == sf::Mouse::Left) {
+                if (mResumeText.getGlobalBounds().contains(mouse))
+                {
+                    mPaused = false;
+                }
+                else if (mHUD.getPauseIconBounds().contains(mouse)) {
+                    mPaused = false;
+                }
+            }
+
+            continue;
+        }
+
+        // Đang nhập tên save
         if (mEnteringSaveName) {
             if (event.type == sf::Event::TextEntered) {
                 if (event.text.unicode >= 32 &&
                     event.text.unicode < 128 &&
-                    mCurrentSaveName.size() < 20)
-                {
+                    mCurrentSaveName.size() < 20) {
                     mCurrentSaveName += static_cast<char>(event.text.unicode);
                 }
             }
 
             if (event.type == sf::Event::KeyPressed) {
                 if (event.key.code == sf::Keyboard::BackSpace &&
-                    !mCurrentSaveName.empty())
-                {
+                    !mCurrentSaveName.empty()) {
                     mCurrentSaveName.pop_back();
                 }
                 else if (event.key.code == sf::Keyboard::Enter) {
@@ -352,22 +369,34 @@ void CGAME::handleEvents() {
                         mCurrentSaveName =
                             "Save Slot " + std::to_string(mSaveSlotPending);
                     }
+
                     saveGame(mSaveSlotPending);
 
                     mEnteringSaveName = false;
-                    mSaveSlotPending  = 0;
+                    mSaveSlotPending = 0;
                     mCurrentSaveName.clear();
                 }
                 else if (event.key.code == sf::Keyboard::Escape) {
                     mEnteringSaveName = false;
-                    mSaveSlotPending  = 0;
+                    mSaveSlotPending = 0;
                     mCurrentSaveName.clear();
                 }
             }
+
             continue;
         }
 
-        //Bình thường
+        // Click icon pause trên HUD
+        if (event.type == sf::Event::MouseButtonPressed &&
+            event.mouseButton.button == sf::Mouse::Left) {
+
+            if (mHUD.getPauseIconBounds().contains(mouse)) {
+                mPaused = true;
+                continue;
+            }
+        }
+
+        // Bình thường
         if (event.type == sf::Event::KeyPressed) {
             if (event.key.code == sf::Keyboard::Escape) {
                 mShowQuitConfirm = true;
@@ -376,7 +405,7 @@ void CGAME::handleEvents() {
                 reset();
             }
             else if (event.key.code == sf::Keyboard::P) {
-                mPaused = true;   // sửa: phải là true, không phải false
+                mPaused = true;
             }
             else if (event.key.code == sf::Keyboard::F1) {
                 if (SaveData::hasData(1)) {
@@ -385,9 +414,10 @@ void CGAME::handleEvents() {
                         ? "Save Slot 1" : slots[0].saveName;
                     saveGame(1);
                     mCurrentSaveName.clear();
-                } else {
+                }
+                else {
                     mEnteringSaveName = true;
-                    mSaveSlotPending  = 1;
+                    mSaveSlotPending = 1;
                     mCurrentSaveName.clear();
                 }
             }
@@ -398,9 +428,10 @@ void CGAME::handleEvents() {
                         ? "Save Slot 2" : slots[1].saveName;
                     saveGame(2);
                     mCurrentSaveName.clear();
-                } else {
+                }
+                else {
                     mEnteringSaveName = true;
-                    mSaveSlotPending  = 2;
+                    mSaveSlotPending = 2;
                     mCurrentSaveName.clear();
                 }
             }
@@ -411,9 +442,10 @@ void CGAME::handleEvents() {
                         ? "Save Slot 3" : slots[2].saveName;
                     saveGame(3);
                     mCurrentSaveName.clear();
-                } else {
+                }
+                else {
                     mEnteringSaveName = true;
-                    mSaveSlotPending  = 3;
+                    mSaveSlotPending = 3;
                     mCurrentSaveName.clear();
                 }
             }
@@ -425,18 +457,6 @@ void CGAME::handleEvents() {
             }
             else if (event.key.code == sf::Keyboard::F6) {
                 loadGame(3);
-            }
-        }
-
-        // Click vào icon pause trên HUD
-        if (event.type == sf::Event::MouseButtonPressed
-            && event.mouseButton.button == sf::Mouse::Left) {
-            sf::Vector2f mouse = mWindow.mapPixelToCoords(
-                sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-
-            sf::FloatRect pauseIconArea(Win_W - 70.f, 30.f, 50.f, 60.f);
-            if (pauseIconArea.contains(mouse)) {
-                mPaused = true;
             }
         }
     }
