@@ -30,6 +30,7 @@ class CGAME {
     // Vật cản
     std::vector<CDINOSOUR*>  mDinos;
     std::vector<CBIRD*>      mBirds;
+    std::vector<CMAMMOTH*> mMammoth;
 
     // Vector dùng cho collision + traffic
     std::vector<CVEHICLE*>   mObstacles;
@@ -79,6 +80,12 @@ class CGAME {
     sf::Text mNoText;
     bool mYesHovered = false;
     bool mNoHovered  = false;
+    //Nút Pause
+    bool mPaused = false;
+    sf::RectangleShape mPauseBox;
+    sf::Text mPauseTitle;
+    sf::Text mResumeText;
+    sf::Text mQuitFromPauseText;
 
     //Sound
     //Victory
@@ -87,6 +94,7 @@ class CGAME {
     //Dead
     sf::SoundBuffer mDeadBuffer;
     sf::Sound mDeadSound;
+
 
     //Music
     sf::Music mLevelMusic;

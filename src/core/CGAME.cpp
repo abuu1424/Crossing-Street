@@ -122,6 +122,39 @@ void CGAME::setupUI() {
     sf::FloatRect nt = mNoText.getLocalBounds();
     mNoText.setOrigin(nt.left + nt.width/2.f, nt.top + nt.height/2.f);
     mNoText.setPosition(Win_W / 2.f + 70.f, Win_H / 2.f + 30.f);
+
+    // Bảng Pause
+    float pboxW = 400.f, pboxH = 220.f;
+    mPauseBox.setSize(sf::Vector2f(pboxW, pboxH));
+    mPauseBox.setFillColor(sf::Color(20, 20, 30, 230));
+    mPauseBox.setOutlineColor(sf::Color(180, 140, 90));
+    mPauseBox.setOutlineThickness(3.f);
+    mPauseBox.setOrigin(pboxW / 2.f, pboxH / 2.f);
+    mPauseBox.setPosition(Win_W / 2.f, Win_H / 2.f);
+
+    mPauseTitle.setFont(mFont);
+    mPauseTitle.setString("PAUSED");
+    mPauseTitle.setCharacterSize(36);
+    mPauseTitle.setFillColor(sf::Color(255, 215, 0));
+    sf::FloatRect pt = mPauseTitle.getLocalBounds();
+    mPauseTitle.setOrigin(pt.left + pt.width/2.f, pt.top + pt.height/2.f);
+    mPauseTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 60.f);
+
+    mResumeText.setFont(mFont);
+    mResumeText.setString("Press P or click to RESUME");
+    mResumeText.setCharacterSize(20);
+    mResumeText.setFillColor(sf::Color(150, 255, 150));
+    sf::FloatRect rt = mResumeText.getLocalBounds();
+    mResumeText.setOrigin(rt.left + rt.width/2.f, rt.top + rt.height/2.f);
+    mResumeText.setPosition(Win_W / 2.f, Win_H / 2.f);
+
+    mQuitFromPauseText.setFont(mFont);
+    mQuitFromPauseText.setString("Press ESC to QUIT");
+    mQuitFromPauseText.setCharacterSize(20);
+    mQuitFromPauseText.setFillColor(sf::Color(255, 150, 150));
+    sf::FloatRect qft = mQuitFromPauseText.getLocalBounds();
+    mQuitFromPauseText.setOrigin(qft.left + qft.width/2.f, qft.top + qft.height/2.f);
+    mQuitFromPauseText.setPosition(Win_W / 2.f, Win_H / 2.f + 50.f);
 }
 
 sf::FloatRect shrinkBox(sf::FloatRect r, float amount)
@@ -256,18 +289,33 @@ void CGAME::handleEvents() {
             mWindow.close();
         }
 
-        //Bảng QUIT
+        //Bảng PAUSE
+        if (mPaused) {
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::P)
+                    mPaused = false;
+                else if (event.key.code == sf::Keyboard::Escape)
+                    mShowQuitConfirm = true;
+            }
+            if (event.type == sf::Event::MouseButtonPressed
+                && event.mouseButton.button == sf::Mouse::Left) {
+                sf::Vector2f mouse = mWindow.mapPixelToCoords(
+                    sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+                if (mPauseBox.getGlobalBounds().contains(mouse))
+                    mPaused = false;
+            }
+            continue;
+        }
+
+        //Bảng QUIT confirm
         if (mShowQuitConfirm) {
             if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::Escape) {
-                    mShowQuitConfirm = false;  // ESC lần nữa để hủy quit
-                }
-                else if (event.key.code == sf::Keyboard::Y) {
-                    mWindow.close();
-                }
-                else if (event.key.code == sf::Keyboard::N) {
+                if (event.key.code == sf::Keyboard::Escape)
                     mShowQuitConfirm = false;
-                }
+                else if (event.key.code == sf::Keyboard::Y)
+                    mWindow.close();
+                else if (event.key.code == sf::Keyboard::N)
+                    mShowQuitConfirm = false;
             }
             if (event.type == sf::Event::MouseButtonPressed
                 && event.mouseButton.button == sf::Mouse::Left) {
@@ -304,7 +352,6 @@ void CGAME::handleEvents() {
                         mCurrentSaveName =
                             "Save Slot " + std::to_string(mSaveSlotPending);
                     }
-
                     saveGame(mSaveSlotPending);
 
                     mEnteringSaveName = false;
@@ -317,7 +364,6 @@ void CGAME::handleEvents() {
                     mCurrentSaveName.clear();
                 }
             }
-
             continue;
         }
 
@@ -329,62 +375,48 @@ void CGAME::handleEvents() {
             else if (event.key.code == sf::Keyboard::R) {
                 reset();
             }
-
-            // Save F1
+            else if (event.key.code == sf::Keyboard::P) {
+                mPaused = true;   // sửa: phải là true, không phải false
+            }
             else if (event.key.code == sf::Keyboard::F1) {
                 if (SaveData::hasData(1)) {
                     auto slots = SaveData::getAllSlots();
                     mCurrentSaveName = slots[0].saveName.empty()
-                        ? "Save Slot 1"
-                        : slots[0].saveName;
-
+                        ? "Save Slot 1" : slots[0].saveName;
                     saveGame(1);
                     mCurrentSaveName.clear();
-                }
-                else {
+                } else {
                     mEnteringSaveName = true;
                     mSaveSlotPending  = 1;
                     mCurrentSaveName.clear();
                 }
             }
-
-            // Save F2
             else if (event.key.code == sf::Keyboard::F2) {
                 if (SaveData::hasData(2)) {
                     auto slots = SaveData::getAllSlots();
                     mCurrentSaveName = slots[1].saveName.empty()
-                        ? "Save Slot 2"
-                        : slots[1].saveName;
-
+                        ? "Save Slot 2" : slots[1].saveName;
                     saveGame(2);
                     mCurrentSaveName.clear();
-                }
-                else {
+                } else {
                     mEnteringSaveName = true;
                     mSaveSlotPending  = 2;
                     mCurrentSaveName.clear();
                 }
             }
-
-            // Save F3
             else if (event.key.code == sf::Keyboard::F3) {
                 if (SaveData::hasData(3)) {
                     auto slots = SaveData::getAllSlots();
                     mCurrentSaveName = slots[2].saveName.empty()
-                        ? "Save Slot 3"
-                        : slots[2].saveName;
-
+                        ? "Save Slot 3" : slots[2].saveName;
                     saveGame(3);
                     mCurrentSaveName.clear();
-                }
-                else {
+                } else {
                     mEnteringSaveName = true;
                     mSaveSlotPending  = 3;
                     mCurrentSaveName.clear();
                 }
             }
-
-            // Load F4 F5 F6
             else if (event.key.code == sf::Keyboard::F4) {
                 loadGame(1);
             }
@@ -393,6 +425,18 @@ void CGAME::handleEvents() {
             }
             else if (event.key.code == sf::Keyboard::F6) {
                 loadGame(3);
+            }
+        }
+
+        // Click vào icon pause trên HUD
+        if (event.type == sf::Event::MouseButtonPressed
+            && event.mouseButton.button == sf::Mouse::Left) {
+            sf::Vector2f mouse = mWindow.mapPixelToCoords(
+                sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+
+            sf::FloatRect pauseIconArea(Win_W - 70.f, 30.f, 50.f, 60.f);
+            if (pauseIconArea.contains(mouse)) {
+                mPaused = true;
             }
         }
     }
@@ -449,6 +493,7 @@ void CGAME::checkFinish() {
 void CGAME::update(float dt) {
     if (mEnteringSaveName) return;
     if (mShowQuitConfirm) return;
+    if (mPaused) return;
     if (!mPlayer.isDead() && !mPlayer.isFinish()) {
         mlevelTime += dt;
         if (mlevelTime >= Level_Time_Limit)
@@ -527,6 +572,14 @@ void CGAME::render() {
         mWindow.draw(mQuitTitle);
         mWindow.draw(mYesText);
         mWindow.draw(mNoText);
+    }
+
+    if (mPaused)
+    {
+        mWindow.draw(mPauseBox);
+        mWindow.draw(mPauseTitle);
+        mWindow.draw(mResumeText);
+        mWindow.draw(mQuitFromPauseText);
     }
 
     mWindow.display();

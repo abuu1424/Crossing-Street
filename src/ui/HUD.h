@@ -1,14 +1,12 @@
 #pragma once
-
 #include <SFML/Graphics.hpp>
 #include <string>
 
 class HUD {
 private:
-    sf::Font mFont;
-
-    sf::Texture mBarTexture;
-    sf::Sprite  mBarSprite;
+    sf::Font    mFont;
+    sf::Texture mHudTexture;
+    sf::Sprite  mHudSprite;
 
     sf::Text mLevelText;
     sf::Text mScoreText;
@@ -17,7 +15,7 @@ private:
     bool mLoaded;
 
 private:
-    void setupText(sf::Text& text, unsigned int size, float x, float y);
+    void setupText(sf::Text& text, unsigned int size, float xRatio, float yRatio);
     std::string formatTime(float seconds) const;
 
 public:
@@ -27,4 +25,5 @@ public:
 
     void update(int level, int score, float timeSeconds);
     void draw(sf::RenderWindow& window);
+    sf::FloatRect getPauseIconBounds() const;
 };
