@@ -27,14 +27,13 @@ class CGAME {
     // Player
     CPEOPLE                  mPlayer;
 
-    // Vật cản
-    std::vector<CDINOSOUR*>  mDinos;
-    std::vector<CBIRD*>      mBirds;
-    std::vector<CMAMMOTH*> mMammoth;
-
     // Vector dùng cho collision + traffic
     std::vector<CVEHICLE*>   mObstacles;
     std::vector<CANIMAL*>    mAnimals;
+
+    //Helper của obstacle
+    CVEHICLE* createObstacle(ObstacleType type, float speed, float direction);
+    CANIMAL*  createAnimal(AnimalType type, float speed, float direction);
 
     // Traffic light
     CTRAFFIC_LV1*            mTraffic= nullptr;

@@ -2,7 +2,11 @@
 #include <string>
 #include <vector>
 
+enum class ObstacleType { DINOSAUR, MAMMOTH, CHARIOT, HORSE, CAR, TRUCK, FLYCAR, ROBOT };
+enum class AnimalType   { BIRD, PTERO, EAGLE, CROW, PIGEON, DRONE };
+
 struct LaneConfig {
+    ObstacleType type;
     float speed;
     float direction;
     float y;
@@ -12,6 +16,7 @@ struct LaneConfig {
 };
 
 struct AnimalConfig {
+    AnimalType type;
     float speed;
     float direction;
     float y;
@@ -23,15 +28,15 @@ struct AnimalConfig {
 struct LevelConfig {
     int         level;
     std::string backgroundPath;
+    std::string musicPath;
     std::string trafficRedPath;
     std::string trafficGreenPath;
-    std::string musicPath;
     float       trafficX;
     float       trafficY;
     std::vector<LaneConfig>   lanes;
     std::vector<AnimalConfig> animals;
 };
 
-// Khai báo 5 level
 LevelConfig getLevel1();
+
 LevelConfig getLevel(int level);

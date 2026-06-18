@@ -174,12 +174,12 @@ bool sameLane(sf::FloatRect playerBox, sf::FloatRect objectBox)
     return std::abs(playerCenterY - objectCenterY) < 40.f;
 }
 
-void CGAME::clearEntities() {
-    for (auto* d : mDinos)  delete d;
-    for (auto* b : mBirds)  delete b;
+void CGAME::clearEntities()
+{
+    for (auto* o : mObstacles) delete o;
+    for (auto* a : mAnimals)   delete a;
     delete mTraffic;
-    mDinos.clear();
-    mBirds.clear();
+
     mObstacles.clear();
     mAnimals.clear();
     mTraffic = nullptr;
@@ -187,80 +187,65 @@ void CGAME::clearEntities() {
 
 void CGAME::loadLevel(int level) {
     clearEntities();
-
-    LevelConfig cfg = getLevel(level);  // lấy config theo level
+    LevelConfig cfg = getLevel(level);
 
     mLevelCleared = false;
     mCurrentLevel = cfg.level;
     mlevelTime = 0.f;
-
     mHUD.update(mCurrentLevel, mScore, mlevelTime);
 
     // Background
-    if (!mBgTexture.loadFromFile(cfg.backgroundPath)) {
+    if (!mBgTexture.loadFromFile(cfg.backgroundPath))
         printf("FAILED background\n");
-    }
-
     mBgSprite.setTexture(mBgTexture);
     mBgSprite.setScale(
         static_cast<float>(Win_W) / mBgTexture.getSize().x,
         static_cast<float>(Win_H) / mBgTexture.getSize().y
     );
 
-    //Music
     mLevelMusic.stop();
-    if (mLevelMusic.openFromFile(cfg.musicPath))
-    {
+    if (mLevelMusic.openFromFile(cfg.musicPath)) {
         mLevelMusic.setLoop(true);
-        mLevelMusic.setVolume(70.f);
+        mLevelMusic.setVolume(40.f);
         mLevelMusic.play();
     }
-    else printf("Failed to load music background");
 
     // Player
     mPlayer.setDead(false);
     mPlayer.setFinish(false);
     mPlayer.setPosition(SPAWN_X, SPAWN_Y);
 
-    // Spawn vật cản theo config
+    // Spawn vật cản — KHÔNG CẦN if/else theo loại nữa
     for (auto& lane : cfg.lanes) {
         for (int i = 0; i < lane.count; i++) {
-            auto* d = new CDINOSOUR(lane.speed, lane.direction);
-
             float x = lane.direction > 0
                 ? i * lane.spacing
                 : Win_W - i * lane.spacing;
 
-            d->loadSprite(lane.spritePath, x, lane.y);
-
-            mDinos.push_back(d);
-            mObstacles.push_back(d);
+            CVEHICLE* obj = createObstacle(lane.type, lane.speed, lane.direction);
+            obj->loadSprite(lane.spritePath, x, lane.y);
+            mObstacles.push_back(obj);
         }
     }
 
-    // Spawn động vật bay theo config
+    // Spawn động vật bay — tương tự
     for (auto& ani : cfg.animals) {
         for (int i = 0; i < ani.count; i++) {
-            auto* b = new CBIRD(ani.speed, ani.direction);
-
             float x = ani.direction > 0
                 ? i * ani.spacing
                 : Win_W - i * ani.spacing;
 
-            b->loadSprite(ani.spritePath, x, ani.y);
-
-            mBirds.push_back(b);
-            mAnimals.push_back(b);
+            CANIMAL* obj = createAnimal(ani.type, ani.speed, ani.direction);
+            obj->loadSprite(ani.spritePath, x, ani.y);
+            mAnimals.push_back(obj);
         }
     }
 
-    // Traffic light theo config
+    // Traffic light
     mTraffic = new CTRAFFIC_LV1(mObstacles);
     mTraffic->loadSprite(
-        cfg.trafficRedPath,
-        cfg.trafficGreenPath,
-        cfg.trafficX,
-        cfg.trafficY
+        cfg.trafficRedPath, cfg.trafficGreenPath,
+        cfg.trafficX, cfg.trafficY
     );
 }
 
@@ -703,4 +688,19 @@ bool CGAME::loadGame(int slot)
     mPlayer.setPosition(playerX, playerY);
     mHUD.update(mCurrentLevel, mScore, mlevelTime);
     return true;
+}
+
+CVEHICLE* CGAME::createObstacle(ObstacleType type, float speed, float direction) {
+    switch (type) {
+    case ObstacleType::DINOSAUR: return new CDINOSOUR(speed, direction);
+    case ObstacleType::MAMMOTH:  return new CMAMMOTH(speed, direction);
+    default: return new CDINOSOUR(speed, direction);
+    }
+}
+
+CANIMAL* CGAME::createAnimal(AnimalType type, float speed, float direction) {
+    switch (type) {
+    case AnimalType::BIRD: return new CBIRD(speed, direction);
+    default: return new CBIRD(speed, direction);
+    }
 }

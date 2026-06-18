@@ -12,10 +12,14 @@ private:
     sf::Text mScoreText;
     sf::Text mTimeText;
 
+    sf::Vector2f mLevelCenter;
+    sf::Vector2f mScoreCenter;
+    sf::Vector2f mTimeCenter;
+
     bool mLoaded;
 
 private:
-    void setupText(sf::Text& text, unsigned int size, float xRatio, float yRatio);
+    void setupText(sf::Text& text, unsigned int size, float xRatio, float yRatio, sf::Vector2f& centerOut);
     std::string formatTime(float seconds) const;
 
 public:
