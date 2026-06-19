@@ -61,6 +61,7 @@ class CGAME {
     sf::RectangleShape mVictoryBox;
     sf::Text mVictoryTitle;
     sf::Text mVictorySubText;
+    sf::Text mVictoryScore;
 
     //Bảng nhập tên file save
     bool mEnteringSaveName = false;

@@ -66,7 +66,11 @@ void CGAME::setupUI() {
     mVictorySubText.setFillColor(sf::Color::White);
     sf::FloatRect vs = mVictorySubText.getLocalBounds();
     mVictorySubText.setOrigin(vs.left + vs.width/2.f, vs.top + vs.height/2.f);
-    mVictorySubText.setPosition(Win_W / 2.f, Win_H / 2.f + 40.f);
+    mVictorySubText.setPosition(Win_W / 2.f, Win_H / 2.f + 40.f);\
+    mVictoryScore.setFont(mFont);
+    mVictoryScore.setCharacterSize(28);
+    mVictoryScore.setFillColor(sf::Color(255, 215, 0));
+    mVictoryScore.setPosition(Win_W / 2.f, Win_H / 2.f + 80.f);
 
     // Bảng nhập tên save
     float sboxW = 450.f, sboxH = 180.f;
@@ -483,6 +487,13 @@ void CGAME::checkFinish() {
     if (mPlayer.getPosition().y < 80.f) {
         mLevelCleared = true;
 
+        float timeRemaining = Level_Time_Limit - mlevelTime;
+        if (timeRemaining < 0.f) timeRemaining = 0.f;
+        int baseScore  = 100 * mCurrentLevel;
+        int timeBonus  = static_cast<int>(timeRemaining) * 10;
+        mScore        += baseScore + timeBonus;
+        printf("Level %d clear! +%d (base=%d, bonus=%d)\n",
+               mCurrentLevel, baseScore + timeBonus, baseScore, timeBonus);
         if (mCurrentLevel == 1) {
             mPlayer.setFinish(true);
             mLevelMusic.stop();
@@ -562,7 +573,15 @@ void CGAME::render() {
         mWindow.draw(mVictoryBox);
         mWindow.draw(mVictoryTitle);
         mWindow.draw(mVictorySubText);
+
+        // Cập nhật và vẽ score
+        mVictoryScore.setString("Final Score: " + std::to_string(mScore));
+        sf::FloatRect sb = mVictoryScore.getLocalBounds();
+        mVictoryScore.setOrigin(sb.left + sb.width/2.f, sb.top + sb.height/2.f);
+        mVictoryScore.setPosition(Win_W / 2.f, Win_H / 2.f + 80.f);
+        mWindow.draw(mVictoryScore);
     }
+
     if (mEnteringSaveName)
     {
         mSaveInput.setString(mCurrentSaveName + "_");
