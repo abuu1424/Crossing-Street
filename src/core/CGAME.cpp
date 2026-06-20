@@ -1,5 +1,6 @@
 #include "CGAME.h"
 #include "LevelConfig.h"
+#include "HighScore.h"
 #include <cstdio>
 #include <cmath>
 
@@ -44,10 +45,11 @@ void CGAME::setupUI() {
     mDeadText.setPosition(Win_W / 2.f, Win_H / 2.f);
 
     // Bảng VICTORY
-    float vboxW = 500.f, vboxH = 200.f;
+    // Bảng VICTORY
+    float vboxW = 500.f, vboxH = 260.f;
     mVictoryBox.setSize(sf::Vector2f(vboxW, vboxH));
     mVictoryBox.setFillColor(sf::Color(0, 0, 0, 200));
-    mVictoryBox.setOutlineColor(sf::Color(255, 215, 0));  // viền vàng
+    mVictoryBox.setOutlineColor(sf::Color(255, 215, 0));
     mVictoryBox.setOutlineThickness(3.f);
     mVictoryBox.setOrigin(vboxW / 2.f, vboxH / 2.f);
     mVictoryBox.setPosition(Win_W / 2.f, Win_H / 2.f);
@@ -55,22 +57,35 @@ void CGAME::setupUI() {
     mVictoryTitle.setFont(mFont);
     mVictoryTitle.setString("VICTORY!");
     mVictoryTitle.setCharacterSize(52);
-    mVictoryTitle.setFillColor(sf::Color(255, 215, 0));  // chữ vàng
+    mVictoryTitle.setFillColor(sf::Color(255, 215, 0));
     sf::FloatRect vt = mVictoryTitle.getLocalBounds();
-    mVictoryTitle.setOrigin(vt.left + vt.width/2.f, vt.top + vt.height/2.f);
-    mVictoryTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 40.f);
+    mVictoryTitle.setOrigin(vt.left + vt.width / 2.f, vt.top + vt.height / 2.f);
+    mVictoryTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 85.f);
 
     mVictorySubText.setFont(mFont);
     mVictorySubText.setString("You escaped through time!\nPress R to play again");
     mVictorySubText.setCharacterSize(20);
     mVictorySubText.setFillColor(sf::Color::White);
     sf::FloatRect vs = mVictorySubText.getLocalBounds();
-    mVictorySubText.setOrigin(vs.left + vs.width/2.f, vs.top + vs.height/2.f);
-    mVictorySubText.setPosition(Win_W / 2.f, Win_H / 2.f + 40.f);\
+    mVictorySubText.setOrigin(vs.left + vs.width / 2.f, vs.top + vs.height / 2.f);
+    mVictorySubText.setPosition(Win_W / 2.f, Win_H / 2.f - 20.f);
+
     mVictoryScore.setFont(mFont);
-    mVictoryScore.setCharacterSize(28);
-    mVictoryScore.setFillColor(sf::Color(255, 215, 0));
-    mVictoryScore.setPosition(Win_W / 2.f, Win_H / 2.f + 80.f);
+    mVictoryScore.setString("SCORE: 0");
+    mVictoryScore.setCharacterSize(26);
+    mVictoryScore.setFillColor(sf::Color::White);
+    sf::FloatRect sc = mVictoryScore.getLocalBounds();
+    mVictoryScore.setOrigin(sc.left + sc.width / 2.f, sc.top + sc.height / 2.f);
+    mVictoryScore.setPosition(Win_W / 2.f, Win_H / 2.f + 45.f);
+
+    mVictoryHighScore.setFont(mFont);
+    mVictoryHighScore.setString("HIGH SCORE: 0");
+    mVictoryHighScore.setCharacterSize(26);
+    mVictoryHighScore.setFillColor(sf::Color(255, 215, 0));
+    sf::FloatRect hs = mVictoryHighScore.getLocalBounds();
+    mVictoryHighScore.setOrigin(hs.left + hs.width / 2.f, hs.top + hs.height / 2.f);
+    mVictoryHighScore.setPosition(Win_W / 2.f, Win_H / 2.f + 85.f);
+
 
     // Bảng nhập tên save
     float sboxW = 450.f, sboxH = 180.f;
@@ -498,6 +513,13 @@ void CGAME::checkFinish() {
             mPlayer.setFinish(true);
             mLevelMusic.stop();
             mVictorySound.play();
+
+            bool isNewHighScore = HighScore::updateIfHigher(mScore);
+
+            if (isNewHighScore) {
+                printf("NEW HIGH SCORE: %d\n", mScore);
+            }
+
             printf("VICTORY!\n");
             return;
         }
@@ -574,12 +596,17 @@ void CGAME::render() {
         mWindow.draw(mVictoryTitle);
         mWindow.draw(mVictorySubText);
 
-        // Cập nhật và vẽ score
-        mVictoryScore.setString("Final Score: " + std::to_string(mScore));
-        sf::FloatRect sb = mVictoryScore.getLocalBounds();
-        mVictoryScore.setOrigin(sb.left + sb.width/2.f, sb.top + sb.height/2.f);
-        mVictoryScore.setPosition(Win_W / 2.f, Win_H / 2.f + 80.f);
+        mVictoryScore.setString("SCORE: " + std::to_string(mScore));
+        sf::FloatRect sc = mVictoryScore.getLocalBounds();
+        mVictoryScore.setOrigin(sc.left + sc.width / 2.f, sc.top + sc.height / 2.f);
+
+        int highScore = HighScore::load();
+        mVictoryHighScore.setString("HIGH SCORE: " + std::to_string(highScore));
+        sf::FloatRect hs = mVictoryHighScore.getLocalBounds();
+        mVictoryHighScore.setOrigin(hs.left + hs.width / 2.f, hs.top + hs.height / 2.f);
+
         mWindow.draw(mVictoryScore);
+        mWindow.draw(mVictoryHighScore);
     }
 
     if (mEnteringSaveName)

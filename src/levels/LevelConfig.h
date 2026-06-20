@@ -25,14 +25,15 @@ struct AnimalConfig {
     float spacing;
 };
 
+
 struct LevelConfig {
     int         level;
     std::string backgroundPath;
     std::string musicPath;
     std::string trafficRedPath;
     std::string trafficGreenPath;
-    float       trafficX;
-    float       trafficY;
+    float trafficX;
+    float trafficY;
     std::vector<LaneConfig>   lanes;
     std::vector<AnimalConfig> animals;
 };

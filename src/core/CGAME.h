@@ -36,7 +36,7 @@ class CGAME {
     CANIMAL*  createAnimal(AnimalType type, float speed, float direction);
 
     // Traffic light
-    CTRAFFIC_LV1*            mTraffic= nullptr;
+    CTRAFFIC_LV1* mTraffic = nullptr;
 
     // Trạng thái
     bool                     mLevelCleared = false;
@@ -62,6 +62,7 @@ class CGAME {
     sf::Text mVictoryTitle;
     sf::Text mVictorySubText;
     sf::Text mVictoryScore;
+    sf::Text mVictoryHighScore;
 
     //Bảng nhập tên file save
     bool mEnteringSaveName = false;
