@@ -10,9 +10,9 @@
 | MSSV     | Họ tên            | Phụ trách                                                      |
 |----------|-------------------|----------------------------------------------------------------|
 | 23127065 | Phan Gia Huy      | CGAME, main, LevelConfig, Save,Utils                           |
-| 23127xxx | Nguyễn Hoàng Nhật | CPEOPLE, CVEHICLE, vật cản, sprite(Con người, map)             |
-| 23127xxx | Nguyễn Văn Hải    | CANIMAL, động vật, âm thanh, sprite(động vật bay, vật thể bay) |
-| 23127xxx | Phan Đình Quốc    | Menu, HUD, sprite(menu, hud)                                   |
+| 23127445 | Nguyễn Hoàng Nhật | CPEOPLE, CVEHICLE, vật cản, sprite(Con người, map)             |
+| 23127485 | Nguyễn Văn Hải    | CANIMAL, động vật, âm thanh, sprite(động vật bay, vật thể bay) |
+| 23127322 | Phan Đình Quốc    | Menu, HUD, sprite(menu, hud)                                   |
 
 > **Giáo viên hướng dẫn:** Thầy Trương Toàn Thịnh — Khoa CNTT, ĐHKHTN TP.HCM
 
