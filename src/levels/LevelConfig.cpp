@@ -23,10 +23,26 @@ LevelConfig getLevel1() {
     };
 }
 
+LevelConfig getLevel2()
+{
+    return {
+        2,
+        "assets/background/lv2_bg/bg_lv2.png",
+        "assets/sounds/lv2_sd/music_bg2.ogg",
+        "assets/sprites/lv2_sp/traffic/torch.png",
+        "assets/sprites/lv2_sp/traffic/torch1.png",
+        80, 550,
+        {
+        }
+    };
+};
+
 LevelConfig getLevel(int level) {
     switch (level) {
     case 1:
         return getLevel1();
+    case 2:
+        return getLevel2();
     default:
         return getLevel1();
     }

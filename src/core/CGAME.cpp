@@ -18,6 +18,7 @@ CGAME::CGAME(sf::RenderWindow& window)
 CGAME::~CGAME() {
     clearEntities();
 }
+
 void CGAME::setupUI() {
     mFont.loadFromFile("assets/font/pixel_operator/PixelOperator.ttf");
 
@@ -174,6 +175,45 @@ void CGAME::setupUI() {
     sf::FloatRect qft = mQuitFromPauseText.getLocalBounds();
     mQuitFromPauseText.setOrigin(qft.left + qft.width/2.f, qft.top + qft.height/2.f);
     mQuitFromPauseText.setPosition(Win_W / 2.f, Win_H / 2.f + 50.f);
+
+    // Bảng Level Clear
+    float lcW = 500.f, lcH = 300.f;
+    mLevelClearBox.setSize(sf::Vector2f(lcW, lcH));
+    mLevelClearBox.setFillColor(sf::Color(20, 20, 30, 230));
+    mLevelClearBox.setOutlineColor(sf::Color(255, 215, 0));
+    mLevelClearBox.setOutlineThickness(3.f);
+    mLevelClearBox.setOrigin(lcW / 2.f, lcH / 2.f);
+    mLevelClearBox.setPosition(Win_W / 2.f, Win_H / 2.f);
+
+    mLevelClearTitle.setFont(mFont);
+    mLevelClearTitle.setCharacterSize(32);
+    mLevelClearTitle.setFillColor(sf::Color(255, 215, 0));
+    {
+        sf::FloatRect b = mLevelClearTitle.getLocalBounds();
+        mLevelClearTitle.setOrigin(b.left + b.width/2.f, b.top + b.height/2.f);
+        mLevelClearTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 110.f);
+    }
+
+    mLevelClearScore.setFont(mFont);
+    mLevelClearScore.setCharacterSize(20);
+    mLevelClearScore.setFillColor(sf::Color::White);
+    mLevelClearScore.setPosition(Win_W / 2.f, Win_H / 2.f - 65.f);
+
+    // 4 lựa chọn
+    auto setupOpt = [&](sf::Text& t, const std::string& str, float y) {
+        t.setFont(mFont);
+        t.setString(str);
+        t.setCharacterSize(20);
+        t.setFillColor(sf::Color(150, 220, 255));
+        sf::FloatRect b = t.getLocalBounds();
+        t.setOrigin(b.left + b.width/2.f, b.top + b.height/2.f);
+        t.setPosition(Win_W / 2.f, y);
+    };
+
+    setupOpt(mOpt1Text, "[1]  Next Level",    Win_H / 2.f - 10.f);
+    setupOpt(mOpt2Text, "[2]  Save",          Win_H / 2.f + 40.f);
+    setupOpt(mOpt3Text, "[3]  Save & Exit",   Win_H / 2.f + 90.f);
+    setupOpt(mOpt4Text, "[4]  Exit",          Win_H / 2.f + 140.f);
 }
 
 sf::FloatRect shrinkBox(sf::FloatRect r, float amount)
@@ -353,6 +393,74 @@ void CGAME::handleEvents() {
             continue;
         }
 
+        // Bảng Level Clear
+        if (mShowLevelClear) {
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Num1) {
+                    mShowLevelClear = false;
+                    mPlayer.setFinish(false);
+                    if (mCurrentLevel < 5)
+                        loadLevel(mCurrentLevel + 1);
+                    else {
+                        mPlayer.setFinish(true);
+                        mVictorySound.play();
+                    }
+                }
+                else if (event.key.code == sf::Keyboard::Num2) {
+                    // Mở bảng save
+                    mShowLevelClear = false;
+                    mEnteringSaveName = true;
+                    mSaveSlotPending  = 1;
+                    mCurrentSaveName.clear();
+                }
+                else if (event.key.code == sf::Keyboard::Num3) {
+                    // Save và exit — mở bảng save, sau khi save sẽ exit
+                    mShowLevelClear   = false;
+                    mEnteringSaveName = true;
+                    mSaveSlotPending  = 1;
+                    mCurrentSaveName.clear();
+                    mPendingSaveAndExit = true;  // cờ exit sau khi save
+                }
+                else if (event.key.code == sf::Keyboard::Num4) {
+                    mWindow.close();
+                }
+            }
+
+            if (event.type == sf::Event::MouseButtonPressed
+                && event.mouseButton.button == sf::Mouse::Left) {
+                sf::Vector2f mouse = mWindow.mapPixelToCoords(
+                    sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+
+                if (mOpt1Text.getGlobalBounds().contains(mouse)) {
+                    mShowLevelClear = false;
+                    mPlayer.setFinish(false);
+                    if (mCurrentLevel < 5)
+                        loadLevel(mCurrentLevel + 1);
+                    else {
+                        mPlayer.setFinish(true);
+                        mVictorySound.play();
+                    }
+                }
+                else if (mOpt2Text.getGlobalBounds().contains(mouse)) {
+                    mShowLevelClear   = false;
+                    mEnteringSaveName = true;
+                    mSaveSlotPending  = 1;
+                    mCurrentSaveName.clear();
+                }
+                else if (mOpt3Text.getGlobalBounds().contains(mouse)) {
+                    mShowLevelClear     = false;
+                    mEnteringSaveName   = true;
+                    mSaveSlotPending    = 1;
+                    mCurrentSaveName.clear();
+                    mPendingSaveAndExit = true;
+                }
+                else if (mOpt4Text.getGlobalBounds().contains(mouse)) {
+                    mWindow.close();
+                }
+            }
+            continue;
+        }
+
         // Đang nhập tên save
         if (mEnteringSaveName) {
             if (event.type == sf::Event::TextEntered) {
@@ -379,6 +487,11 @@ void CGAME::handleEvents() {
                     mEnteringSaveName = false;
                     mSaveSlotPending = 0;
                     mCurrentSaveName.clear();
+
+                    if (mPendingSaveAndExit) {
+                        mPendingSaveAndExit = false;
+                        mWindow.close();
+                    }
                 }
                 else if (event.key.code == sf::Keyboard::Escape) {
                     mEnteringSaveName = false;
@@ -489,6 +602,8 @@ void CGAME::handleCollision() {
 
         if (sameLane(pb, ab) && pb.intersects(ab)) {
             mPlayer.setDead(true);
+            mLevelMusic.stop();
+            mDeadSound.play();
             printf("DEAD\n");
             return;
         }
@@ -502,29 +617,53 @@ void CGAME::checkFinish() {
     if (mPlayer.getPosition().y < 80.f) {
         mLevelCleared = true;
 
+        // Tính score
         float timeRemaining = Level_Time_Limit - mlevelTime;
         if (timeRemaining < 0.f) timeRemaining = 0.f;
-        int baseScore  = 100 * mCurrentLevel;
-        int timeBonus  = static_cast<int>(timeRemaining) * 10;
-        mScore        += baseScore + timeBonus;
+        int baseScore = 100 * mCurrentLevel;
+        int timeBonus = static_cast<int>(timeRemaining) * 10;
+        mScore += baseScore + timeBonus;
         printf("Level %d clear! +%d (base=%d, bonus=%d)\n",
                mCurrentLevel, baseScore + timeBonus, baseScore, timeBonus);
-        if (mCurrentLevel == 1) {
-            mPlayer.setFinish(true);
-            mLevelMusic.stop();
-            mVictorySound.play();
 
-            bool isNewHighScore = HighScore::updateIfHigher(mScore);
-
-            if (isNewHighScore) {
-                printf("NEW HIGH SCORE: %d\n", mScore);
-            }
-
-            printf("VICTORY!\n");
-            return;
+        // Cập nhật text bảng Level Clear
+        mLevelClearTitle.setString("Level " + std::to_string(mCurrentLevel) + " Complete!");
+        {
+            sf::FloatRect b = mLevelClearTitle.getLocalBounds();
+            mLevelClearTitle.setOrigin(b.left + b.width/2.f, b.top + b.height/2.f);
         }
 
-        loadLevel(mCurrentLevel + 1);
+        mLevelClearScore.setString(
+            "+" + std::to_string(baseScore) + " base  +  " +
+            std::to_string(timeBonus) + " time bonus  =  " +
+            std::to_string(mScore) + " total"
+        );
+        {
+            sf::FloatRect b = mLevelClearScore.getLocalBounds();
+            mLevelClearScore.setOrigin(b.left + b.width/2.f, b.top + b.height/2.f);
+            mLevelClearScore.setPosition(Win_W / 2.f, Win_H / 2.f - 65.f);
+        }
+
+        if (mCurrentLevel == 2) {
+            mOpt1Text.setString("[1]  See Victory Screen");
+        } else {
+            mOpt1Text.setString("[1]  Next Level");
+        }
+        {
+            sf::FloatRect b = mOpt1Text.getLocalBounds();
+            mOpt1Text.setOrigin(b.left + b.width/2.f, b.top + b.height/2.f);
+        }
+
+        mLevelMusic.stop();
+        mPlayer.setFinish(true);  // dừng di chuyển
+        mShowLevelClear = true;   // hiện bảng
+
+        // HighScore
+        if (mCurrentLevel == 2) {
+            bool isNewHighScore = HighScore::updateIfHigher(mScore);
+            if (isNewHighScore) printf("NEW HIGH SCORE: %d\n", mScore);
+            printf("VICTORY!\n");
+        }
     }
 }
 
@@ -532,6 +671,8 @@ void CGAME::update(float dt) {
     if (mEnteringSaveName) return;
     if (mShowQuitConfirm) return;
     if (mPaused) return;
+    if (mLevelCleared) return;
+
     if (!mPlayer.isDead() && !mPlayer.isFinish()) {
         mlevelTime += dt;
         if (mlevelTime >= Level_Time_Limit)
@@ -591,7 +732,7 @@ void CGAME::render() {
         mWindow.draw(mDeadText);
     }
 
-    if (mPlayer.isFinish()) {
+    if (mPlayer.isFinish() && mCurrentLevel == 2 && !mShowLevelClear) {
         mWindow.draw(mVictoryBox);
         mWindow.draw(mVictoryTitle);
         mWindow.draw(mVictorySubText);
@@ -617,6 +758,7 @@ void CGAME::render() {
         mWindow.draw(mSaveTitle);
         mWindow.draw(mSaveInput);
     }
+
     if (mShowQuitConfirm)
     {
         mWindow.draw(mQuitBox);
@@ -631,6 +773,16 @@ void CGAME::render() {
         mWindow.draw(mPauseTitle);
         mWindow.draw(mResumeText);
         mWindow.draw(mQuitFromPauseText);
+    }
+
+    if (mShowLevelClear) {
+        mWindow.draw(mLevelClearBox);
+        mWindow.draw(mLevelClearTitle);
+        mWindow.draw(mLevelClearScore);
+        mWindow.draw(mOpt1Text);
+        mWindow.draw(mOpt2Text);
+        mWindow.draw(mOpt3Text);
+        mWindow.draw(mOpt4Text);
     }
 
     mWindow.display();
@@ -740,6 +892,8 @@ CVEHICLE* CGAME::createObstacle(ObstacleType type, float speed, float direction)
     switch (type) {
     case ObstacleType::DINOSAUR: return new CDINOSOUR(speed, direction);
     case ObstacleType::MAMMOTH:  return new CMAMMOTH(speed, direction);
+    case ObstacleType::CHARIOT: return new CCHARIOT(speed, direction);
+    case ObstacleType::WAR_ELEPHENT: return new CWARELEPHENT(speed, direction);
     default: return new CDINOSOUR(speed, direction);
     }
 }
@@ -747,6 +901,7 @@ CVEHICLE* CGAME::createObstacle(ObstacleType type, float speed, float direction)
 CANIMAL* CGAME::createAnimal(AnimalType type, float speed, float direction) {
     switch (type) {
     case AnimalType::BIRD: return new CBIRD(speed, direction);
+    case AnimalType::EAGLE: return new CEAGLE(speed, direction);
     default: return new CBIRD(speed, direction);
     }
 }

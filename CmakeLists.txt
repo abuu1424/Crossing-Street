@@ -39,9 +39,11 @@ add_executable(CrossingGame ${SOURCES}
         src/obstacles/lv1/traffic_lv1/CTRAFFIC_LV1.h
         src/levels/LevelConfig.cpp "src/obstacles/lv2/animal_lv2/CEAGLE.cpp" "src/obstacles/lv2/animal_lv2/CEAGLE.h"
         src/core/SaveData.h
-        "src/core/SaveData.cpp" "src/obstacles/lv4/animal_lv4/CPTERO.cpp" "src/obstacles/lv4/animal_lv4/CPTERO.h" "src/obstacles/lv2/animal_lv2/CCHARIOT.cpp" "src/obstacles/lv2/animal_lv2/CCHARIOT.h" "src/obstacles/lv2/animal_lv2/CHORSE.cpp" "src/obstacles/lv2/animal_lv2/CHORSE.h"
+        "src/core/SaveData.cpp" "src/obstacles/lv4/animal_lv4/CPTERO.cpp" "src/obstacles/lv4/animal_lv4/CPTERO.h" "src/obstacles/lv2/animal_lv2/CCHARIOT.cpp" "src/obstacles/lv2/animal_lv2/CCHARIOT.h" "src/obstacles/lv3/animal_lv3/CHORSE.cpp" "src/obstacles/lv3/animal_lv3/CHORSE.h"
         src/core/HighScore.cpp
-        src/core/HighScore.h)
+        src/core/HighScore.h
+        src/obstacles/lv2/animal_lv2/CWARELEPHENT.cpp
+        src/obstacles/lv2/animal_lv2/CWARELEPHENT.h)
 
 # ── Include paths ─────────────────────────────────────────────────────────────
 target_include_directories(CrossingGame PRIVATE

@@ -6,6 +6,9 @@
 #include "CDINOSOUR.h"
 #include "CBIRD.h"
 #include "CMAMMOTH.h"
+#include "CCHARIOT.h"
+#include "CWARELEPHENT.h"
+#include "CEAGLE.h"
 #include "CTRAFFIC_LV1.h"
 #include "LevelConfig.h"
 #include "Menu.h"
@@ -81,6 +84,18 @@ class CGAME {
     sf::Text mNoText;
     bool mYesHovered = false;
     bool mNoHovered  = false;
+
+    // Bảng Level Clear
+    bool mShowLevelClear = false;
+    sf::RectangleShape mLevelClearBox;
+    sf::Text mLevelClearTitle;
+    sf::Text mLevelClearScore;
+    sf::Text mOpt1Text;   // Next Level
+    sf::Text mOpt2Text;   // Save
+    sf::Text mOpt3Text;   // Save & Exit
+    sf::Text mOpt4Text;   // Exit
+    bool mPendingSaveAndExit = false;
+
     //Nút Pause
     bool mPaused = false;
     sf::RectangleShape mPauseBox;

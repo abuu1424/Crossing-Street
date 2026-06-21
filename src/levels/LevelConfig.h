@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-enum class ObstacleType { DINOSAUR, MAMMOTH, CHARIOT, HORSE, CAR, TRUCK, FLYCAR, ROBOT };
+enum class ObstacleType { DINOSAUR, MAMMOTH, CHARIOT, WAR_ELEPHENT, HORSE, CAR, TRUCK, FLYCAR, ROBOT };
 enum class AnimalType   { BIRD, PTERO, EAGLE, CROW, PIGEON, DRONE };
 
 struct LaneConfig {
@@ -39,5 +39,6 @@ struct LevelConfig {
 };
 
 LevelConfig getLevel1();
+LevelConfig getLevel2();
 
 LevelConfig getLevel(int level);
