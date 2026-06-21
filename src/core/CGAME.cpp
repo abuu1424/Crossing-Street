@@ -439,35 +439,39 @@ void CGAME::handleEvents() {
                 else if (event.key.code == sf::Keyboard::Num3) mSaveSlotPending = 3;
                 else if (event.key.code == sf::Keyboard::Escape) {
                     mSelectingSaveSlot = false;
-                    setupLevelClearOptions();
                     mShowLevelClear = true;
+                    mSaveSlotPending = 0;
                     continue;
                 }
 
                 if (mSaveSlotPending != 0) {
-                    mSelectingSaveSlot = false;
-                    mEnteringSaveName = true;
-                    mCurrentSaveName.clear();
-                }
-            }
+                    if (SaveData::hasData(mSaveSlotPending)) {
+                        auto slots = SaveData::getAllSlots();
 
-            if (event.type == sf::Event::MouseButtonPressed &&
-                event.mouseButton.button == sf::Mouse::Left) {
+                        mCurrentSaveName =
+                            slots[mSaveSlotPending - 1].saveName.empty()
+                            ? "Save Slot " + std::to_string(mSaveSlotPending)
+                            : slots[mSaveSlotPending - 1].saveName;
 
-                if (mOpt1Text.getGlobalBounds().contains(mouse)) mSaveSlotPending = 1;
-                else if (mOpt2Text.getGlobalBounds().contains(mouse)) mSaveSlotPending = 2;
-                else if (mOpt3Text.getGlobalBounds().contains(mouse)) mSaveSlotPending = 3;
-                else if (mOpt4Text.getGlobalBounds().contains(mouse)) {
-                    mSelectingSaveSlot = false;
-                    setupLevelClearOptions();
-                    mShowLevelClear = true;
-                    continue;
-                }
+                        saveGame(mSaveSlotPending);
 
-                if (mSaveSlotPending != 0) {
-                    mSelectingSaveSlot = false;
-                    mEnteringSaveName = true;
-                    mCurrentSaveName.clear();
+                        mSelectingSaveSlot = false;
+                        mSaveSlotPending = 0;
+                        mCurrentSaveName.clear();
+
+                        if (mPendingSaveAndExit) {
+                            mPendingSaveAndExit = false;
+                            mWindow.close();
+                        }
+                        else {
+                            mShowLevelClear = true;
+                        }
+                    }
+                    else {
+                        mSelectingSaveSlot = false;
+                        mEnteringSaveName = true;
+                        mCurrentSaveName.clear();
+                    }
                 }
             }
 
