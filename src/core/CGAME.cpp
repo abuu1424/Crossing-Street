@@ -216,6 +216,44 @@ void CGAME::setupUI() {
     setupOpt(mOpt4Text, "[4]  Exit",          Win_H / 2.f + 140.f);
 }
 
+void CGAME::centerText(sf::Text& text) {
+    sf::FloatRect b = text.getLocalBounds();
+    text.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
+}
+
+void CGAME::setupLevelClearOptions() {
+    if (mCurrentLevel == 2) {
+        mOpt1Text.setString("[1]  See Victory Screen");
+    }
+    else {
+        mOpt1Text.setString("[1]  Next Level");
+    }
+
+    mOpt2Text.setString("[2]  Save");
+    mOpt3Text.setString("[3]  Save & Exit");
+    mOpt4Text.setString("[4]  Exit");
+
+    centerText(mOpt1Text);
+    centerText(mOpt2Text);
+    centerText(mOpt3Text);
+    centerText(mOpt4Text);
+}
+
+void CGAME::setupSaveSlotOptions() {
+    mLevelClearTitle.setString("SELECT SAVE SLOT");
+    centerText(mLevelClearTitle);
+
+    mOpt1Text.setString("[1]  Slot 1");
+    mOpt2Text.setString("[2]  Slot 2");
+    mOpt3Text.setString("[3]  Slot 3");
+    mOpt4Text.setString("[ESC]  Back");
+
+    centerText(mOpt1Text);
+    centerText(mOpt2Text);
+    centerText(mOpt3Text);
+    centerText(mOpt4Text);
+}
+
 sf::FloatRect shrinkBox(sf::FloatRect r, float amount)
 {
     r.left += amount;
@@ -393,12 +431,55 @@ void CGAME::handleEvents() {
             continue;
         }
 
-        // Bảng Level Clear
+        // Bảng chọn save slot
+        if (mSelectingSaveSlot) {
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Num1) mSaveSlotPending = 1;
+                else if (event.key.code == sf::Keyboard::Num2) mSaveSlotPending = 2;
+                else if (event.key.code == sf::Keyboard::Num3) mSaveSlotPending = 3;
+                else if (event.key.code == sf::Keyboard::Escape) {
+                    mSelectingSaveSlot = false;
+                    setupLevelClearOptions();
+                    mShowLevelClear = true;
+                    continue;
+                }
+
+                if (mSaveSlotPending != 0) {
+                    mSelectingSaveSlot = false;
+                    mEnteringSaveName = true;
+                    mCurrentSaveName.clear();
+                }
+            }
+
+            if (event.type == sf::Event::MouseButtonPressed &&
+                event.mouseButton.button == sf::Mouse::Left) {
+
+                if (mOpt1Text.getGlobalBounds().contains(mouse)) mSaveSlotPending = 1;
+                else if (mOpt2Text.getGlobalBounds().contains(mouse)) mSaveSlotPending = 2;
+                else if (mOpt3Text.getGlobalBounds().contains(mouse)) mSaveSlotPending = 3;
+                else if (mOpt4Text.getGlobalBounds().contains(mouse)) {
+                    mSelectingSaveSlot = false;
+                    setupLevelClearOptions();
+                    mShowLevelClear = true;
+                    continue;
+                }
+
+                if (mSaveSlotPending != 0) {
+                    mSelectingSaveSlot = false;
+                    mEnteringSaveName = true;
+                    mCurrentSaveName.clear();
+                }
+            }
+
+            continue;
+        }
+
         if (mShowLevelClear) {
             if (event.type == sf::Event::KeyPressed) {
                 if (event.key.code == sf::Keyboard::Num1) {
                     mShowLevelClear = false;
                     mPlayer.setFinish(false);
+
                     if (mCurrentLevel < 5)
                         loadLevel(mCurrentLevel + 1);
                     else {
@@ -407,19 +488,20 @@ void CGAME::handleEvents() {
                     }
                 }
                 else if (event.key.code == sf::Keyboard::Num2) {
-                    // Mở bảng save
+                    // Save: mở bảng chọn slot
                     mShowLevelClear = false;
-                    mEnteringSaveName = true;
-                    mSaveSlotPending  = 1;
+                    mSelectingSaveSlot = true;
+                    mPendingSaveAndExit = false;
+                    mSaveSlotPending = 0;
                     mCurrentSaveName.clear();
                 }
                 else if (event.key.code == sf::Keyboard::Num3) {
-                    // Save và exit — mở bảng save, sau khi save sẽ exit
-                    mShowLevelClear   = false;
-                    mEnteringSaveName = true;
-                    mSaveSlotPending  = 1;
+                    // Save & Exit: mở bảng chọn slot, sau khi save sẽ exit
+                    mShowLevelClear = false;
+                    mSelectingSaveSlot = true;
+                    mPendingSaveAndExit = true;
+                    mSaveSlotPending = 0;
                     mCurrentSaveName.clear();
-                    mPendingSaveAndExit = true;  // cờ exit sau khi save
                 }
                 else if (event.key.code == sf::Keyboard::Num4) {
                     mWindow.close();
@@ -428,12 +510,14 @@ void CGAME::handleEvents() {
 
             if (event.type == sf::Event::MouseButtonPressed
                 && event.mouseButton.button == sf::Mouse::Left) {
+
                 sf::Vector2f mouse = mWindow.mapPixelToCoords(
                     sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 
                 if (mOpt1Text.getGlobalBounds().contains(mouse)) {
                     mShowLevelClear = false;
                     mPlayer.setFinish(false);
+
                     if (mCurrentLevel < 5)
                         loadLevel(mCurrentLevel + 1);
                     else {
@@ -442,22 +526,26 @@ void CGAME::handleEvents() {
                     }
                 }
                 else if (mOpt2Text.getGlobalBounds().contains(mouse)) {
-                    mShowLevelClear   = false;
-                    mEnteringSaveName = true;
-                    mSaveSlotPending  = 1;
+                    // Save: mở bảng chọn slot
+                    mShowLevelClear = false;
+                    mSelectingSaveSlot = true;
+                    mPendingSaveAndExit = false;
+                    mSaveSlotPending = 0;
                     mCurrentSaveName.clear();
                 }
                 else if (mOpt3Text.getGlobalBounds().contains(mouse)) {
-                    mShowLevelClear     = false;
-                    mEnteringSaveName   = true;
-                    mSaveSlotPending    = 1;
-                    mCurrentSaveName.clear();
+                    // Save & Exit: mở bảng chọn slot
+                    mShowLevelClear = false;
+                    mSelectingSaveSlot = true;
                     mPendingSaveAndExit = true;
+                    mSaveSlotPending = 0;
+                    mCurrentSaveName.clear();
                 }
                 else if (mOpt4Text.getGlobalBounds().contains(mouse)) {
                     mWindow.close();
                 }
             }
+
             continue;
         }
 
@@ -492,11 +580,17 @@ void CGAME::handleEvents() {
                         mPendingSaveAndExit = false;
                         mWindow.close();
                     }
+                    else {
+                        setupLevelClearOptions();
+                        mShowLevelClear = true;
+                    }
                 }
                 else if (event.key.code == sf::Keyboard::Escape) {
                     mEnteringSaveName = false;
                     mSaveSlotPending = 0;
                     mCurrentSaveName.clear();
+                    setupLevelClearOptions();
+                    mShowLevelClear = true;
                 }
             }
 
@@ -644,15 +738,7 @@ void CGAME::checkFinish() {
             mLevelClearScore.setPosition(Win_W / 2.f, Win_H / 2.f - 65.f);
         }
 
-        if (mCurrentLevel == 2) {
-            mOpt1Text.setString("[1]  See Victory Screen");
-        } else {
-            mOpt1Text.setString("[1]  Next Level");
-        }
-        {
-            sf::FloatRect b = mOpt1Text.getLocalBounds();
-            mOpt1Text.setOrigin(b.left + b.width/2.f, b.top + b.height/2.f);
-        }
+        setupLevelClearOptions();
 
         mLevelMusic.stop();
         mPlayer.setFinish(true);  // dừng di chuyển
@@ -773,6 +859,17 @@ void CGAME::render() {
         mWindow.draw(mPauseTitle);
         mWindow.draw(mResumeText);
         mWindow.draw(mQuitFromPauseText);
+    }
+
+    if (mSelectingSaveSlot) {
+        setupSaveSlotOptions();
+
+        mWindow.draw(mLevelClearBox);
+        mWindow.draw(mLevelClearTitle);
+        mWindow.draw(mOpt1Text);
+        mWindow.draw(mOpt2Text);
+        mWindow.draw(mOpt3Text);
+        mWindow.draw(mOpt4Text);
     }
 
     if (mShowLevelClear) {

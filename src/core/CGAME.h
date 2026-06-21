@@ -55,6 +55,9 @@ class CGAME {
     void handleCollision();
     void checkFinish();
     void setupUI();
+    void centerText(sf::Text& text);
+    void setupLevelClearOptions();
+    void setupSaveSlotOptions();
 
     //Bảng DEAD
     sf::Font mFont;
@@ -95,6 +98,7 @@ class CGAME {
     sf::Text mOpt3Text;   // Save & Exit
     sf::Text mOpt4Text;   // Exit
     bool mPendingSaveAndExit = false;
+    bool mSelectingSaveSlot = false;
 
     //Nút Pause
     bool mPaused = false;
