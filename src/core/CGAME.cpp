@@ -29,6 +29,9 @@ void CGAME::setupUI() {
     //S_Dead
     if (mDeadBuffer.loadFromFile("assets/sounds/dead/dead.ogg")) mDeadSound.setBuffer(mDeadBuffer);
     else printf("Failed to load dead sound");
+    //S_LevelClear
+    if (mLevelClearBuffer.loadFromFile("assets/sounds/victory/level_clear.ogg")) mLevelClearSound.setBuffer(mLevelClearBuffer);
+    else printf("Failed to load level clear sound");
 
     // Bảng DEAD
     float boxW = 400.f, boxH = 150.f;
@@ -482,12 +485,17 @@ void CGAME::handleEvents() {
             if (event.type == sf::Event::KeyPressed) {
                 if (event.key.code == sf::Keyboard::Num1) {
                     mShowLevelClear = false;
+                    mLevelClearSound.stop();
                     mPlayer.setFinish(false);
 
-                    if (mCurrentLevel < 5)
+                    if (mCurrentLevel < 2)
+                    {
                         loadLevel(mCurrentLevel + 1);
+                    }
                     else {
+                        mShowLevelClear = false;
                         mPlayer.setFinish(true);
+                        mLevelClearSound.stop();
                         mVictorySound.play();
                     }
                 }
@@ -520,10 +528,14 @@ void CGAME::handleEvents() {
 
                 if (mOpt1Text.getGlobalBounds().contains(mouse)) {
                     mShowLevelClear = false;
+                    mLevelClearSound.stop();
                     mPlayer.setFinish(false);
 
-                    if (mCurrentLevel < 5)
+                    if (mCurrentLevel < 2)
+                    {
                         loadLevel(mCurrentLevel + 1);
+                        mLevelClearSound.stop();
+                    }
                     else {
                         mPlayer.setFinish(true);
                         mVictorySound.play();
@@ -745,14 +757,17 @@ void CGAME::checkFinish() {
         setupLevelClearOptions();
 
         mLevelMusic.stop();
-        mPlayer.setFinish(true);  // dừng di chuyển
-        mShowLevelClear = true;   // hiện bảng
+        mPlayer.setFinish(true);
 
-        // HighScore
-        if (mCurrentLevel == 2) {
+        if (mCurrentLevel < 2) {
+            mLevelClearSound.play();
+            mShowLevelClear = true;
+        }
+        else {
+            mVictorySound.play();
             bool isNewHighScore = HighScore::updateIfHigher(mScore);
-            if (isNewHighScore) printf("NEW HIGH SCORE: %d\n", mScore);
-            printf("VICTORY!\n");
+            if (isNewHighScore)
+                printf("NEW HIGH SCORE: %d\n", mScore);
         }
     }
 }

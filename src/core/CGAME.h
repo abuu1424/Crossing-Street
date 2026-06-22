@@ -114,6 +114,9 @@ class CGAME {
     //Dead
     sf::SoundBuffer mDeadBuffer;
     sf::Sound mDeadSound;
+    //LevelClear
+    sf::SoundBuffer mLevelClearBuffer;
+    sf::Sound mLevelClearSound;
 
 
     //Music
