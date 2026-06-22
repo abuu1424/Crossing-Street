@@ -22,15 +22,15 @@ A 2D road-crossing game developed in C++17 using SFML 2.6.2 for the Object-Orien
 
 ## Controls
 
-| Key                         | Action              |
-|-----------------------------| ------------------- |
-| W / A / S / D or Arrow keys | Move                |
-| Arrow Keys                  | Move                |
-| P                           | Pause / Resume      |
-| R                           | Restart Level       |
-| ESC                         | Quit Dialog         |
-| F1 / F2 / F3                | Save Slot 1 / 2 / 3 |
-| F4 / F5 / F6                | Load Slot 1 / 2 / 3 |
+| Key            | Action              |
+|----------------| ------------------- |
+| W / A / S / D  | Move                |
+| Arrow Keys     | Move                |
+| P              | Pause / Resume      |
+| R              | Restart Level       |
+| ESC            | Quit Dialog         |
+| F1 / F2 / F3   | Save Slot 1 / 2 / 3 |
+| F4 / F5 / F6   | Load Slot 1 / 2 / 3 |
 
 ## Project Structure
 
