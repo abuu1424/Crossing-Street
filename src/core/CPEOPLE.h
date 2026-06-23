@@ -20,6 +20,7 @@ public:
     CPEOPLE();
     ~CPEOPLE();
     bool loadSprite(const std::string& texturePath);
+    void reloadSprite(const std::string& texturePath);
     void Move(float dt);
     void update(float dt);
     void setPosition(float x, float y);

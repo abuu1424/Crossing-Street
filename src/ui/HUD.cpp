@@ -4,28 +4,12 @@
 #include <sstream>
 #include <iomanip>
 
-HUD::HUD() : mLoaded(false) {
+HUD::HUD() : mLoaded(false), mHudBarLoaded(false) {
     mLoaded = mFont.loadFromFile(Font_Path);
     if (!mLoaded) {
         std::cerr << "Cannot load HUD font\n";
         return;
     }
-
-    if (!mHudTexture.loadFromFile("assets/ui/hud/hud_bar.png")) {
-        std::cerr << "Cannot load HUD image\n";
-    }
-    mHudSprite.setTexture(mHudTexture);
-    float hudHeight = 300.f;
-    float scale = hudHeight / mHudTexture.getSize().y;
-    mHudSprite.setScale(scale, scale);
-
-    float scaledWidth = mHudTexture.getSize().x * scale;
-    mHudSprite.setPosition(Win_W / 2.f - scaledWidth / 2.f, -110.f);
-
-    setupText(mLevelText, 26, 275.f/1536.f, 495.f/1024.f, mLevelCenter);
-    setupText(mScoreText, 26, 800.f/1536.f, 495.f/1024.f, mScoreCenter);
-    setupText(mTimeText,  28, 1200.f/1536.f, 495.f/1024.f, mTimeCenter);
-
     update(1, 0, 0.f);
 }
 
@@ -77,6 +61,7 @@ void HUD::update(int level, int score, float timeSeconds) {
 }
 
 void HUD::draw(sf::RenderWindow& window) {
+    if (!mHudBarLoaded) return;
     window.draw(mHudSprite);
 
     if (!mLoaded) return;
@@ -84,6 +69,26 @@ void HUD::draw(sf::RenderWindow& window) {
     window.draw(mLevelText);
     window.draw(mScoreText);
     window.draw(mTimeText);
+}
+
+void HUD::reloadHudBar(const std::string& hudPath) {
+    if (!mHudTexture.loadFromFile(hudPath)) {
+        printf("FAILED reload HUD: %s\n", hudPath.c_str());
+        return;
+    }
+    mHudBarLoaded = true;
+    mHudSprite.setTexture(mHudTexture);
+
+    float hudHeight = 300.f;
+    float scale = hudHeight / mHudTexture.getSize().y;
+    mHudSprite.setScale(scale, scale);
+
+    float scaledWidth = mHudTexture.getSize().x * scale;
+    mHudSprite.setPosition(Win_W / 2.f - scaledWidth / 2.f, -110.f);
+
+    setupText(mLevelText, 26, 275.f/1536.f, 495.f/1024.f, mLevelCenter);
+    setupText(mScoreText, 26, 800.f/1536.f, 495.f/1024.f, mScoreCenter);
+    setupText(mTimeText,  28, 1200.f/1536.f, 495.f/1024.f, mTimeCenter);
 }
 
 sf::FloatRect HUD::getPauseIconBounds() const {
