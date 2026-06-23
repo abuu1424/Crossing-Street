@@ -40,6 +40,18 @@ bool CPEOPLE::loadSprite(const std::string& texturePath) {
     return true;
 }
 
+void CPEOPLE::reloadSprite(const std::string& texturePath) {
+    if (!mTexture.loadFromFile(texturePath)) {
+        printf("FAILED reload sprite: %s\n", texturePath.c_str());
+        return;
+    }
+    delete mAnim;
+    mAnim = new Animation(mSprite, mTexture,
+        64, 64, 4, 1, Frame_Time);
+    mSprite.setScale(Player_W / 64.f, Player_H / 64.f);
+    //KO load vị trí mới
+}
+
 void CPEOPLE::update(float dt) {
     if (!mAnim) return;
 

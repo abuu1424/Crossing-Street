@@ -30,6 +30,8 @@ struct LevelConfig {
     int         level;
     std::string backgroundPath;
     std::string musicPath;
+    std::string playerSpritePath;
+    std::string hudBarPath;
     std::string trafficRedPath;
     std::string trafficGreenPath;
     float trafficX;

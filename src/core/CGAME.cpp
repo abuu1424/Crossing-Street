@@ -292,7 +292,6 @@ void CGAME::loadLevel(int level) {
     mLevelCleared = false;
     mCurrentLevel = cfg.level;
     mlevelTime = 0.f;
-    mHUD.update(mCurrentLevel, mScore, mlevelTime);
 
     // Background
     if (!mBgTexture.loadFromFile(cfg.backgroundPath))
@@ -311,9 +310,14 @@ void CGAME::loadLevel(int level) {
     }
 
     // Player
+    mPlayer.reloadSprite(cfg.playerSpritePath);
     mPlayer.setDead(false);
     mPlayer.setFinish(false);
     mPlayer.setPosition(SPAWN_X, SPAWN_Y);
+
+    //HUD
+    mHUD.reloadHudBar(cfg.hudBarPath);
+    mHUD.update(mCurrentLevel, mScore, mlevelTime);
 
     // Spawn vật cản — KHÔNG CẦN if/else theo loại nữa
     for (auto& lane : cfg.lanes) {
