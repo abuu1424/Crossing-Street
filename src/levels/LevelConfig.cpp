@@ -6,7 +6,7 @@ LevelConfig getLevel1() {
         "assets/background/lv1_bg/bg_lv1.png",
         "assets/sounds/lv1_sd/music_bg1.ogg",
         "assets/lv1_sp/player/player.png",
-        "assets/ui/hud/hud_lv1.png",
+        "assets/ui/hud/tiền_sử.png",
         "assets/sprites/lv1_sp/traffic/torch.png",
         "assets/sprites/lv1_sp/traffic/torch1.png",
         80, 550,
@@ -32,11 +32,14 @@ LevelConfig getLevel2()
         "assets/background/lv2_bg/bg_lv2.png",
         "assets/sounds/lv2_sd/music_bg2.ogg",
         "assets/lv2_sp/player/player.png",
-        "assets/ui/hud/hud_lv2.png",
+        "assets/ui/hud/cổ_đại.png",
         "assets/sprites/lv2_sp/traffic/torch.png",
         "assets/sprites/lv2_sp/traffic/torch1.png",
         80, 550,
         {
+        },
+        {
+                {AnimalType::EAGLE, 180.f, 1, 115.f, "assets/sprites/lv2_sp/bird/kenkenaicap.png", 2, 520.f}
         }
     };
 };

@@ -9,8 +9,8 @@ bool CEAGLE::loadSprite(const std::string& path, float x, float y) {
 		return false;
 	}
 	delete mAnim;
-	mAnim = new Animation(mSprite, mTexture, 32, 32, 2, 2, Frame_Time);
-	mSprite.setScale(3.f, 3.f);
+	mAnim = new Animation(mSprite, mTexture, 64, 64, 2, 2, Frame_Time);
+	mSprite.setScale(1.f, 1.f);
 	mSprite.setPosition(x, y);
 	return true;
 }
