@@ -106,6 +106,9 @@ class CGAME {
     sf::Text mPauseTitle;
     sf::Text mResumeText;
     sf::Text mQuitFromPauseText;
+    sf::Text mPauseSettingsTitle;
+    float    mPauseMusicVol = 50.f;
+    float    mPauseSFXVol   = 50.f;
 
     //Sound
     //Victory

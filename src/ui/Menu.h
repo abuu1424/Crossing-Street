@@ -17,7 +17,8 @@ enum class MenuResult {
 
 enum class MenuScreen {
     MAIN,
-    LOAD
+    LOAD,
+    SETTINGS
 };
 
 struct MenuButton {
@@ -55,6 +56,33 @@ class Menu {
 
     // Nhạc nền
     sf::Music            mMusic;
+
+    //SETTINGS
+    struct Slider {
+        float        value     = 50.f;   // 0-100
+        float        x, y, w;           // vị trí và chiều rộng
+        bool         dragging  = false;
+        sf::RectangleShape track;
+        sf::RectangleShape thumb;
+        sf::Text     label;
+        sf::Text     valueText;
+    };
+
+    Slider mMusicSlider;
+    Slider mSFXSlider;
+    bool   mMuteAll   = false;
+
+    sf::Text           mSettingsTitle;
+    sf::Text           mMuteText;
+    sf::Text           mBackSettingsText;
+
+    void setupSettingsMenu();
+    void updateSlider(Slider& s, sf::Vector2f mouse, bool mouseDown);
+    void drawSlider(sf::RenderWindow& w, Slider& s);
+    void drawSettingsMenu(sf::RenderWindow& window);
+    void handleSettingsEvent(const sf::Event& event,
+                             sf::RenderWindow& window,
+                             MenuResult& result);
 
     // Helpers
     void setupButton(MenuButton& btn,
