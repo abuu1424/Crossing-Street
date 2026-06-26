@@ -147,7 +147,8 @@ void CGAME::setupUI() {
     mNoText.setPosition(Win_W / 2.f + 70.f, Win_H / 2.f + 30.f);
 
     // Bảng Pause
-    float pboxW = 400.f, pboxH = 220.f;
+    // Bảng Pause — dùng size lớn hơn để chứa slider
+    float pboxW = 450.f, pboxH = 340.f;
     mPauseBox.setSize(sf::Vector2f(pboxW, pboxH));
     mPauseBox.setFillColor(sf::Color(20, 20, 30, 230));
     mPauseBox.setOutlineColor(sf::Color(180, 140, 90));
@@ -159,25 +160,69 @@ void CGAME::setupUI() {
     mPauseTitle.setString("PAUSED");
     mPauseTitle.setCharacterSize(36);
     mPauseTitle.setFillColor(sf::Color(255, 215, 0));
-    sf::FloatRect pt = mPauseTitle.getLocalBounds();
-    mPauseTitle.setOrigin(pt.left + pt.width/2.f, pt.top + pt.height/2.f);
-    mPauseTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 60.f);
+    {
+        sf::FloatRect pt = mPauseTitle.getLocalBounds();
+        mPauseTitle.setOrigin(pt.left + pt.width/2.f, pt.top + pt.height/2.f);
+        mPauseTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 140.f);
+    }
 
     mResumeText.setFont(mFont);
     mResumeText.setString("Press P or click to RESUME");
     mResumeText.setCharacterSize(20);
     mResumeText.setFillColor(sf::Color(150, 255, 150));
-    sf::FloatRect rt = mResumeText.getLocalBounds();
-    mResumeText.setOrigin(rt.left + rt.width/2.f, rt.top + rt.height/2.f);
-    mResumeText.setPosition(Win_W / 2.f, Win_H / 2.f);
+    {
+        sf::FloatRect rt = mResumeText.getLocalBounds();
+        mResumeText.setOrigin(rt.left + rt.width/2.f, rt.top + rt.height/2.f);
+        mResumeText.setPosition(Win_W / 2.f, Win_H / 2.f - 95.f);
+    }
 
     mQuitFromPauseText.setFont(mFont);
     mQuitFromPauseText.setString("Press ESC to QUIT");
     mQuitFromPauseText.setCharacterSize(20);
     mQuitFromPauseText.setFillColor(sf::Color(255, 150, 150));
-    sf::FloatRect qft = mQuitFromPauseText.getLocalBounds();
-    mQuitFromPauseText.setOrigin(qft.left + qft.width/2.f, qft.top + qft.height/2.f);
-    mQuitFromPauseText.setPosition(Win_W / 2.f, Win_H / 2.f + 50.f);
+    {
+        sf::FloatRect qft = mQuitFromPauseText.getLocalBounds();
+        mQuitFromPauseText.setOrigin(qft.left + qft.width/2.f, qft.top + qft.height/2.f);
+        mQuitFromPauseText.setPosition(Win_W / 2.f, Win_H / 2.f - 50.f);
+    }
+
+    // Slider Music
+    mPauseMusicLabel.setFont(mFont);
+    mPauseMusicLabel.setString("Music Volume");
+    mPauseMusicLabel.setCharacterSize(18);
+    mPauseMusicLabel.setFillColor(sf::Color::White);
+    mPauseMusicLabel.setPosition(Win_W/2.f - 150.f, Win_H/2.f + 20.f);
+
+    mPauseMusicTrack.setSize(sf::Vector2f(300.f, 6.f));
+    mPauseMusicTrack.setFillColor(sf::Color(80, 80, 80));
+    mPauseMusicTrack.setPosition(Win_W/2.f - 150.f, Win_H/2.f + 50.f);
+
+    mPauseMusicThumb.setSize(sf::Vector2f(16.f, 24.f));
+    mPauseMusicThumb.setFillColor(sf::Color(255, 215, 0));
+    mPauseMusicThumb.setOrigin(8.f, 12.f);
+
+    mPauseMusicVal.setFont(mFont);
+    mPauseMusicVal.setCharacterSize(16);
+    mPauseMusicVal.setFillColor(sf::Color(200, 200, 200));
+
+    // Slider SFX
+    mPauseSFXLabel.setFont(mFont);
+    mPauseSFXLabel.setString("SFX Volume");
+    mPauseSFXLabel.setCharacterSize(18);
+    mPauseSFXLabel.setFillColor(sf::Color::White);
+    mPauseSFXLabel.setPosition(Win_W/2.f - 150.f, Win_H/2.f + 100.f);
+
+    mPauseSFXTrack.setSize(sf::Vector2f(300.f, 6.f));
+    mPauseSFXTrack.setFillColor(sf::Color(80, 80, 80));
+    mPauseSFXTrack.setPosition(Win_W/2.f - 150.f, Win_H/2.f + 130.f);
+
+    mPauseSFXThumb.setSize(sf::Vector2f(16.f, 24.f));
+    mPauseSFXThumb.setFillColor(sf::Color(255, 215, 0));
+    mPauseSFXThumb.setOrigin(8.f, 12.f);
+
+    mPauseSFXVal.setFont(mFont);
+    mPauseSFXVal.setCharacterSize(16);
+    mPauseSFXVal.setFillColor(sf::Color(200, 200, 200));
 
     // Bảng Level Clear
     float lcW = 500.f, lcH = 300.f;
@@ -433,8 +478,27 @@ void CGAME::handleEvents() {
                 else if (mHUD.getPauseIconBounds().contains(mouse)) {
                     mPaused = false;
                 }
+                else if (mPauseMusicThumb.getGlobalBounds().contains(mouse) ||
+                  mPauseMusicTrack.getGlobalBounds().contains(mouse)) {
+                    mDraggingMusicSlider = true;
+                    updatePauseSliders(mouse);
+                  }
+                else if (mPauseSFXThumb.getGlobalBounds().contains(mouse) ||
+                         mPauseSFXTrack.getGlobalBounds().contains(mouse)) {
+                    mDraggingSFXSlider = true;
+                    updatePauseSliders(mouse);
+                         }
+            }
+            if (event.type == sf::Event::MouseButtonReleased) {
+                mDraggingMusicSlider = false;
+                mDraggingSFXSlider   = false;
             }
 
+            if (event.type == sf::Event::MouseMoved) {
+                sf::Vector2f m = mWindow.mapPixelToCoords(
+                    sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
+                updatePauseSliders(m);
+            }
             continue;
         }
 
@@ -623,6 +687,8 @@ void CGAME::handleEvents() {
 
             if (mHUD.getPauseIconBounds().contains(mouse)) {
                 mPaused = true;
+                mPauseMusicVol = mMenu.getMusicVolume();
+                mPauseSFXVol   = mMenu.getSFXVolume();
                 continue;
             }
         }
@@ -637,6 +703,8 @@ void CGAME::handleEvents() {
             }
             else if (event.key.code == sf::Keyboard::P) {
                 mPaused = true;
+                mPauseMusicVol = mMenu.getMusicVolume();
+                mPauseSFXVol   = mMenu.getSFXVolume();
             }
             else if (event.key.code == sf::Keyboard::F1) {
                 if (SaveData::hasData(1)) {
@@ -878,10 +946,23 @@ void CGAME::render() {
 
     if (mPaused)
     {
+        if (!mDraggingMusicSlider && !mDraggingSFXSlider)
+            updatePauseSliders({});
+
         mWindow.draw(mPauseBox);
         mWindow.draw(mPauseTitle);
         mWindow.draw(mResumeText);
         mWindow.draw(mQuitFromPauseText);
+        // Slider
+        mWindow.draw(mPauseMusicLabel);
+        mWindow.draw(mPauseMusicTrack);
+        mWindow.draw(mPauseMusicThumb);
+        mWindow.draw(mPauseMusicVal);
+
+        mWindow.draw(mPauseSFXLabel);
+        mWindow.draw(mPauseSFXTrack);
+        mWindow.draw(mPauseSFXThumb);
+        mWindow.draw(mPauseSFXVal);
     }
 
     if (mSelectingSaveSlot) {
@@ -972,6 +1053,39 @@ void CGAME::run() {
         update(dt);
         render();
     }
+}
+
+void CGAME::updatePauseSliders(sf::Vector2f mouse)
+{
+    if (mDraggingMusicSlider)
+    {
+        float v = (mouse.x - (Win_W/2.f - 150.f)) / 300.f * 100.f;
+        mPauseMusicVol = std::clamp(v, 0.f, 100.f);
+
+        mMenu.setMusicVolume(mPauseMusicVol);
+        mLevelMusic.setVolume(mPauseMusicVol);
+    }
+
+    if (mDraggingSFXSlider)
+    {
+        float v = (mouse.x - (Win_W/2.f - 150.f)) / 300.f * 100.f;
+        mPauseSFXVol = std::clamp(v, 0.f, 100.f);
+
+        mMenu.setSFXVolume(mPauseSFXVol);
+        mDeadSound.setVolume(mPauseSFXVol);
+        mVictorySound.setVolume(mPauseSFXVol);
+        mLevelClearSound.setVolume(mPauseSFXVol);
+    }
+    //Music
+    float musicX = Win_W/2.f - 150.f + (mPauseMusicVol/100.f)*300.f;
+    mPauseMusicThumb.setPosition(musicX, Win_H/2.f + 53.f);
+    mPauseMusicVal.setString(std::to_string((int)mPauseMusicVol));
+    mPauseMusicVal.setPosition(Win_W/2.f + 160.f, Win_H/2.f + 42.f);
+    //SFX
+    float sfxX = Win_W/2.f - 150.f + (mPauseSFXVol/100.f)*300.f;
+    mPauseSFXThumb.setPosition(sfxX, Win_H/2.f + 133.f);
+    mPauseSFXVal.setString(std::to_string((int)mPauseSFXVol));
+    mPauseSFXVal.setPosition(Win_W/2.f + 160.f, Win_H/2.f + 122.f);
 }
 
 //Save Game

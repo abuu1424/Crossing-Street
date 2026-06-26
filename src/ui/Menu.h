@@ -31,7 +31,8 @@ struct MenuButton {
     bool            hovered    = false;
 };
 
-class Menu {
+class Menu
+{
     // Background
     sf::Texture          mBgTexture;
     sf::Sprite           mBgSprite;
@@ -108,4 +109,21 @@ public:
                      MenuResult& result);
     void update(float dt, sf::RenderWindow& window);
     void draw(sf::RenderWindow& window);
+
+    float getMusicVolume() const { return mMuteAll ? 0.f : mMusicSlider.value; }
+    float getSFXVolume()   const { return mMuteAll ? 0.f : mSFXSlider.value;   }
+    bool  getMuteAll()     const { return mMuteAll; }
+
+    // Để CGAME set volume từ pause
+    void setMusicVolume(float v) {
+        mMusicSlider.value = std::max(0.f, std::min(100.f, v));
+        if (!mMuteAll) mMusic.setVolume(mMusicSlider.value);
+    }
+    void setSFXVolume(float v) {
+        mSFXSlider.value = std::max(0.f, std::min(100.f, v));
+    }
+    void setMuteAll(bool mute) {
+        mMuteAll = mute;
+        mMusic.setVolume(mute ? 0.f : mMusicSlider.value);
+    }
 };

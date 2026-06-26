@@ -58,6 +58,7 @@ class CGAME {
     void centerText(sf::Text& text);
     void setupLevelClearOptions();
     void setupSaveSlotOptions();
+    void updatePauseSliders(sf::Vector2f mouse);
 
     //Bảng DEAD
     sf::Font mFont;
@@ -109,6 +110,18 @@ class CGAME {
     sf::Text mPauseSettingsTitle;
     float    mPauseMusicVol = 50.f;
     float    mPauseSFXVol   = 50.f;
+    sf::RectangleShape mPauseMusicTrack;
+    sf::RectangleShape mPauseMusicThumb;
+    sf::Text           mPauseMusicLabel;
+    sf::Text           mPauseMusicVal;
+
+    sf::RectangleShape mPauseSFXTrack;
+    sf::RectangleShape mPauseSFXThumb;
+    sf::Text           mPauseSFXLabel;
+    sf::Text           mPauseSFXVal;
+
+    bool               mDraggingMusicSlider = false;
+    bool               mDraggingSFXSlider   = false;
 
     //Sound
     //Victory
