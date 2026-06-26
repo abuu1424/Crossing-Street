@@ -6,7 +6,7 @@ LevelConfig getLevel1() {
         "assets/background/lv1_bg/bg_lv1.png",
         "assets/sounds/lv1_sd/music_bg1.ogg",
         "assets/sprites/lv1_sp/player/player.png",
-        "assets/ui/hud/tiền_sử.png",
+        "assets/ui/hud/tiensu.png",
         "assets/sprites/lv1_sp/traffic/torch.png",
         "assets/sprites/lv1_sp/traffic/torch1.png",
         80, 550,
