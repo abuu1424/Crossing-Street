@@ -4,19 +4,18 @@ project(CrossingGame VERSION 1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# ── Tìm SFML — phải đặt PREFIX_PATH TRƯỚC find_package ───────────────────────
+#Tìm SFML
 if(APPLE)
     set(CMAKE_PREFIX_PATH "/opt/homebrew/opt/sfml@2")
 endif()
 
 if(WIN32)
-    # Chỉnh đường dẫn SFML trên máy Windows nếu không dùng vcpkg
     set(CMAKE_PREFIX_PATH "C:/SFML-2.6.2")
 endif()
 
 find_package(SFML 2.5 COMPONENTS graphics window system audio REQUIRED)
 
-# ── Thu thập source files ─────────────────────────────────────────────────────
+#Thu thập source files
 file(GLOB_RECURSE SOURCES
         "save/*cpp"
         "src/*.cpp"
@@ -29,22 +28,36 @@ file(GLOB_RECURSE SOURCES
         "src/obstacles/lv1/traffic_lv1/*.cpp"
 )
 
-# ── Tạo executable ────────────────────────────────────────────────────────────
-
-add_executable(CrossingGame ${SOURCES}
+#Tạo executable
+add_executable(CrossingGame
+        ${SOURCES}
         src/main.cpp
-        src/levels/LevelConfig.cpp
-        src/obstacles/lv1/traffic_lv1/CTRAFFIC_LV1.cpp
-        src/obstacles/lv1/traffic_lv1/CTRAFFIC_LV1.h
-        src/levels/LevelConfig.cpp "src/obstacles/lv2/animal_lv2/CEAGLE.cpp" "src/obstacles/lv2/animal_lv2/CEAGLE.h"
+        # Core
+        src/core/SaveData.cpp
         src/core/SaveData.h
-        "src/core/SaveData.cpp" "src/obstacles/lv4/animal_lv4/CPTERO.cpp" "src/obstacles/lv4/animal_lv4/CPTERO.h" "src/obstacles/lv2/animal_lv2/CCHARIOT.cpp" "src/obstacles/lv2/animal_lv2/CCHARIOT.h" "src/obstacles/lv3/animal_lv3/CHORSE.cpp" "src/obstacles/lv3/animal_lv3/CHORSE.h"
         src/core/HighScore.cpp
         src/core/HighScore.h
+        # Levels
+        src/levels/LevelConfig.cpp
+        # Level 1
+        src/obstacles/lv1/traffic_lv1/CTRAFFIC_LV1.cpp
+        src/obstacles/lv1/traffic_lv1/CTRAFFIC_LV1.h
+        # Level 2
+        src/obstacles/lv2/animal_lv2/CEAGLE.cpp
+        src/obstacles/lv2/animal_lv2/CEAGLE.h
+        src/obstacles/lv2/animal_lv2/CCHARIOT.cpp
+        src/obstacles/lv2/animal_lv2/CCHARIOT.h
         src/obstacles/lv2/animal_lv2/CWARELEPHENT.cpp
-        src/obstacles/lv2/animal_lv2/CWARELEPHENT.h)
+        src/obstacles/lv2/animal_lv2/CWARELEPHENT.h
+        # Level 3
+        src/obstacles/lv3/animal_lv3/CHORSE.cpp
+        src/obstacles/lv3/animal_lv3/CHORSE.h
+        # Level 4
+        src/obstacles/lv4/animal_lv4/CPTERO.cpp
+        src/obstacles/lv4/animal_lv4/CPTERO.h
+)
 
-# ── Include paths ─────────────────────────────────────────────────────────────
+#Include paths
 target_include_directories(CrossingGame PRIVATE
         src
         src/core
@@ -71,7 +84,7 @@ target_include_directories(CrossingGame PRIVATE
         save
 )
 
-# ── Link SFML ─────────────────────────────────────────────────────────────────
+#Link SFML
 target_link_libraries(CrossingGame PRIVATE
         sfml-graphics
         sfml-window
@@ -79,7 +92,7 @@ target_link_libraries(CrossingGame PRIVATE
         sfml-audio
 )
 
-# ── Tắt warning trên macOS ────────────────────────────────────────────────────
+#Tắt warning trên macOS
 if(APPLE)
     target_compile_options(CrossingGame PRIVATE -w)
 endif()
@@ -87,7 +100,7 @@ endif()
 file(COPY ${CMAKE_SOURCE_DIR}/assets
         DESTINATION ${CMAKE_BINARY_DIR})
 
-# ── Copy assets vào build ─────────────────────────────────────────────────────
+#Copy assets vào build
 add_custom_command(TARGET CrossingGame POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/assets"
@@ -95,14 +108,14 @@ add_custom_command(TARGET CrossingGame POST_BUILD
         COMMENT "Copying assets..."
 )
 
-# ── Tạo thư mục saves ─────────────────────────────────────────────────────────
+#Tạo thư mục saves
 add_custom_command(TARGET CrossingGame POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory
         "$<TARGET_FILE_DIR:CrossingGame>/saves"
         COMMENT "Creating saves directory..."
 )
 
-# ── Windows: copy SFML DLL vào cùng thư mục exe ──────────────────────────────
+#Windows: copy SFML DLL vào cùng thư mục exe
 if(WIN32)
     add_custom_command(TARGET CrossingGame POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
