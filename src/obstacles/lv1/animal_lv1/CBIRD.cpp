@@ -14,11 +14,11 @@ bool CBIRD::loadSprite(const std::string& path, float x, float y) {
     }
     delete mAnim;
     mAnim = new Animation(mSprite, mTexture,
-        32, 32,
+        64, 64,
         2, 2,
         Frame_Time
     );
-    mSprite.setScale(3.f, 3.f);
+    mSprite.setScale(1.5f, 1.5f);
     mSprite.setPosition(x, y);
     return true;
 }

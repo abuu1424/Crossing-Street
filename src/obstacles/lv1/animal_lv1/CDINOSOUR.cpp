@@ -11,7 +11,7 @@ bool CDINOSOUR::loadSprite(const std::string& path, float x, float y) {
 
     delete mAnim;
     mAnim = new Animation(mSprite, mTexture,
-        32, 32,   // frameW, frameH
+        64, 64,   // frameW, frameH
         2, 2,
         Frame_Time
     );
