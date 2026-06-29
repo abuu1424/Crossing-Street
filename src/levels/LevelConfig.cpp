@@ -33,7 +33,7 @@ LevelConfig getLevel2()
         "assets/background/lv2_bg/bg_lv2.png",
         "assets/sounds/lv2_sd/music_bg2.ogg",
         "assets/sprites/lv2_sp/player/player.png",
-        "assets/ui/hud/codai.png",
+        "assets/ui/hud/tuonglai.png",
         "assets/sprites/lv2_sp/traffic/torch.png",
         "assets/sprites/lv2_sp/traffic/torch1.png",
         80,
