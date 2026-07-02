@@ -2,6 +2,7 @@
 #include "LevelConfig.h"
 #include "HighScore.h"
 #include <cstdio>
+#include <algorithm>
 #include <cmath>
 
 const float SPAWN_X = Win_W / 2.f - Player_W / 2.f;
@@ -888,13 +889,25 @@ void CGAME::render() {
 
     mWindow.draw(mBgSprite);
 
-    for (auto* obs : mObstacles) {
-        obs->Draw(mWindow);
-    }
+    //Sort theo y
+    std::sort(mAnimals.begin(), mAnimals.end(),
+    [](CANIMAL* a, CANIMAL* b) {
+        return a->getPosition().y < b->getPosition().y;
+    });
 
     for (auto* ani : mAnimals) {
         ani->Draw(mWindow);
     }
+
+    std::sort(mObstacles.begin(), mObstacles.end(),
+    [](CVEHICLE* a, CVEHICLE* b) {
+        return a->getPosition().y < b->getPosition().y;
+    });
+
+    for (auto* obs : mObstacles) {
+        obs->Draw(mWindow);
+    }
+
 
     if (mTraffic) {
         mTraffic->Draw(mWindow);

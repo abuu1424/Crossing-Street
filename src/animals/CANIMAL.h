@@ -17,5 +17,7 @@ public:
     virtual void update(float dt);
 	virtual bool loadSprite(const std::string& texturePath, float x, float y);
 
+	sf::Vector2f getPosition() const { return mSprite.getPosition(); }
+
     sf::FloatRect getBounds() const { return mSprite.getGlobalBounds(); }
 };

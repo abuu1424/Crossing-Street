@@ -21,8 +21,8 @@ LevelConfig getLevel1()
             {ObstacleType::MAMMOTH, 80.f, 1.f, 80.f, "assets/sprites/lv1_sp/mammoth/MAMUT.png", 2, 620.f},
         },
         {
-            {AnimalType::BIRD, 150.f, 1.f, 50.f, "assets/sprites/lv1_sp/bird/bay.png", 2, 520.f},
-            {AnimalType::BIRD, 200.f, -1.f, 50.f, "assets/sprites/lv1_sp/bird/baytrai.png", 2, 520.f},
+            {AnimalType::BIRD, 280.f, 1.f, 50.f, "assets/sprites/lv1_sp/bird/bay.png", 2, 520.f},
+            {AnimalType::BIRD, 250.f, -1.f, 50.f, "assets/sprites/lv1_sp/bird/baytrai.png", 2, 520.f},
         }};
 }
 
