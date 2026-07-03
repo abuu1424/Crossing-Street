@@ -4,6 +4,7 @@
 #include <string>
 #include "SaveData.h"
 #include <vector>
+#include "Animation.h"
 
 enum class MenuResult {
     NONE,
@@ -22,47 +23,51 @@ enum class MenuScreen {
 };
 
 struct MenuButton {
-    sf::Sprite      sprite;
-    sf::Texture     texture;
-    sf::Text        label;
-    float           baseScale  = 1.f;   // scale bình thường
-    float           hoverScale = 1.15f; // scale khi hover
-    float           curScale   = 1.f;   // scale hiện tại
-    bool            hovered    = false;
+    sf::Sprite sprite;
+    sf::Texture texture;
+    sf::Text label;
+    float baseScale  = 1.f;   // scale bình thường
+    float hoverScale = 1.15f; // scale khi hover
+    float curScale   = 1.f;   // scale hiện tại
+    bool  hovered    = false;
 };
 
 class Menu
 {
     // Background
-    sf::Texture          mBgTexture;
-    sf::Sprite           mBgSprite;
+    sf::Texture mBgTexture;
+    sf::Sprite mBgSprite;
 
     // Title
-    sf::Font             mFont;
-    sf::Text             mTitle;
+    sf::Font mFont;
+    sf::Text mTitle;
+    sf::Texture mTitleTexture;
+    sf::Sprite mTitleSprite;
+    Animation *mTitleAnim = nullptr;
+
 
     // Buttons
-    MenuButton           mBtnNew;
-    MenuButton           mBtnLoad;
-    MenuButton           mBtnQuit;
-    MenuButton           mBtnSetting;
+    MenuButton mBtnNew;
+    MenuButton mBtnLoad;
+    MenuButton mBtnQuit;
+    MenuButton mBtnSetting;
 
     // Load menu
-    MenuScreen           mScreen = MenuScreen::MAIN;
+    MenuScreen mScreen = MenuScreen::MAIN;
     std::vector<SaveSlot> mSaveSlots;
 
-    sf::Text             mLoadTitle;
-    sf::Text             mSlotTexts[3];
-    sf::Text             mBackText;
+    sf::Text mLoadTitle;
+    sf::Text mSlotTexts[3];
+    sf::Text mBackText;
 
     // Nhạc nền
-    sf::Music            mMusic;
+    sf::Music mMusic;
 
     //SETTINGS
     struct Slider {
-        float        value     = 50.f;   // 0-100
-        float        x, y, w;           // vị trí và chiều rộng
-        bool         dragging  = false;
+        float value     = 50.f;   // 0-100
+        float x, y, w;           // vị trí và chiều rộng
+        bool dragging  = false;
         sf::RectangleShape track;
         sf::RectangleShape thumb;
         sf::Text     label;
@@ -73,9 +78,9 @@ class Menu
     Slider mSFXSlider;
     bool   mMuteAll   = false;
 
-    sf::Text           mSettingsTitle;
-    sf::Text           mMuteText;
-    sf::Text           mBackSettingsText;
+    sf::Text mSettingsTitle;
+    sf::Text mMuteText;
+    sf::Text mBackSettingsText;
 
     void setupSettingsMenu();
     void updateSlider(Slider& s, sf::Vector2f mouse, bool mouseDown);
@@ -104,6 +109,7 @@ class Menu
 
 public:
     Menu();
+    ~Menu();
     void handleEvent(const sf::Event& event,
                      sf::RenderWindow& window,
                      MenuResult& result);

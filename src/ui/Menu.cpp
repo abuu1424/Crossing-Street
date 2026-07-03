@@ -18,13 +18,35 @@ Menu::Menu() {
     );
 
     // Title
-    mTitle.setFont(mFont);
-    mTitle.setString("CROSSING STREET");
-    mTitle.setCharacterSize(64);
-    mTitle.setFillColor(sf::Color(255, 215, 0));
-    sf::FloatRect tb = mTitle.getLocalBounds();
-    mTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
-    mTitle.setPosition(Win_W / 2.f, 160.f);
+
+    if (mTitleTexture.loadFromFile("assets/ui/menu/title.png"))
+    {
+        printf("OK: %dx%d\n", mTitleTexture.getSize().x, mTitleTexture.getSize().y);
+        mTitleSprite.setTexture(mTitleTexture);
+        mTitleSprite.setTextureRect(sf::IntRect(0, 0, 350, 40));
+        mTitleSprite.setScale(3.f, 3.f);
+        mTitleSprite.setOrigin(350 / 2.f, 40 / 2.f);
+        mTitleSprite.setPosition(Win_W / 2.f, 120.f);
+        mTitleAnim = new Animation(
+        mTitleSprite,
+        mTitleTexture,
+        350, 40,
+        4,4,
+        0.12f, //frame
+        true // Loop
+    );
+    }
+    else
+    {
+        printf("FAILED TO LOAD TITLE");
+        mTitle.setFont(mFont);
+        mTitle.setString("CROSSING STREET");
+        mTitle.setCharacterSize(64);
+        mTitle.setFillColor(sf::Color(255, 215, 0));
+        sf::FloatRect tb = mTitle.getLocalBounds();
+        mTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
+        mTitle.setPosition(Win_W / 2.f, 160.f);
+    }
 
     // Buttons
     float btnY = 280.f;
@@ -43,6 +65,11 @@ Menu::Menu() {
     mMusic.setLoop(true);
     mMusic.setVolume(50.f);
     mMusic.play();
+}
+
+Menu::~Menu()
+{
+    delete mTitleAnim;
 }
 
 void Menu::setupButton(MenuButton& btn,
@@ -206,6 +233,7 @@ void Menu::update(float dt, sf::RenderWindow& window) {
     }
     if (mScreen == MenuScreen::SETTINGS) return;
 
+    if (mTitleAnim) mTitleAnim->update(dt);
     sf::Vector2f mouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
     updateButton(mBtnNew,  mouse, dt);
     updateButton(mBtnLoad, mouse, dt);
@@ -240,7 +268,10 @@ void Menu::draw(sf::RenderWindow& window) {
         return;
     }
     window.draw(mBgSprite);
-    window.draw(mTitle);
+    if (mTitleAnim)
+        window.draw(mTitleSprite);
+    else
+        window.draw(mTitle);
     drawButton(window, mBtnNew);
     drawButton(window, mBtnLoad);
     drawButton(window, mBtnSetting);
