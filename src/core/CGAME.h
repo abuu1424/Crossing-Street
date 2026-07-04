@@ -17,18 +17,18 @@
 
 
 class CGAME {
-    sf::RenderWindow&        mWindow;
+    sf::RenderWindow& mWindow;
 
     // Background
-    sf::Texture              mBgTexture;
-    sf::Sprite               mBgSprite;
+    sf::Texture mBgTexture;
+    sf::Sprite mBgSprite;
 
     //Menu
     bool mInMenu = true;
     Menu mMenu;
 
     // Player
-    CPEOPLE                  mPlayer;
+    CPEOPLE mPlayer;
 
     // Vector dùng cho collision + traffic
     std::vector<CVEHICLE*>   mObstacles;
@@ -42,13 +42,14 @@ class CGAME {
     CTRAFFIC_LV1* mTraffic = nullptr;
 
     // Trạng thái
-    bool                     mLevelCleared = false;
-    int                      mCurrentLevel = 1;
+    bool mLevelCleared = false;
+    int mCurrentLevel = 1;
 
     // HUD
-    HUD                      mHUD;
-	int     	             mScore = 0;
-	float                    mlevelTime = 0.f;
+    HUD mHUD;
+	int mScore = 0;
+	float mlevelTime = 0.f;
+    float mSurvivalTime = mlevelTime;
     // Helpers
     void loadLevel(int level);
     void clearEntities();
@@ -112,16 +113,16 @@ class CGAME {
     float    mPauseSFXVol   = 50.f;
     sf::RectangleShape mPauseMusicTrack;
     sf::RectangleShape mPauseMusicThumb;
-    sf::Text           mPauseMusicLabel;
-    sf::Text           mPauseMusicVal;
+    sf::Text mPauseMusicLabel;
+    sf::Text mPauseMusicVal;
 
     sf::RectangleShape mPauseSFXTrack;
     sf::RectangleShape mPauseSFXThumb;
-    sf::Text           mPauseSFXLabel;
-    sf::Text           mPauseSFXVal;
+    sf::Text mPauseSFXLabel;
+    sf::Text mPauseSFXVal;
 
-    bool               mDraggingMusicSlider = false;
-    bool               mDraggingSFXSlider   = false;
+    bool mDraggingMusicSlider = false;
+    bool mDraggingSFXSlider   = false;
 
     //Sound
     //Victory

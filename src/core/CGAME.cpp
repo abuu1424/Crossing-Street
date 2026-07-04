@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <algorithm>
 #include <cmath>
+#include <sstream>
+#include <iomanip>
 
 const float SPAWN_X = Win_W / 2.f - Player_W / 2.f;
 const float SPAWN_Y = 590.f;
@@ -18,6 +20,16 @@ CGAME::CGAME(sf::RenderWindow& window)
 
 CGAME::~CGAME() {
     clearEntities();
+}
+
+static std::string formatTime(float seconds) {
+    if (seconds < 0.f) seconds = 0.f;
+    int total = static_cast<int>(seconds);
+    int m = total / 60, s = total % 60;
+    std::ostringstream oss;
+    oss << std::setw(2) << std::setfill('0') << m << ":"
+        << std::setw(2) << std::setfill('0') << s;
+    return oss.str();
 }
 
 void CGAME::setupUI() {
@@ -42,7 +54,6 @@ void CGAME::setupUI() {
     mDeadBox.setPosition(Win_W / 2.f, Win_H / 2.f);
 
     mDeadText.setFont(mFont);
-    mDeadText.setString("YOU DIED!\nPress R to restart");
     mDeadText.setCharacterSize(36);
     mDeadText.setFillColor(sf::Color::Red);
     sf::FloatRect db = mDeadText.getLocalBounds();
@@ -917,7 +928,14 @@ void CGAME::render() {
 
     mHUD.draw(mWindow);
 
-    if (mPlayer.isDead()) {
+    if (mPlayer.isDead())
+    {
+        mDeadText.setString(
+            "YOU DIED!\nTime: " +
+            formatTime(mlevelTime) +
+            "\nPress R to restart"
+        );
+        centerText(mDeadText);
         mWindow.draw(mDeadBox);
         mWindow.draw(mDeadText);
     }
