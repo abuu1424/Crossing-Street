@@ -3,53 +3,40 @@
 #include <vector>
 #include "Utils.h"
 #include "CPEOPLE.h"
-#include "CDINOSOUR.h"
-#include "CBIRD.h"
-#include "CMAMMOTH.h"
-#include "CCHARIOT.h"
-#include "CWARELEPHENT.h"
-#include "CEAGLE.h"
-#include "CTRAFFIC_LV1.h"
 #include "LevelConfig.h"
 #include "Menu.h"
 #include "HUD.h"
 #include "SaveData.h"
+#include "EntityManager.h"
+#include "SoundManager.h"
 
 
 class CGAME {
-    sf::RenderWindow& mWindow;
+    sf::RenderWindow&        mWindow;
 
     // Background
-    sf::Texture mBgTexture;
-    sf::Sprite mBgSprite;
+    sf::Texture              mBgTexture;
+    sf::Sprite               mBgSprite;
 
     //Menu
     bool mInMenu = true;
     Menu mMenu;
 
     // Player
-    CPEOPLE mPlayer;
+    CPEOPLE                  mPlayer;
 
-    // Vector dùng cho collision + traffic
-    std::vector<CVEHICLE*>   mObstacles;
-    std::vector<CANIMAL*>    mAnimals;
-
-    //Helper của obstacle
-    CVEHICLE* createObstacle(ObstacleType type, float speed, float direction);
-    CANIMAL*  createAnimal(AnimalType type, float speed, float direction);
-
-    // Traffic light
-    CTRAFFIC_LV1* mTraffic = nullptr;
+    // Quản lý vòng đời obstacle/animal/traffic light (xem EntityManager.h).
+    // Thay cho việc CGAME tự new/delete các vector này trước đây.
+    EntityManager            mEntities;
 
     // Trạng thái
-    bool mLevelCleared = false;
-    int mCurrentLevel = 1;
+    bool                     mLevelCleared = false;
+    int                      mCurrentLevel = 1;
 
     // HUD
-    HUD mHUD;
-	int mScore = 0;
-	float mlevelTime = 0.f;
-    float mSurvivalTime = mlevelTime;
+    HUD                      mHUD;
+	int     	             mScore = 0;
+	float                    mlevelTime = 0.f;
     // Helpers
     void loadLevel(int level);
     void clearEntities();
@@ -113,31 +100,19 @@ class CGAME {
     float    mPauseSFXVol   = 50.f;
     sf::RectangleShape mPauseMusicTrack;
     sf::RectangleShape mPauseMusicThumb;
-    sf::Text mPauseMusicLabel;
-    sf::Text mPauseMusicVal;
+    sf::Text           mPauseMusicLabel;
+    sf::Text           mPauseMusicVal;
 
     sf::RectangleShape mPauseSFXTrack;
     sf::RectangleShape mPauseSFXThumb;
-    sf::Text mPauseSFXLabel;
-    sf::Text mPauseSFXVal;
+    sf::Text           mPauseSFXLabel;
+    sf::Text           mPauseSFXVal;
 
-    bool mDraggingMusicSlider = false;
-    bool mDraggingSFXSlider   = false;
+    bool               mDraggingMusicSlider = false;
+    bool               mDraggingSFXSlider   = false;
 
-    //Sound
-    //Victory
-    sf::SoundBuffer mVictoryBuffer;
-    sf::Sound mVictorySound;
-    //Dead
-    sf::SoundBuffer mDeadBuffer;
-    sf::Sound mDeadSound;
-    //LevelClear
-    sf::SoundBuffer mLevelClearBuffer;
-    sf::Sound mLevelClearSound;
-
-
-    //Music
-    sf::Music mLevelMusic;
+    //Sound (nhạc nền + 3 sound effect, xem SoundManager.h)
+    SoundManager mSound;
 
 public:
     explicit CGAME(sf::RenderWindow& window);

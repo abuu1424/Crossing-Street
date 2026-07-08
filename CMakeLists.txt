@@ -37,6 +37,10 @@ add_executable(CrossingGame
         src/core/SaveData.h
         src/core/HighScore.cpp
         src/core/HighScore.h
+        src/core/EntityManager.cpp
+        src/core/EntityManager.h
+        src/core/SoundManager.cpp
+        src/core/SoundManager.h
         # Levels
         src/levels/LevelConfig.cpp
         # Level 1
@@ -73,8 +77,10 @@ target_include_directories(CrossingGame PRIVATE
         src/obstacles/lv2/traffic_lv2
         src/obstacles/lv3/animal_lv3
         src/obstacles/lv3/traffic_lv3
+        src/obstacles/lv4/animal_lv4
         src/obstacles/lv4/car_lv4
         src/obstacles/lv4/traffic_lv4
+        src/obstacles/lv5/animal_lv5
         src/obstacles/lv5/car_lv5
         src/obstacles/lv5/traffic_lv5
         src/vehicle

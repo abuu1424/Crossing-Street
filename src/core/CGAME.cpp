@@ -2,10 +2,7 @@
 #include "LevelConfig.h"
 #include "HighScore.h"
 #include <cstdio>
-#include <algorithm>
 #include <cmath>
-#include <sstream>
-#include <iomanip>
 
 const float SPAWN_X = Win_W / 2.f - Player_W / 2.f;
 const float SPAWN_Y = 590.f;
@@ -22,29 +19,13 @@ CGAME::~CGAME() {
     clearEntities();
 }
 
-static std::string formatTime(float seconds) {
-    if (seconds < 0.f) seconds = 0.f;
-    int total = static_cast<int>(seconds);
-    int m = total / 60, s = total % 60;
-    std::ostringstream oss;
-    oss << std::setw(2) << std::setfill('0') << m << ":"
-        << std::setw(2) << std::setfill('0') << s;
-    return oss.str();
-}
-
 void CGAME::setupUI() {
     mFont.loadFromFile("assets/font/pixel_operator/PixelOperator.ttf");
 
     //Sound
-    //S_Victory
-    if (mVictoryBuffer.loadFromFile("assets/sounds/victory/vt1.ogg")) mVictorySound.setBuffer(mVictoryBuffer);
-    else printf("Failed to load victory sound");
-    //S_Dead
-    if (mDeadBuffer.loadFromFile("assets/sounds/dead/dead.ogg")) mDeadSound.setBuffer(mDeadBuffer);
-    else printf("Failed to load dead sound");
-    //S_LevelClear
-    if (mLevelClearBuffer.loadFromFile("assets/sounds/victory/level_clear.ogg")) mLevelClearSound.setBuffer(mLevelClearBuffer);
-    else printf("Failed to load level clear sound");
+    mSound.loadEffects("assets/sounds/victory/vt1.ogg",
+                        "assets/sounds/dead/dead.ogg",
+                        "assets/sounds/victory/level_clear.ogg");
 
     // Bảng DEAD
     float boxW = 400.f, boxH = 150.f;
@@ -54,6 +35,7 @@ void CGAME::setupUI() {
     mDeadBox.setPosition(Win_W / 2.f, Win_H / 2.f);
 
     mDeadText.setFont(mFont);
+    mDeadText.setString("YOU DIED!\nPress R to restart");
     mDeadText.setCharacterSize(36);
     mDeadText.setFillColor(sf::Color::Red);
     sf::FloatRect db = mDeadText.getLocalBounds();
@@ -333,13 +315,7 @@ bool sameLane(sf::FloatRect playerBox, sf::FloatRect objectBox)
 
 void CGAME::clearEntities()
 {
-    for (auto* o : mObstacles) delete o;
-    for (auto* a : mAnimals)   delete a;
-    delete mTraffic;
-
-    mObstacles.clear();
-    mAnimals.clear();
-    mTraffic = nullptr;
+    mEntities.clear();
 }
 
 void CGAME::loadLevel(int level) {
@@ -359,12 +335,7 @@ void CGAME::loadLevel(int level) {
         static_cast<float>(Win_H) / mBgTexture.getSize().y
     );
 
-    mLevelMusic.stop();
-    if (mLevelMusic.openFromFile(cfg.musicPath)) {
-        mLevelMusic.setLoop(true);
-        mLevelMusic.setVolume(40.f);
-        mLevelMusic.play();
-    }
+    mSound.playLevelMusic(cfg.musicPath, 40.f);
 
     // Player
     mPlayer.reloadSprite(cfg.playerSpritePath);
@@ -376,44 +347,13 @@ void CGAME::loadLevel(int level) {
     mHUD.reloadHudBar(cfg.hudBarPath);
     mHUD.update(mCurrentLevel, mScore, mlevelTime);
 
-    // Spawn vật cản — KHÔNG CẦN if/else theo loại nữa
-    for (auto& lane : cfg.lanes) {
-        for (int i = 0; i < lane.count; i++) {
-            float x = lane.direction > 0
-                ? i * lane.spacing
-                : Win_W - i * lane.spacing;
-
-            CVEHICLE* obj = createObstacle(lane.type, lane.speed, lane.direction);
-            obj->loadSprite(lane.spritePath, x, lane.y);
-            mObstacles.push_back(obj);
-        }
-    }
-
-    // Spawn động vật bay — tương tự
-    for (auto& ani : cfg.animals) {
-        for (int i = 0; i < ani.count; i++) {
-            float x = ani.direction > 0
-                ? i * ani.spacing
-                : Win_W - i * ani.spacing;
-
-            CANIMAL* obj = createAnimal(ani.type, ani.speed, ani.direction);
-            obj->loadSprite(ani.spritePath, x, ani.y);
-            mAnimals.push_back(obj);
-        }
-    }
-
-    // Traffic light
-    mTraffic = new CTRAFFIC_LV1(mObstacles);
-    mTraffic->loadSprite(
-        cfg.trafficRedPath, cfg.trafficGreenPath,
-        cfg.trafficX, cfg.trafficY
-    );
+    // Spawn obstacle/animal/traffic light — xem EntityManager::spawnFromLevel
+    mEntities.spawnFromLevel(cfg);
 }
 
 void CGAME::reset() {
-    mDeadSound.stop();
-    mVictorySound.stop();
-    mLevelMusic.stop();
+    mSound.stopAllEffects();
+    mSound.stopMusic();
 
     mScore = 0;
     mlevelTime = 0.f;
@@ -565,7 +505,7 @@ void CGAME::handleEvents() {
             if (event.type == sf::Event::KeyPressed) {
                 if (event.key.code == sf::Keyboard::Num1) {
                     mShowLevelClear = false;
-                    mLevelClearSound.stop();
+                    mSound.stopLevelClear();
                     mPlayer.setFinish(false);
 
                     if (mCurrentLevel < 2)
@@ -575,8 +515,8 @@ void CGAME::handleEvents() {
                     else {
                         mShowLevelClear = false;
                         mPlayer.setFinish(true);
-                        mLevelClearSound.stop();
-                        mVictorySound.play();
+                        mSound.stopLevelClear();
+                        mSound.playVictory();
                     }
                 }
                 else if (event.key.code == sf::Keyboard::Num2) {
@@ -608,17 +548,17 @@ void CGAME::handleEvents() {
 
                 if (mOpt1Text.getGlobalBounds().contains(mouse)) {
                     mShowLevelClear = false;
-                    mLevelClearSound.stop();
+                    mSound.stopLevelClear();
                     mPlayer.setFinish(false);
 
                     if (mCurrentLevel < 2)
                     {
                         loadLevel(mCurrentLevel + 1);
-                        mLevelClearSound.stop();
+                        mSound.stopLevelClear();
                     }
                     else {
                         mPlayer.setFinish(true);
-                        mVictorySound.play();
+                        mSound.playVictory();
                     }
                 }
                 else if (mOpt2Text.getGlobalBounds().contains(mouse)) {
@@ -778,26 +718,26 @@ void CGAME::handleCollision() {
 
     sf::FloatRect pb = shrinkBox(mPlayer.getBounds(), 8.f);
 
-    for (auto* obs : mObstacles) {
+    for (auto* obs : mEntities.obstacles()) {
         sf::FloatRect ob = shrinkBox(obs->getBounds(), 8.f);
 
         if (sameLane(pb, ob) && pb.intersects(ob)) {
             mPlayer.setDead(true);
-            mLevelMusic.stop();
-            mDeadSound.play();
+            mSound.stopMusic();
+            mSound.playDead();
             printf("DEAD\n");
             return;
         }
     }
 
-    for (auto* ani : mAnimals)
+    for (auto* ani : mEntities.animals())
     {
         sf::FloatRect ab = shrinkBox(ani->getBounds(), 8.f);
 
         if (sameLane(pb, ab) && pb.intersects(ab)) {
             mPlayer.setDead(true);
-            mLevelMusic.stop();
-            mDeadSound.play();
+            mSound.stopMusic();
+            mSound.playDead();
             printf("DEAD\n");
             return;
         }
@@ -840,15 +780,15 @@ void CGAME::checkFinish() {
 
         setupLevelClearOptions();
 
-        mLevelMusic.stop();
+        mSound.stopMusic();
         mPlayer.setFinish(true);
 
         if (mCurrentLevel < 2) {
-            mLevelClearSound.play();
+            mSound.playLevelClear();
             mShowLevelClear = true;
         }
         else {
-            mVictorySound.play();
+            mSound.playVictory();
             bool isNewHighScore = HighScore::updateIfHigher(mScore);
             if (isNewHighScore)
                 printf("NEW HIGH SCORE: %d\n", mScore);
@@ -867,26 +807,14 @@ void CGAME::update(float dt) {
         if (mlevelTime >= Level_Time_Limit)
         {
             mPlayer.setDead(true);
-            mLevelMusic.stop();
-            mDeadSound.play();
+            mSound.stopMusic();
+            mSound.playDead();
             printf("You ran out of time");
         }
         mPlayer.Move(dt);
         mPlayer.update(dt);
 
-        for (auto* obs : mObstacles) {
-            obs->Move(dt);
-            obs->update(dt);
-        }
-
-        for (auto* ani : mAnimals) {
-            ani->Move(dt);
-            ani->update(dt);
-        }
-
-        if (mTraffic) {
-            mTraffic->update(dt);
-        }
+        mEntities.update(dt);
 
         handleCollision();
         checkFinish();
@@ -900,42 +828,13 @@ void CGAME::render() {
 
     mWindow.draw(mBgSprite);
 
-    //Sort theo y
-    std::sort(mAnimals.begin(), mAnimals.end(),
-    [](CANIMAL* a, CANIMAL* b) {
-        return a->getPosition().y < b->getPosition().y;
-    });
-
-    for (auto* ani : mAnimals) {
-        ani->Draw(mWindow);
-    }
-
-    std::sort(mObstacles.begin(), mObstacles.end(),
-    [](CVEHICLE* a, CVEHICLE* b) {
-        return a->getPosition().y < b->getPosition().y;
-    });
-
-    for (auto* obs : mObstacles) {
-        obs->Draw(mWindow);
-    }
-
-
-    if (mTraffic) {
-        mTraffic->Draw(mWindow);
-    }
+    mEntities.draw(mWindow);
 
     mPlayer.Draw(mWindow);
 
     mHUD.draw(mWindow);
 
-    if (mPlayer.isDead())
-    {
-        mDeadText.setString(
-            "YOU DIED!\nTime: " +
-            formatTime(mlevelTime) +
-            "\nPress R to restart"
-        );
-        centerText(mDeadText);
+    if (mPlayer.isDead()) {
         mWindow.draw(mDeadBox);
         mWindow.draw(mDeadText);
     }
@@ -1094,7 +993,7 @@ void CGAME::updatePauseSliders(sf::Vector2f mouse)
         mPauseMusicVol = std::clamp(v, 0.f, 100.f);
 
         mMenu.setMusicVolume(mPauseMusicVol);
-        mLevelMusic.setVolume(mPauseMusicVol);
+        mSound.setMusicVolume(mPauseMusicVol);
     }
 
     if (mDraggingSFXSlider)
@@ -1103,9 +1002,7 @@ void CGAME::updatePauseSliders(sf::Vector2f mouse)
         mPauseSFXVol = std::clamp(v, 0.f, 100.f);
 
         mMenu.setSFXVolume(mPauseSFXVol);
-        mDeadSound.setVolume(mPauseSFXVol);
-        mVictorySound.setVolume(mPauseSFXVol);
-        mLevelClearSound.setVolume(mPauseSFXVol);
+        mSound.setSFXVolume(mPauseSFXVol);
     }
     //Music
     float musicX = Win_W/2.f - 150.f + (mPauseMusicVol/100.f)*300.f;
@@ -1153,20 +1050,3 @@ bool CGAME::loadGame(int slot)
     return true;
 }
 
-CVEHICLE* CGAME::createObstacle(ObstacleType type, float speed, float direction) {
-    switch (type) {
-    case ObstacleType::DINOSAUR: return new CDINOSOUR(speed, direction);
-    case ObstacleType::MAMMOTH:  return new CMAMMOTH(speed, direction);
-    case ObstacleType::CHARIOT: return new CCHARIOT(speed, direction);
-    case ObstacleType::WAR_ELEPHENT: return new CWARELEPHENT(speed, direction);
-    default: return new CDINOSOUR(speed, direction);
-    }
-}
-
-CANIMAL* CGAME::createAnimal(AnimalType type, float speed, float direction) {
-    switch (type) {
-    case AnimalType::BIRD: return new CBIRD(speed, direction);
-    case AnimalType::EAGLE: return new CEAGLE(speed, direction);
-    default: return new CBIRD(speed, direction);
-    }
-}
