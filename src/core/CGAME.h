@@ -25,8 +25,6 @@ class CGAME {
     // Player
     CPEOPLE                  mPlayer;
 
-    // Quản lý vòng đời obstacle/animal/traffic light (xem EntityManager.h).
-    // Thay cho việc CGAME tự new/delete các vector này trước đây.
     EntityManager            mEntities;
 
     // Trạng thái

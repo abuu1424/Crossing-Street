@@ -31,10 +31,10 @@ void SoundManager::stopAllEffects() {
     mLevelClearSound.stop();
 }
 
-void SoundManager::playVictory()     { mVictorySound.play(); }
-void SoundManager::playDead()        { mDeadSound.play(); }
-void SoundManager::playLevelClear()  { mLevelClearSound.play(); }
-void SoundManager::stopLevelClear()  { mLevelClearSound.stop(); }
+void SoundManager::playVictory() { mVictorySound.play(); }
+void SoundManager::playDead() { mDeadSound.play(); }
+void SoundManager::playLevelClear() { mLevelClearSound.play(); }
+void SoundManager::stopLevelClear() { mLevelClearSound.stop(); }
 
 void SoundManager::setMusicVolume(float v) {
     mLevelMusic.setVolume(v);

@@ -44,8 +44,6 @@ CVEHICLE* EntityManager::createObstacle(ObstacleType type, float speed, float di
     case ObstacleType::TRUCK:        return new CTRUCK(speed, direction);
     case ObstacleType::FLYCAR:
     case ObstacleType::ROBOT:
-        // Chưa có class riêng cho FLYCAR/ROBOT (level 5 chưa thiết kế xong).
-        // In cảnh báo thay vì âm thầm trả về DINOSAUR sai lệch hành vi.
         printf("[EntityManager] WARNING: chua co class cho ObstacleType %d, dung DINOSAUR tam thoi\n", (int)type);
         return new CDINOSOUR(speed, direction);
     }
@@ -60,7 +58,6 @@ CANIMAL* EntityManager::createAnimal(AnimalType type, float speed, float directi
     case AnimalType::CROW:  return new CROW(speed, direction);
     case AnimalType::DRONE: return new CDRONE(speed, direction);
     case AnimalType::PIGEON:
-        // Chưa có class CPIGEON — dùng CBIRD tạm và cảnh báo rõ ràng.
         printf("[EntityManager] WARNING: chua co class cho AnimalType::PIGEON, dung BIRD tam thoi\n");
         return new CBIRD(speed, direction);
     }
