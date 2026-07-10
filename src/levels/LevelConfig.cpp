@@ -38,8 +38,14 @@ LevelConfig getLevel2()
         "assets/sprites/lv2_sp/traffic/torch1.png",
         80,
         550,
-        {},
-        {{AnimalType::EAGLE, 180.f, 1, 115.f, "assets/sprites/lv2_sp/bird/kenkenaicap.png", 2, 520.f}}};
+        {
+            {ObstacleType::SPHINX, 170.f, 1, 180.f, "assets/sprites/lv2_sp/animal/sphinx.png", 3, 520.f},
+            {ObstacleType::CAMEL, 170.f, -1, 315, "assets/sprites/lv2_sp/animal/lacda.png", 4, 520.f},
+        },
+        {
+            {AnimalType::EAGLE, 180.f, 1, 115.f, "assets/sprites/lv2_sp/bird/kenkenaicap.png", 2, 520.f},
+            {AnimalType::HORUS, 180.f, -1, 80.f, "assets/sprites/lv2_sp/bird/chim2.png", 3, 520.f}
+    }};
 };
 
 LevelConfig getLevel(int level)

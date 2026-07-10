@@ -1,10 +1,10 @@
-#include "CCHARIOT.h"
+#include "CSPHINX.h"
 
-CCHARIOT::CCHARIOT(float speed, float direction)
+CSPHINX::CSPHINX(float speed, float direction)
     : CVEHICLE(speed, direction) {
 }
 
-bool CCHARIOT::loadSprite(const std::string& path, float x, float y) {
+bool CSPHINX::loadSprite(const std::string& path, float x, float y) {
     if (!mTexture.loadFromFile(path)) {
         printf("FAILED: %s\n", path.c_str());
         return false;
@@ -12,16 +12,16 @@ bool CCHARIOT::loadSprite(const std::string& path, float x, float y) {
 
     delete mAnim;
     mAnim = new Animation(mSprite, mTexture,
-        32, 32,   // frameW, frameH
-        2, 2,
+        64, 64,   // frameW, frameH
+        4, 2,
         Frame_Time
     );
-    mSprite.setScale(3.f, 3.f);
+    mSprite.setScale(2.5f, 2.5f);
     mSprite.setPosition(x, y);
     return true;
 }
 
-void CCHARIOT::update(float dt) {
+void CSPHINX::update(float dt) {
     if (mAnim && !mIsStopped)
         mAnim->update(dt);
 }

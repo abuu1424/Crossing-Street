@@ -1,18 +1,19 @@
 #include "EntityManager.h"
 #include <cstdio>
 
-// Obstacle (CVEHICLE-derived)
+// Obstacle
 #include "CDINOSOUR.h"
 #include "CMAMMOTH.h"
-#include "CCHARIOT.h"
-#include "CWARELEPHENT.h"
+#include "CCAMEL.h"
 #include "CHORSE.h"
 #include "CCAR.h"
 #include "CTRUCK.h"
+#include "CSPHINX.h"
 
-// Animal (CANIMAL-derived)
+// Animal
 #include "CBIRD.h"
 #include "CEAGLE.h"
+#include "CHORUS.h"
 #include "CPTERO.h"
 #include "CROW.h"
 #include "CDRONE.h"
@@ -35,13 +36,13 @@ void EntityManager::clear() {
 
 CVEHICLE* EntityManager::createObstacle(ObstacleType type, float speed, float direction) {
     switch (type) {
-    case ObstacleType::DINOSAUR:     return new CDINOSOUR(speed, direction);
-    case ObstacleType::MAMMOTH:      return new CMAMMOTH(speed, direction);
-    case ObstacleType::CHARIOT:      return new CCHARIOT(speed, direction);
-    case ObstacleType::WAR_ELEPHENT: return new CWARELEPHENT(speed, direction);
-    case ObstacleType::HORSE:        return new CHORSE(speed, direction);
-    case ObstacleType::CAR:          return new CCAR(speed, direction);
-    case ObstacleType::TRUCK:        return new CTRUCK(speed, direction);
+    case ObstacleType::DINOSAUR: return new CDINOSOUR(speed, direction);
+    case ObstacleType::MAMMOTH: return new CMAMMOTH(speed, direction);
+    case ObstacleType::CAMEL: return new CCAMEL(speed, direction);
+    case ObstacleType::HORSE: return new CHORSE(speed, direction);
+    case ObstacleType::CAR: return new CCAR(speed, direction);
+    case ObstacleType::TRUCK: return new CTRUCK(speed, direction);
+    case ObstacleType::SPHINX: return new CSPHINX(speed, direction);
     case ObstacleType::FLYCAR:
     case ObstacleType::ROBOT:
         printf("[EntityManager] WARNING: chua co class cho ObstacleType %d, dung DINOSAUR tam thoi\n", (int)type);
@@ -54,6 +55,7 @@ CANIMAL* EntityManager::createAnimal(AnimalType type, float speed, float directi
     switch (type) {
     case AnimalType::BIRD:  return new CBIRD(speed, direction);
     case AnimalType::EAGLE: return new CEAGLE(speed, direction);
+    case AnimalType::HORUS: return new CHORUS(speed, direction);
     case AnimalType::PTERO: return new CPTERO(speed, direction);
     case AnimalType::CROW:  return new CROW(speed, direction);
     case AnimalType::DRONE: return new CDRONE(speed, direction);
