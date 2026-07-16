@@ -128,7 +128,6 @@ void Menu::setupLoadMenu() {
 
 void Menu::refreshSaveSlots() {
     mSaveSlots = SaveData::getAllSlots();
-
     for (int i = 0; i < 3; i++) {
         if (mSaveSlots[i].isEmpty) {
             mSlotTexts[i].setString("Slot " + std::to_string(i + 1) + ": Empty");
@@ -137,11 +136,14 @@ void Menu::refreshSaveSlots() {
             std::string name = mSaveSlots[i].saveName.empty()
                 ? "Unnamed Save"
                 : mSaveSlots[i].saveName;
-
+            std::string suffix = "";
+            if (mScreen == MenuScreen::NEW_GAME_SELECT && mConfirmOverwriteSlot == i) {
+                suffix = "  >> Enter again to overwrite file save <<";
+            }
             mSlotTexts[i].setString(
                 "Slot " + std::to_string(i + 1) + ": " + name +
                 " | Lv " + std::to_string(mSaveSlots[i].level) +
-                " | Score " + std::to_string(mSaveSlots[i].score)
+                " | Score " + std::to_string(mSaveSlots[i].score) + suffix
             );
         }
     }
@@ -190,9 +192,14 @@ void Menu::handleLoadEvent(const sf::Event& event,
     }
 }
 
+
 void Menu::handleEvent(const sf::Event& event,
                        sf::RenderWindow& window,
                        MenuResult& result) {
+    if (mScreen == MenuScreen::NEW_GAME_SELECT) {
+        handleNewGameEvent(event, window, result);
+        return;
+    }
     if (mScreen == MenuScreen::LOAD) {
         handleLoadEvent(event, window, result);
         return;
@@ -211,8 +218,9 @@ void Menu::handleEvent(const sf::Event& event,
         );
 
         if (mBtnNew.sprite.getGlobalBounds().contains(mouse)) {
-            mMusic.stop();
-            result = MenuResult::NEW_GAME;
+            refreshSaveSlots();
+            mConfirmOverwriteSlot = -1;
+            mScreen = MenuScreen::NEW_GAME_SELECT;
         }
         else if (mBtnLoad.sprite.getGlobalBounds().contains(mouse)) {
             refreshSaveSlots();
@@ -227,7 +235,50 @@ void Menu::handleEvent(const sf::Event& event,
     }
 }
 
+void Menu::handleNewGameEvent(const sf::Event& event,
+                              sf::RenderWindow& window,
+                              MenuResult& result) {
+    if (event.type != sf::Event::MouseButtonPressed ||
+        event.mouseButton.button != sf::Mouse::Left) {
+        return;
+        }
+
+    sf::Vector2f mouse = window.mapPixelToCoords(
+        sf::Vector2i(event.mouseButton.x, event.mouseButton.y)
+    );
+
+    for (int i = 0; i < 3; i++) {
+        if (mSlotTexts[i].getGlobalBounds().contains(mouse)) {
+            if (mSaveSlots[i].isEmpty) {
+                if (i == 0) result = MenuResult::NEW_GAME_SLOT_1;
+                else if (i == 1) result = MenuResult::NEW_GAME_SLOT_2;
+                else result = MenuResult::NEW_GAME_SLOT_3;
+                mMusic.stop();
+            }
+            else if (mConfirmOverwriteSlot == i) {
+                if (i == 0) result = MenuResult::NEW_GAME_SLOT_1;
+                else if (i == 1) result = MenuResult::NEW_GAME_SLOT_2;
+                else result = MenuResult::NEW_GAME_SLOT_3;
+                mConfirmOverwriteSlot = -1;
+                mMusic.stop();
+            }
+            else {
+                mConfirmOverwriteSlot = i;
+                refreshSaveSlots();
+            }
+            return;
+        }
+    }
+    if (mBackText.getGlobalBounds().contains(mouse)) {
+        mConfirmOverwriteSlot = -1;
+        mScreen = MenuScreen::MAIN;
+    }
+}
+
 void Menu::update(float dt, sf::RenderWindow& window) {
+    if (mScreen == MenuScreen::NEW_GAME_SELECT) {
+        return;
+    }
     if (mScreen == MenuScreen::LOAD) {
         return;
     }
@@ -247,17 +298,30 @@ void Menu::drawButton(sf::RenderWindow& w, MenuButton& btn) {
 }
 
 void Menu::drawLoadMenu(sf::RenderWindow& window) {
+    mLoadTitle.setString("LOAD GAME");
+    sf::FloatRect tb = mLoadTitle.getLocalBounds();
+    mLoadTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
     window.draw(mBgSprite);
     window.draw(mLoadTitle);
+    for (int i = 0; i < 3; i++) window.draw(mSlotTexts[i]);
+    window.draw(mBackText);
+}
 
-    for (int i = 0; i < 3; i++) {
-        window.draw(mSlotTexts[i]);
-    }
-
+void Menu::drawNewGameMenu(sf::RenderWindow& window) {
+    mLoadTitle.setString("NEW GAME - CHOOSE FILE SAVE");
+    sf::FloatRect tb = mLoadTitle.getLocalBounds();
+    mLoadTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
+    window.draw(mBgSprite);
+    window.draw(mLoadTitle);
+    for (int i = 0; i < 3; i++) window.draw(mSlotTexts[i]);
     window.draw(mBackText);
 }
 
 void Menu::draw(sf::RenderWindow& window) {
+    if (mScreen == MenuScreen::NEW_GAME_SELECT) {
+        drawNewGameMenu(window);
+        return;
+    }
     if (mScreen == MenuScreen::LOAD) {
         drawLoadMenu(window);
         return;

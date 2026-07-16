@@ -9,6 +9,9 @@
 enum class MenuResult {
     NONE,
     NEW_GAME,
+    NEW_GAME_SLOT_1,
+    NEW_GAME_SLOT_2,
+    NEW_GAME_SLOT_3,
     LOAD_SLOT_1,
     LOAD_SLOT_2,
     LOAD_SLOT_3,
@@ -18,6 +21,7 @@ enum class MenuResult {
 
 enum class MenuScreen {
     MAIN,
+    NEW_GAME_SELECT,
     LOAD,
     SETTINGS
 };
@@ -55,6 +59,7 @@ class Menu
     // Load menu
     MenuScreen mScreen = MenuScreen::MAIN;
     std::vector<SaveSlot> mSaveSlots;
+    int mConfirmOverwriteSlot = -1;
 
     sf::Text mLoadTitle;
     sf::Text mSlotTexts[3];
@@ -106,6 +111,10 @@ class Menu
     void handleLoadEvent(const sf::Event& event,
                          sf::RenderWindow& window,
                          MenuResult& result);
+    void drawNewGameMenu(sf::RenderWindow& window);
+    void handleNewGameEvent(const sf::Event& event,
+                            sf::RenderWindow& window,
+                            MenuResult& result);
 
 public:
     Menu();

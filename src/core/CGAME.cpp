@@ -508,9 +508,11 @@ void CGAME::handleEvents() {
                     mSound.stopLevelClear();
                     mPlayer.setFinish(false);
 
-                    if (mCurrentLevel < 2)
+                    if (mCurrentLevel < Max_Level)
                     {
                         loadLevel(mCurrentLevel + 1);
+                        mHUD.update(mCurrentLevel, mScore, mlevelTime);
+                        if (mActiveSlot > 0) saveGame(mActiveSlot);
                     }
                     else {
                         mShowLevelClear = false;
@@ -551,10 +553,12 @@ void CGAME::handleEvents() {
                     mSound.stopLevelClear();
                     mPlayer.setFinish(false);
 
-                    if (mCurrentLevel < 2)
+                    if (mCurrentLevel < Max_Level)
                     {
                         loadLevel(mCurrentLevel + 1);
+                        mHUD.update(mCurrentLevel, mScore, mlevelTime);
                         mSound.stopLevelClear();
+                        if (mActiveSlot > 0) saveGame(mActiveSlot);
                     }
                     else {
                         mPlayer.setFinish(true);
@@ -783,7 +787,7 @@ void CGAME::checkFinish() {
         mSound.stopMusic();
         mPlayer.setFinish(true);
 
-        if (mCurrentLevel < 2) {
+        if (mCurrentLevel < Max_Level) {
             mSound.playLevelClear();
             mShowLevelClear = true;
         }
@@ -839,7 +843,7 @@ void CGAME::render() {
         mWindow.draw(mDeadText);
     }
 
-    if (mPlayer.isFinish() && mCurrentLevel == 2 && !mShowLevelClear) {
+    if (mPlayer.isFinish() && mCurrentLevel == Max_Level && !mShowLevelClear) {
         mWindow.draw(mVictoryBox);
         mWindow.draw(mVictoryTitle);
         mWindow.draw(mVictorySubText);
@@ -922,10 +926,8 @@ void CGAME::render() {
 void CGAME::run() {
     sf::Clock clock;
     MenuResult menuResult = MenuResult::NONE;
-
     while (mWindow.isOpen()) {
         float dt = clock.restart().asSeconds();
-
         // Menu
         if (mInMenu) {
             sf::Event event;
@@ -937,10 +939,18 @@ void CGAME::run() {
 
                 mMenu.handleEvent(event, mWindow, menuResult);
             }
-
-            if (menuResult == MenuResult::NEW_GAME) {
+            // NEW_GAME
+            if (menuResult == MenuResult::NEW_GAME_SLOT_1 ||
+                menuResult == MenuResult::NEW_GAME_SLOT_2 ||
+                menuResult == MenuResult::NEW_GAME_SLOT_3) {
+                mActiveSlot =
+                    (menuResult == MenuResult::NEW_GAME_SLOT_1) ? 1 :
+                    (menuResult == MenuResult::NEW_GAME_SLOT_2) ? 2 : 3;
                 mInMenu = false;
                 reset();
+                mCurrentSaveName.clear();
+                saveGame(mActiveSlot);
+
                 menuResult = MenuResult::NONE;
             }
             else if (menuResult == MenuResult::QUIT) {
@@ -949,35 +959,33 @@ void CGAME::run() {
             else if (menuResult == MenuResult::SETTING) {
                 menuResult = MenuResult::NONE;
             }
-
             // LOAD_GAME
             else if (menuResult == MenuResult::LOAD_SLOT_1)
             {
-                if (loadGame(1)) mInMenu = false;
+                if (loadGame(1)) { mInMenu = false; mActiveSlot = 1; }
                 menuResult = MenuResult::NONE;
             }
             else if (menuResult == MenuResult::LOAD_SLOT_2) {
                 if (loadGame(2)) {
                     mInMenu = false;
+                    mActiveSlot = 2;
                 }
                 menuResult = MenuResult::NONE;
             }
             else if (menuResult == MenuResult::LOAD_SLOT_3) {
                 if (loadGame(3)) {
                     mInMenu = false;
+                    mActiveSlot = 3;
                 }
                 menuResult = MenuResult::NONE;
             }
-
             mMenu.update(dt, mWindow);
-
             mWindow.clear();
             mMenu.draw(mWindow);
             mWindow.display();
 
             continue;
         }
-
         // Game
         handleEvents();
         update(dt);

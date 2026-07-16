@@ -61,6 +61,7 @@ class CGAME {
     bool mEnteringSaveName = false;
     std::string mCurrentSaveName;
     int mSaveSlotPending = 0;
+    int mActiveSlot = 0;
 
     sf::RectangleShape mSaveBox;
     sf::Text mSaveTitle;
