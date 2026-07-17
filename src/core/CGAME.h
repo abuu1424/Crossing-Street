@@ -122,6 +122,7 @@ public:
     void update(float dt);
     void render();
     void reset();
+    void restartLevel();
 
     //Save game
     void saveGame(int slot);

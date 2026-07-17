@@ -367,6 +367,18 @@ void CGAME::reset() {
     mHUD.update(mCurrentLevel, mScore, mlevelTime);
 }
 
+void CGAME::restartLevel() {
+    mSound.stopAllEffects();
+
+    mlevelTime = 0.f;
+
+    mPlayer.setDead(false);
+    mPlayer.setFinish(false);
+    mPlayer.setPosition(SPAWN_X, SPAWN_Y);
+    loadLevel(mCurrentLevel);
+    mHUD.update(mCurrentLevel, mScore, mlevelTime);
+}
+
 void CGAME::handleEvents() {
     sf::Event event;
 
@@ -462,6 +474,7 @@ void CGAME::handleEvents() {
                 else if (event.key.code == sf::Keyboard::Num3) mSaveSlotPending = 3;
                 else if (event.key.code == sf::Keyboard::Escape) {
                     mSelectingSaveSlot = false;
+                    setupLevelClearOptions();
                     mShowLevelClear = true;
                     mSaveSlotPending = 0;
                     continue;
@@ -487,6 +500,7 @@ void CGAME::handleEvents() {
                             mWindow.close();
                         }
                         else {
+                            setupLevelClearOptions();
                             mShowLevelClear = true;
                         }
                     }
@@ -495,6 +509,52 @@ void CGAME::handleEvents() {
                         mEnteringSaveName = true;
                         mCurrentSaveName.clear();
                     }
+                }
+            }
+            if (event.type == sf::Event::MouseButtonPressed
+                && event.mouseButton.button == sf::Mouse::Left) {
+
+                int clickedSlot = 0;
+                if (mOpt1Text.getGlobalBounds().contains(mouse)) clickedSlot = 1;
+                else if (mOpt2Text.getGlobalBounds().contains(mouse)) clickedSlot = 2;
+                else if (mOpt3Text.getGlobalBounds().contains(mouse)) clickedSlot = 3;
+
+                if (clickedSlot != 0) {
+                    if (SaveData::hasData(clickedSlot)) {
+                        auto slots = SaveData::getAllSlots();
+
+                        mCurrentSaveName =
+                            slots[clickedSlot - 1].saveName.empty()
+                            ? "Save Slot " + std::to_string(clickedSlot)
+                            : slots[clickedSlot - 1].saveName;
+
+                        saveGame(clickedSlot);
+
+                        mSelectingSaveSlot = false;
+                        mSaveSlotPending = 0;
+                        mCurrentSaveName.clear();
+
+                        if (mPendingSaveAndExit) {
+                            mPendingSaveAndExit = false;
+                            mWindow.close();
+                        }
+                        else {
+                            setupLevelClearOptions();
+                            mShowLevelClear = true;
+                        }
+                    }
+                    else {
+                        mSelectingSaveSlot = false;
+                        mEnteringSaveName = true;
+                        mSaveSlotPending = clickedSlot;
+                        mCurrentSaveName.clear();
+                    }
+                }
+                else if (mOpt4Text.getGlobalBounds().contains(mouse)) {
+                    mSelectingSaveSlot = false;
+                    setupLevelClearOptions();
+                    mShowLevelClear = true;
+                    mSaveSlotPending = 0;
                 }
             }
 
@@ -530,7 +590,6 @@ void CGAME::handleEvents() {
                     mCurrentSaveName.clear();
                 }
                 else if (event.key.code == sf::Keyboard::Num3) {
-                    // Save & Exit: mở bảng chọn slot, sau khi save sẽ exit
                     mShowLevelClear = false;
                     mSelectingSaveSlot = true;
                     mPendingSaveAndExit = true;
@@ -655,7 +714,14 @@ void CGAME::handleEvents() {
                 mShowQuitConfirm = true;
             }
             else if (event.key.code == sf::Keyboard::R) {
-                reset();
+                if (mPlayer.isDead())
+                {
+                    restartLevel();
+                }
+                else
+                {
+                    reset();
+                }
             }
             else if (event.key.code == sf::Keyboard::P) {
                 mPaused = true;
