@@ -39,17 +39,17 @@ LevelConfig getLevel2()
         80,
         550,
         {
-                {ObstacleType::SPHINX, 170.f, 1, 300.f, "assets/sprites/lv2_sp/animal/sphinx.png", 3, 520.f},
-                {ObstacleType::CAMEL, 170.f, -1, 180.f, "assets/sprites/lv2_sp/animal/lacda.png", 3, 520.f},
-                {ObstacleType::SPHINX, 170.f, 1, 185.f, "assets/sprites/lv2_sp/animal/sphinx.png", 4, 520.f},
-                {ObstacleType::CAMEL, 170.f, -1, 385, "assets/sprites/lv2_sp/animal/lacda.png", 3, 520.f}
+                {ObstacleType::SPHINX, 170.f, 1, 300.f, "assets/sprites/lv2_sp/animal/sphinx.png", 3, 420.f},
+                {ObstacleType::CAMEL, 170.f, -1, 180.f, "assets/sprites/lv2_sp/animal/lacda.png", 3, 430.f},
+                {ObstacleType::SPHINX, 170.f, 1, 185.f, "assets/sprites/lv2_sp/animal/sphinx.png", 2, 620.f},
+                {ObstacleType::CAMEL, 170.f, -1, 385, "assets/sprites/lv2_sp/animal/lacda.png", 3, 630.f}
 
 
             },
             {
-                {AnimalType::EAGLE, 280.f, 1, 170.f, "assets/sprites/lv2_sp/bird/kenkenaicap.png", 4, 520.f},
-                {AnimalType::HORUS, 300.f, -1, 180.f, "assets/sprites/lv2_sp/bird/chim2.png", 3, 520.f},
-                {AnimalType::HORUS, 300.f, -1, 400.f, "assets/sprites/lv2_sp/bird/chim2.png", 3, 520.f},
+                {AnimalType::EAGLE, 180.f, 1, 170.f, "assets/sprites/lv2_sp/bird/kenkenaicap.png", 2, 520.f},
+                {AnimalType::HORUS, 180.f, -1, 180.f, "assets/sprites/lv2_sp/bird/chim2.png", 2, 520.f},
+                {AnimalType::HORUS, 180.f, -1, 400.f, "assets/sprites/lv2_sp/bird/chim2.png", 2, 520.f},
 
             }
     };
