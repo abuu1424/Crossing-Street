@@ -96,6 +96,8 @@ void Menu::setupButton(MenuButton& btn,
     btn.label.setString(label);
     btn.label.setCharacterSize(28);
     btn.label.setFillColor(sf::Color::White);
+    btn.label.setOutlineColor(sf::Color::Black);
+    btn.label.setOutlineThickness(2.f);
 
     sf::FloatRect lb = btn.label.getLocalBounds();
     btn.label.setOrigin(lb.left + lb.width / 2.f, lb.top + lb.height / 2.f);
@@ -107,6 +109,15 @@ void Menu::setupLoadMenu() {
     mLoadTitle.setString("LOAD GAME");
     mLoadTitle.setCharacterSize(56);
     mLoadTitle.setFillColor(sf::Color(255, 215, 0));
+    mLoadTitle.setOutlineColor(sf::Color::Black);
+    mLoadTitle.setOutlineThickness(3.f);
+
+    mPanelBox.setSize(sf::Vector2f(680.f, 380.f));
+    mPanelBox.setFillColor(sf::Color(0, 0, 0, 140));
+    mPanelBox.setOutlineColor(sf::Color(255, 255, 255, 60));
+    mPanelBox.setOutlineThickness(2.f);
+    mPanelBox.setOrigin(340.f, 190.f);
+    mPanelBox.setPosition(Win_W / 2.f, Win_H / 2.f + 20.f);
 
     sf::FloatRect tb = mLoadTitle.getLocalBounds();
     mLoadTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
@@ -122,8 +133,20 @@ void Menu::setupLoadMenu() {
     mBackText.setFont(mFont);
     mBackText.setString("BACK");
     mBackText.setCharacterSize(32);
+    mBackText.setOutlineColor(sf::Color::Black);
+    mBackText.setOutlineThickness(2.f);
     mBackText.setFillColor(sf::Color(220, 220, 220));
     mBackText.setPosition(Win_W / 2.f - 60.f, 560.f);
+
+    mOverwriteHint.setFont(mFont);
+    mOverwriteHint.setCharacterSize(22);
+    mOverwriteHint.setFillColor(sf::Color(255, 90, 90));
+    mOverwriteHint.setOutlineColor(sf::Color::Black);
+    mOverwriteHint.setOutlineThickness(2.f);
+    mOverwriteHint.setString(">> Click again to overwrite this slot <<");
+    sf::FloatRect ob = mOverwriteHint.getLocalBounds();
+    mOverwriteHint.setOrigin(ob.left + ob.width / 2.f, ob.top + ob.height / 2.f);
+    mOverwriteHint.setPosition(Win_W / 2.f, 530.f);
 }
 
 void Menu::refreshSaveSlots() {
@@ -136,14 +159,12 @@ void Menu::refreshSaveSlots() {
             std::string name = mSaveSlots[i].saveName.empty()
                 ? "Unnamed Save"
                 : mSaveSlots[i].saveName;
-            std::string suffix = "";
-            if (mScreen == MenuScreen::NEW_GAME_SELECT && mConfirmOverwriteSlot == i) {
-                suffix = "  >> Enter again to overwrite file save <<";
-            }
+            // FIX (bug 1): không còn nối "suffix" cảnh báo ghi đè vào đây nữa —
+            // dòng cảnh báo được vẽ riêng (mOverwriteHint) trong drawNewGameMenu().
             mSlotTexts[i].setString(
                 "Slot " + std::to_string(i + 1) + ": " + name +
                 " | Lv " + std::to_string(mSaveSlots[i].level) +
-                " | Score " + std::to_string(mSaveSlots[i].score) + suffix
+                " | Score " + std::to_string(mSaveSlots[i].score)
             );
         }
     }
@@ -302,6 +323,7 @@ void Menu::drawLoadMenu(sf::RenderWindow& window) {
     sf::FloatRect tb = mLoadTitle.getLocalBounds();
     mLoadTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
     window.draw(mBgSprite);
+    window.draw(mPanelBox);
     window.draw(mLoadTitle);
     for (int i = 0; i < 3; i++) window.draw(mSlotTexts[i]);
     window.draw(mBackText);
@@ -312,8 +334,14 @@ void Menu::drawNewGameMenu(sf::RenderWindow& window) {
     sf::FloatRect tb = mLoadTitle.getLocalBounds();
     mLoadTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
     window.draw(mBgSprite);
+    window.draw(mPanelBox);
     window.draw(mLoadTitle);
     for (int i = 0; i < 3; i++) window.draw(mSlotTexts[i]);
+
+    if (mConfirmOverwriteSlot != -1) {
+        window.draw(mOverwriteHint);
+    }
+
     window.draw(mBackText);
 }
 
@@ -348,6 +376,9 @@ void Menu::setupSettingsMenu() {
     mSettingsTitle.setString("SETTINGS");
     mSettingsTitle.setCharacterSize(52);
     mSettingsTitle.setFillColor(sf::Color(255, 215, 0));
+    mSettingsTitle.setOutlineColor(sf::Color::Black);
+    mSettingsTitle.setOutlineThickness(3.f);
+
     sf::FloatRect tb = mSettingsTitle.getLocalBounds();
     mSettingsTitle.setOrigin(tb.left + tb.width/2.f, tb.top + tb.height/2.f);
     mSettingsTitle.setPosition(Win_W / 2.f, 120.f);
@@ -411,6 +442,8 @@ void Menu::setupSettingsMenu() {
     mBackSettingsText.setString("BACK");
     mBackSettingsText.setCharacterSize(28);
     mBackSettingsText.setFillColor(sf::Color(220, 220, 220));
+    mBackSettingsText.setOutlineColor(sf::Color::Black);
+    mBackSettingsText.setOutlineThickness(2.f);
     sf::FloatRect bb = mBackSettingsText.getLocalBounds();
     mBackSettingsText.setOrigin(bb.left + bb.width/2.f, bb.top + bb.height/2.f);
     mBackSettingsText.setPosition(Win_W / 2.f, 540.f);
@@ -445,6 +478,7 @@ void Menu::drawSlider(sf::RenderWindow& w, Slider& s) {
 
 void Menu::drawSettingsMenu(sf::RenderWindow& window) {
     window.draw(mBgSprite);
+    window.draw(mPanelBox);
     window.draw(mSettingsTitle);
 
     drawSlider(window, mMusicSlider);
@@ -516,7 +550,10 @@ void Menu::handleSettingsEvent(const sf::Event& event,
             if (!mMuteAll) mMusic.setVolume(mMusicSlider.value);
         }
         if (event.key.code == sf::Keyboard::M)
+        {
             mMuteAll = !mMuteAll;
+            mMusic.setVolume(mMuteAll ? 0.f : mMusicSlider.value / 2.f);
+        }
         if (event.key.code == sf::Keyboard::Escape)
             mScreen = MenuScreen::MAIN;
     }

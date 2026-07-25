@@ -63,6 +63,8 @@ class Menu
 
     sf::Text mLoadTitle;
     sf::Text mSlotTexts[3];
+    sf::RectangleShape mPanelBox;
+    sf::Text mOverwriteHint;
     sf::Text mBackText;
 
     // Nhạc nền
