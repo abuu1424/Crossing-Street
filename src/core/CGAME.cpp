@@ -296,12 +296,14 @@ void CGAME::setupSaveSlotOptions() {
     centerText(mOpt4Text);
 }
 
-sf::FloatRect shrinkBox(sf::FloatRect r, float amount)
+sf::FloatRect shrinkBoxPercent(sf::FloatRect r, float percent)
 {
-    r.left += amount;
-    r.top += amount;
-    r.width -= amount * 2;
-    r.height -= amount * 2;
+    float dx = r.width  * percent;
+    float dy = r.height * percent;
+    r.left   += dx;
+    r.top    += dy;
+    r.width  -= dx * 2.f;
+    r.height -= dy * 2.f;
     return r;
 }
 
@@ -786,10 +788,10 @@ void CGAME::handleEvents() {
 void CGAME::handleCollision() {
     if (mPlayer.isDead() || mPlayer.isFinish()) return;
 
-    sf::FloatRect pb = shrinkBox(mPlayer.getBounds(), 8.f);
+    sf::FloatRect pb = shrinkBoxPercent(mPlayer.getBounds(), 0.22f);
 
     for (auto* obs : mEntities.obstacles()) {
-        sf::FloatRect ob = shrinkBox(obs->getBounds(), 8.f);
+        sf::FloatRect ob = shrinkBoxPercent(obs->getBounds(), 0.22f);
 
         if (sameLane(pb, ob) && pb.intersects(ob)) {
             mPlayer.setDead(true);
@@ -802,7 +804,7 @@ void CGAME::handleCollision() {
 
     for (auto* ani : mEntities.animals())
     {
-        sf::FloatRect ab = shrinkBox(ani->getBounds(), 8.f);
+        sf::FloatRect ab = shrinkBoxPercent(ani->getBounds(), 0.22f);
 
         if (sameLane(pb, ab) && pb.intersects(ab)) {
             mPlayer.setDead(true);

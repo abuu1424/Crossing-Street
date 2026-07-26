@@ -59,6 +59,8 @@ add_executable(CrossingGame
         src/obstacles/lv2/animal_lv2/CHORUS.h
         src/obstacles/lv2/animal_lv2/CCAMEL.cpp
         src/obstacles/lv2/animal_lv2/CCAMEL.h
+        src/obstacles/lv2/traffic_lv2/CTRAFFIC_LV2.cpp
+        src/obstacles/lv2/traffic_lv2/CTRAFFIC_LV2.h
 )
 
 #Include paths
