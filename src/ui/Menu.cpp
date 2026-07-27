@@ -157,14 +157,17 @@ void Menu::setupNewGameNamePopup() {
     mNameBoxSprite.setTexture(mNameBoxTexture);
     sf::Vector2u texSize = mNameBoxTexture.getSize();
 
-    // Kich thuoc hien thi cuoi cung cua khung (giu dung ti le anh 900x520
-    // de khong bi keo meo)
-    const float BOX_W = 640.f;
-    const float BOX_H = 370.f;
+    // Dong bo kich thuoc/vi tri voi mPanelBox (bang dung chung cho
+    // Load Game / New Game / Settings) de de debug, chi 1 bo toa do
+    // tham chieu duy nhat cho tat ca cac loai bang.
+    const float BOX_W = 680.f;
+    const float BOX_H = 380.f;
+    const float BOX_CX = Win_W / 2.f;
+    const float BOX_CY = Win_H / 2.f + 20.f;
 
     if (texSize.x > 0 && texSize.y > 0) {
         mNameBoxSprite.setOrigin(texSize.x / 2.f, texSize.y / 2.f);
-        mNameBoxSprite.setPosition(Win_W / 2.f, Win_H / 2.f);
+        mNameBoxSprite.setPosition(BOX_CX, BOX_CY);
         mNameBoxSprite.setScale(BOX_W / texSize.x, BOX_H / texSize.y);
     }
 
@@ -172,30 +175,30 @@ void Menu::setupNewGameNamePopup() {
     // khung anh (khong nam de len vien tre/hoa van)
     mNameTitle.setFont(mFont);
     mNameTitle.setString("Enter file save name:");
-    mNameTitle.setCharacterSize(24);
+    mNameTitle.setCharacterSize(26);
     mNameTitle.setFillColor(sf::Color::White);
     mNameTitle.setOutlineColor(sf::Color::Black);
     mNameTitle.setOutlineThickness(2.f);
     sf::FloatRect tb = mNameTitle.getLocalBounds();
     mNameTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
-    mNameTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 66.f);
+    mNameTitle.setPosition(BOX_CX, BOX_CY - 48.f);
 
     mNameInput.setFont(mFont);
-    mNameInput.setCharacterSize(28);
+    mNameInput.setCharacterSize(30);
     mNameInput.setFillColor(sf::Color(255, 215, 0));
     mNameInput.setOutlineColor(sf::Color::Black);
     mNameInput.setOutlineThickness(1.5f);
-    mNameInput.setPosition(Win_W / 2.f, Win_H / 2.f - 2.f);
+    mNameInput.setPosition(BOX_CX, BOX_CY + 18.f);
 
     mNameHint.setFont(mFont);
     mNameHint.setString("ENTER: START GAME   |   ESC: Cancel");
-    mNameHint.setCharacterSize(16);
+    mNameHint.setCharacterSize(18);
     mNameHint.setFillColor(sf::Color(200, 200, 200));
     mNameHint.setOutlineColor(sf::Color::Black);
     mNameHint.setOutlineThickness(1.f);
     sf::FloatRect hb = mNameHint.getLocalBounds();
     mNameHint.setOrigin(hb.left + hb.width / 2.f, hb.top + hb.height / 2.f);
-    mNameHint.setPosition(Win_W / 2.f, Win_H / 2.f + 63.f);
+    mNameHint.setPosition(BOX_CX, BOX_CY + 85.f);
 }
 
 void Menu::refreshSaveSlots() {
@@ -415,10 +418,19 @@ void Menu::drawLoadMenu(sf::RenderWindow& window) {
 }
 
 void Menu::drawNewGameMenu(sf::RenderWindow& window) {
+    window.draw(mBgSprite);
+
+    if (mEnteringNewGameName) {
+        // Popup nhap ten dang mo -> AN het bang chon slot,
+        // chi ve popup nhap ten len tren nen game.
+        drawNewGameNamePopup(window);
+        return;
+    }
+
+    // Khong co popup -> ve binh thuong bang chon slot (nhu cu)
     mLoadTitle.setString("NEW GAME - CHOOSE FILE SAVE");
     sf::FloatRect tb = mLoadTitle.getLocalBounds();
     mLoadTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
-    window.draw(mBgSprite);
     window.draw(mPanelBox);
     window.draw(mLoadTitle);
     for (int i = 0; i < 3; i++) window.draw(mSlotTexts[i]);
@@ -428,15 +440,13 @@ void Menu::drawNewGameMenu(sf::RenderWindow& window) {
     }
 
     window.draw(mBackText);
-
-    if (mEnteringNewGameName) drawNewGameNamePopup(window);
 }
 
 void Menu::drawNewGameNamePopup(sf::RenderWindow& window) {
     mNameInput.setString(mNewGameName + "_");
     sf::FloatRect ib = mNameInput.getLocalBounds();
     mNameInput.setOrigin(ib.left + ib.width / 2.f, ib.top + ib.height / 2.f);
-    mNameInput.setPosition(Win_W / 2.f, Win_H / 2.f - 2.f);
+    mNameInput.setPosition(Win_W / 2.f, Win_H / 2.f + 18.f);
 
     window.draw(mNameBoxSprite);
     window.draw(mNameTitle);
