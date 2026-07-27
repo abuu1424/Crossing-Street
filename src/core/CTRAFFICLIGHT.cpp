@@ -18,7 +18,7 @@ bool CTRAFFICLIGHT::loadSprite(const std::string& path, float x, float y) {
     int frameH = mTexture.getSize().y;
     delete mAnim;
     mAnim = new Animation(mSprite, mTexture,
-        frameW, frameH, 4, 1, 0.2f);
+        frameW, frameH, 4, 2, 0.2f);
     mSprite.setScale(3.f, 3.f);
     mSprite.setPosition(x, y);
     return true;

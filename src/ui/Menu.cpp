@@ -58,6 +58,7 @@ Menu::Menu() {
 
     setupLoadMenu();
     setupSettingsMenu();
+    setupNewGameNamePopup();
 
     // Nhạc nền
     if (!mMusic.openFromFile("assets/sounds/menu/menu_music.ogg"))
@@ -147,6 +148,54 @@ void Menu::setupLoadMenu() {
     sf::FloatRect ob = mOverwriteHint.getLocalBounds();
     mOverwriteHint.setOrigin(ob.left + ob.width / 2.f, ob.top + ob.height / 2.f);
     mOverwriteHint.setPosition(Win_W / 2.f, 530.f);
+}
+
+void Menu::setupNewGameNamePopup() {
+    if (!mNameBoxTexture.loadFromFile("assets/ui/menu/popup_namebox.png")) {
+        printf("FAILED popup_namebox.png\n");
+    }
+    mNameBoxSprite.setTexture(mNameBoxTexture);
+    sf::Vector2u texSize = mNameBoxTexture.getSize();
+
+    // Kich thuoc hien thi cuoi cung cua khung (giu dung ti le anh 900x520
+    // de khong bi keo meo)
+    const float BOX_W = 640.f;
+    const float BOX_H = 370.f;
+
+    if (texSize.x > 0 && texSize.y > 0) {
+        mNameBoxSprite.setOrigin(texSize.x / 2.f, texSize.y / 2.f);
+        mNameBoxSprite.setPosition(Win_W / 2.f, Win_H / 2.f);
+        mNameBoxSprite.setScale(BOX_W / texSize.x, BOX_H / texSize.y);
+    }
+
+    // Toa do 3 dong chu duoc tinh dua tren vung nen toi thuc te ben trong
+    // khung anh (khong nam de len vien tre/hoa van)
+    mNameTitle.setFont(mFont);
+    mNameTitle.setString("Enter file save name:");
+    mNameTitle.setCharacterSize(24);
+    mNameTitle.setFillColor(sf::Color::White);
+    mNameTitle.setOutlineColor(sf::Color::Black);
+    mNameTitle.setOutlineThickness(2.f);
+    sf::FloatRect tb = mNameTitle.getLocalBounds();
+    mNameTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
+    mNameTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 66.f);
+
+    mNameInput.setFont(mFont);
+    mNameInput.setCharacterSize(28);
+    mNameInput.setFillColor(sf::Color(255, 215, 0));
+    mNameInput.setOutlineColor(sf::Color::Black);
+    mNameInput.setOutlineThickness(1.5f);
+    mNameInput.setPosition(Win_W / 2.f, Win_H / 2.f - 2.f);
+
+    mNameHint.setFont(mFont);
+    mNameHint.setString("ENTER: START GAME   |   ESC: Cancel");
+    mNameHint.setCharacterSize(16);
+    mNameHint.setFillColor(sf::Color(200, 200, 200));
+    mNameHint.setOutlineColor(sf::Color::Black);
+    mNameHint.setOutlineThickness(1.f);
+    sf::FloatRect hb = mNameHint.getLocalBounds();
+    mNameHint.setOrigin(hb.left + hb.width / 2.f, hb.top + hb.height / 2.f);
+    mNameHint.setPosition(Win_W / 2.f, Win_H / 2.f + 63.f);
 }
 
 void Menu::refreshSaveSlots() {
@@ -241,6 +290,9 @@ void Menu::handleEvent(const sf::Event& event,
         if (mBtnNew.sprite.getGlobalBounds().contains(mouse)) {
             refreshSaveSlots();
             mConfirmOverwriteSlot = -1;
+            mEnteringNewGameName  = false;
+            mPendingNewGameSlot   = -1;
+            mNewGameName.clear();
             mScreen = MenuScreen::NEW_GAME_SELECT;
         }
         else if (mBtnLoad.sprite.getGlobalBounds().contains(mouse)) {
@@ -259,6 +311,11 @@ void Menu::handleEvent(const sf::Event& event,
 void Menu::handleNewGameEvent(const sf::Event& event,
                               sf::RenderWindow& window,
                               MenuResult& result) {
+    if (mEnteringNewGameName) {
+        handleNewGameNameEvent(event, result);
+        return;
+    }
+
     if (event.type != sf::Event::MouseButtonPressed ||
         event.mouseButton.button != sf::Mouse::Left) {
         return;
@@ -271,10 +328,9 @@ void Menu::handleNewGameEvent(const sf::Event& event,
     for (int i = 0; i < 3; i++) {
         if (mSlotTexts[i].getGlobalBounds().contains(mouse)) {
             if (mSaveSlots[i].isEmpty) {
-                if (i == 0) result = MenuResult::NEW_GAME_SLOT_1;
-                else if (i == 1) result = MenuResult::NEW_GAME_SLOT_2;
-                else result = MenuResult::NEW_GAME_SLOT_3;
-                mMusic.stop();
+                mPendingNewGameSlot   = i + 1;
+                mNewGameName.clear();
+                mEnteringNewGameName  = true;
             }
             else if (mConfirmOverwriteSlot == i) {
                 if (i == 0) result = MenuResult::NEW_GAME_SLOT_1;
@@ -293,6 +349,35 @@ void Menu::handleNewGameEvent(const sf::Event& event,
     if (mBackText.getGlobalBounds().contains(mouse)) {
         mConfirmOverwriteSlot = -1;
         mScreen = MenuScreen::MAIN;
+    }
+}
+
+void Menu::handleNewGameNameEvent(const sf::Event& event, MenuResult& result) {
+    if (event.type == sf::Event::TextEntered) {
+        if (event.text.unicode >= 32 && event.text.unicode < 128 &&
+            mNewGameName.size() < 20) {
+            mNewGameName += static_cast<char>(event.text.unicode);
+            }
+    }
+    if (event.type == sf::Event::KeyPressed) {
+        if (event.key.code == sf::Keyboard::BackSpace && !mNewGameName.empty()) {
+            mNewGameName.pop_back();
+        }
+        else if (event.key.code == sf::Keyboard::Enter) {
+            if (mNewGameName.empty()) {
+                mNewGameName = "Save Slot " + std::to_string(mPendingNewGameSlot);
+            }
+            if (mPendingNewGameSlot == 1)      result = MenuResult::NEW_GAME_SLOT_1;
+            else if (mPendingNewGameSlot == 2) result = MenuResult::NEW_GAME_SLOT_2;
+            else if (mPendingNewGameSlot == 3) result = MenuResult::NEW_GAME_SLOT_3;
+            mEnteringNewGameName = false;
+            mMusic.stop();
+        }
+        else if (event.key.code == sf::Keyboard::Escape) {
+            mEnteringNewGameName = false;
+            mPendingNewGameSlot  = -1;
+            mNewGameName.clear();
+        }
     }
 }
 
@@ -343,6 +428,20 @@ void Menu::drawNewGameMenu(sf::RenderWindow& window) {
     }
 
     window.draw(mBackText);
+
+    if (mEnteringNewGameName) drawNewGameNamePopup(window);
+}
+
+void Menu::drawNewGameNamePopup(sf::RenderWindow& window) {
+    mNameInput.setString(mNewGameName + "_");
+    sf::FloatRect ib = mNameInput.getLocalBounds();
+    mNameInput.setOrigin(ib.left + ib.width / 2.f, ib.top + ib.height / 2.f);
+    mNameInput.setPosition(Win_W / 2.f, Win_H / 2.f - 2.f);
+
+    window.draw(mNameBoxSprite);
+    window.draw(mNameTitle);
+    window.draw(mNameInput);
+    window.draw(mNameHint);
 }
 
 void Menu::draw(sf::RenderWindow& window) {

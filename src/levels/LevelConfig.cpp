@@ -34,10 +34,10 @@ LevelConfig getLevel2()
         "assets/sounds/lv2_sd/music_bg2.ogg",
         "assets/sprites/lv2_sp/player/player_codai.png",
         "assets/ui/hud/codai.png",
-        "assets/sprites/lv2_sp/traffic/brazier2.png",
         "assets/sprites/lv2_sp/traffic/brazier1.png",
+        "assets/sprites/lv2_sp/traffic/brazier.png",
+        75,
         80,
-        550,
         {
                 {ObstacleType::SPHINX, 170.f, 1, 300.f, "assets/sprites/lv2_sp/animal/sphinx.png", 3, 420.f},
                 {ObstacleType::CAMEL, 170.f, -1, 180.f, "assets/sprites/lv2_sp/animal/lacda.png", 3, 430.f},
@@ -55,6 +55,33 @@ LevelConfig getLevel2()
     };
 };
 
+LevelConfig getLevel3()
+{
+    return {
+        2,
+        "assets/background/lv3_bg/bg_lv3.png",
+        "assets/sounds/lv2_sd/music_bg2.ogg",
+        "assets/sprites/lv2_sp/player/player_codai.png",
+        "assets/ui/hud/codai.png",
+        "assets/sprites/lv2_sp/traffic/brazier1.png",
+        "assets/sprites/lv2_sp/traffic/brazier.png",
+        75,
+        80,
+        {
+                        {ObstacleType::SPHINX, 170.f, 1, 300.f, "assets/sprites/lv2_sp/animal/sphinx.png", 3, 420.f},
+                        {ObstacleType::CAMEL, 170.f, -1, 180.f, "assets/sprites/lv2_sp/animal/lacda.png", 3, 430.f},
+                        {ObstacleType::SPHINX, 170.f, 1, 185.f, "assets/sprites/lv2_sp/animal/sphinx.png", 2, 620.f},
+                        {ObstacleType::CAMEL, 170.f, 1, 385, "assets/sprites/lv2_sp/animal/lacda_trai.png", 3, 630.f}
+
+
+        },
+        {
+                        {AnimalType::EAGLE, 180.f, 1, 170.f, "assets/sprites/lv2_sp/bird/kenkenaicap.png", 2, 520.f},
+                        {AnimalType::HORUS, 180.f, 1, 180.f, "assets/sprites/lv2_sp/bird/chim2_trai.png", 2, 520.f},
+                        {AnimalType::HORUS, 180.f, -1, 400.f, "assets/sprites/lv2_sp/bird/chim2.png", 2, 520.f},
+        }
+    };
+}
 LevelConfig getLevel(int level)
 {
     switch (level)
@@ -63,6 +90,8 @@ LevelConfig getLevel(int level)
         return getLevel1();
     case 2:
         return getLevel2();
+    case 3:
+        return getLevel3();
     default:
         return getLevel1();
     }

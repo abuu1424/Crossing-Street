@@ -22,6 +22,12 @@ public:
     virtual ~CTRAFFICLIGHT();
 
     virtual bool loadSprite(const std::string& path, float x, float y);
+
+    virtual bool loadSprite(const std::string& redPath, const std::string& greenPath,
+                             float x, float y) {
+        return false;
+    }
+
     virtual void update(float dt);
     virtual void Draw(sf::RenderWindow& w);
 

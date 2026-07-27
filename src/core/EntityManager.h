@@ -4,7 +4,9 @@
 #include "LevelConfig.h"
 #include "CVEHICLE.h"
 #include "CANIMAL.h"
+#include "CTRAFFICLIGHT.h"
 #include "CTRAFFIC_LV1.h"
+#include "CTRAFFIC_LV2.h"
 
 class EntityManager {
 public:
@@ -18,12 +20,12 @@ public:
 
     const std::vector<CVEHICLE*>& obstacles() const { return mObstacles; }
     const std::vector<CANIMAL*>&  animals()   const { return mAnimals; }
-    CTRAFFIC_LV1* traffic() const { return mTraffic; }
+    CTRAFFICLIGHT* traffic() const { return mTraffic; }
 
 private:
     std::vector<CVEHICLE*> mObstacles;
     std::vector<CANIMAL*>  mAnimals;
-    CTRAFFIC_LV1*          mTraffic = nullptr;
+    CTRAFFICLIGHT*         mTraffic = nullptr;
 
     static CVEHICLE* createObstacle(ObstacleType type, float speed, float direction);
     static CANIMAL*  createAnimal(AnimalType type, float speed, float direction);

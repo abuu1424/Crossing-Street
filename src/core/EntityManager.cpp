@@ -18,6 +18,10 @@
 #include "CROW.h"
 #include "CDRONE.h"
 
+// Traffic
+#include "CTRAFFIC_LV1.h"
+#include "CTRAFFIC_LV2.h"
+
 #include "Utils.h"
 
 EntityManager::~EntityManager() {
@@ -93,7 +97,10 @@ void EntityManager::spawnFromLevel(const LevelConfig& cfg) {
         }
     }
 
-    mTraffic = new CTRAFFIC_LV1(mObstacles);
+    if (cfg.level == 2)
+        mTraffic = new CTRAFFIC_LV2(mObstacles);
+    else
+        mTraffic = new CTRAFFIC_LV1(mObstacles);
     mTraffic->loadSprite(
         cfg.trafficRedPath, cfg.trafficGreenPath,
         cfg.trafficX, cfg.trafficY

@@ -89,6 +89,20 @@ class Menu
     sf::Text mMuteText;
     sf::Text mBackSettingsText;
 
+    bool mEnteringNewGameName = false;
+    int  mPendingNewGameSlot  = -1;
+    std::string mNewGameName;
+
+    sf::Texture mNameBoxTexture;
+    sf::Sprite  mNameBoxSprite;
+    sf::Text mNameTitle;
+    sf::Text mNameInput;
+    sf::Text mNameHint;
+
+    void setupNewGameNamePopup();
+    void drawNewGameNamePopup(sf::RenderWindow& window);
+    void handleNewGameNameEvent(const sf::Event& event, MenuResult& result);
+
     void setupSettingsMenu();
     void updateSlider(Slider& s, sf::Vector2f mouse, bool mouseDown);
     void drawSlider(sf::RenderWindow& w, Slider& s);
@@ -126,6 +140,10 @@ public:
                      MenuResult& result);
     void update(float dt, sf::RenderWindow& window);
     void draw(sf::RenderWindow& window);
+
+    //Getter
+    const std::string& getPendingSaveName() const { return mNewGameName; }
+
 
     float getMusicVolume() const { return mMuteAll ? 0.f : mMusicSlider.value; }
     float getSFXVolume()   const { return mMuteAll ? 0.f : mSFXSlider.value;   }

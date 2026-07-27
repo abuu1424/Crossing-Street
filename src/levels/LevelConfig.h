@@ -42,5 +42,6 @@ struct LevelConfig {
 
 LevelConfig getLevel1();
 LevelConfig getLevel2();
+LevelConfig getLevel3();
 
 LevelConfig getLevel(int level);

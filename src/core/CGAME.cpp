@@ -264,7 +264,7 @@ void CGAME::centerText(sf::Text& text) {
 }
 
 void CGAME::setupLevelClearOptions() {
-    if (mCurrentLevel == 2) {
+    if (mCurrentLevel == 5) {
         mOpt1Text.setString("[1]  See Victory Screen");
     }
     else {
