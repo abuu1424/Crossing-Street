@@ -157,9 +157,6 @@ void Menu::setupNewGameNamePopup() {
     mNameBoxSprite.setTexture(mNameBoxTexture);
     sf::Vector2u texSize = mNameBoxTexture.getSize();
 
-    // Dong bo kich thuoc/vi tri voi mPanelBox (bang dung chung cho
-    // Load Game / New Game / Settings) de de debug, chi 1 bo toa do
-    // tham chieu duy nhat cho tat ca cac loai bang.
     const float BOX_W = 680.f;
     const float BOX_H = 380.f;
     const float BOX_CX = Win_W / 2.f;
@@ -171,8 +168,6 @@ void Menu::setupNewGameNamePopup() {
         mNameBoxSprite.setScale(BOX_W / texSize.x, BOX_H / texSize.y);
     }
 
-    // Toa do 3 dong chu duoc tinh dua tren vung nen toi thuc te ben trong
-    // khung anh (khong nam de len vien tre/hoa van)
     mNameTitle.setFont(mFont);
     mNameTitle.setString("Enter file save name:");
     mNameTitle.setCharacterSize(26);
@@ -336,11 +331,10 @@ void Menu::handleNewGameEvent(const sf::Event& event,
                 mEnteringNewGameName  = true;
             }
             else if (mConfirmOverwriteSlot == i) {
-                if (i == 0) result = MenuResult::NEW_GAME_SLOT_1;
-                else if (i == 1) result = MenuResult::NEW_GAME_SLOT_2;
-                else result = MenuResult::NEW_GAME_SLOT_3;
+                mPendingNewGameSlot   = i + 1;
+                mNewGameName.clear();
+                mEnteringNewGameName  = true;
                 mConfirmOverwriteSlot = -1;
-                mMusic.stop();
             }
             else {
                 mConfirmOverwriteSlot = i;

@@ -563,6 +563,7 @@ void CGAME::handleEvents() {
             continue;
         }
 
+        //Level Clear
         if (mShowLevelClear) {
             if (event.type == sf::Event::KeyPressed) {
                 if (event.key.code == sf::Keyboard::Num1) {
@@ -1016,7 +1017,7 @@ void CGAME::run() {
                     (menuResult == MenuResult::NEW_GAME_SLOT_2) ? 2 : 3;
                 mInMenu = false;
                 reset();
-                mCurrentSaveName.clear();
+                mCurrentSaveName = mMenu.getPendingSaveName();
                 saveGame(mActiveSlot);
 
                 menuResult = MenuResult::NONE;
