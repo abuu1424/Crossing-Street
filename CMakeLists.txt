@@ -53,15 +53,15 @@ add_executable(CrossingGame
         src/obstacles/lv3/animal_lv3/CHORSE.cpp
         src/obstacles/lv3/animal_lv3/CHORSE.h
         # Level 4
-        src/obstacles/lv4/animal_lv4/CPTERO.cpp
-        src/obstacles/lv4/animal_lv4/CPTERO.h
+        
+        
         src/obstacles/lv2/animal_lv2/CHORUS.cpp
         src/obstacles/lv2/animal_lv2/CHORUS.h
         src/obstacles/lv2/animal_lv2/CCAMEL.cpp
         src/obstacles/lv2/animal_lv2/CCAMEL.h
         src/obstacles/lv2/traffic_lv2/CTRAFFIC_LV2.cpp
         src/obstacles/lv2/traffic_lv2/CTRAFFIC_LV2.h
-)
+ "src/obstacles/lv4/animal_lv4/CPLANE.h" "src/obstacles/lv4/animal_lv4/CPLANE.cpp" "src/obstacles/lv4/animal_lv4/CMISSILE.h" "src/obstacles/lv4/animal_lv4/CMISSILE.cpp" "src/obstacles/lv4/car_lv4/CMOTOR.h" "src/obstacles/lv4/car_lv4/CMOTOR.cpp")
 
 #Include paths
 target_include_directories(CrossingGame PRIVATE

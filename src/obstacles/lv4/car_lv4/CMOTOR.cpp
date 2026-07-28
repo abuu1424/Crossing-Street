@@ -1,9 +1,11 @@
-#include "CTRUCK.h"
+#include "CMOTOR.h"
 
-CTRUCK::CTRUCK(float speed, float direction)
-    : CVEHICLE(speed, direction) {}
+CMOTOR::CMOTOR(float speed, float direction)
+{
+    CVEHICLE(speed, direction);
+}
 
-bool CTRUCK::loadSprite(const std::string& path, float x, float y) {
+bool CMOTOR::loadSprite(const std::string& path, float x, float y) {
     if (!mTexture.loadFromFile(path)) {
         printf("FAILED: %s\n", path.c_str());
         return false;
@@ -11,16 +13,16 @@ bool CTRUCK::loadSprite(const std::string& path, float x, float y) {
 
     delete mAnim;
     mAnim = new Animation(mSprite, mTexture,
-        32, 32,   // frameW, frameH
+        64, 64,   // frameW, frameH
         2, 2,
         Frame_Time
     );
-    mSprite.setScale(4.f, 3.f);
+    mSprite.setScale(3.f, 3.f);
     mSprite.setPosition(x, y);
     return true;
 }
 
-void CTRUCK::update(float dt) {
+void CMOTOR::update(float dt) {
     if (mAnim && !mIsStopped)
         mAnim->update(dt);
 }
