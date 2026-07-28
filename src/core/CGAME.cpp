@@ -256,6 +256,31 @@ void CGAME::setupUI() {
     setupOpt(mOpt2Text, "[2]  Save",          Win_H / 2.f + 40.f);
     setupOpt(mOpt3Text, "[3]  Save & Exit",   Win_H / 2.f + 90.f);
     setupOpt(mOpt4Text, "[4]  Exit",          Win_H / 2.f + 140.f);
+
+    // Tải các bảng Popup từ assets/ui/hud/
+    if (mTexturePopupLevelClear.loadFromFile("assets/ui/hud/popup_level_clear.png")) {
+        mSpritePopupLevelClear.setTexture(mTexturePopupLevelClear);
+        sf::Vector2u sz = mTexturePopupLevelClear.getSize();
+        mSpritePopupLevelClear.setOrigin(sz.x / 2.f, sz.y / 2.f);
+        mSpritePopupLevelClear.setScale(550.f / sz.x, 550.f / sz.y);
+        mSpritePopupLevelClear.setPosition(Win_W / 2.f, Win_H / 2.f);
+    }
+
+    if (mTexturePopupGameOver.loadFromFile("assets/ui/hud/popup_game_over.png")) {
+        mSpritePopupGameOver.setTexture(mTexturePopupGameOver);
+        sf::Vector2u sz = mTexturePopupGameOver.getSize();
+        mSpritePopupGameOver.setOrigin(sz.x / 2.f, sz.y / 2.f);
+        mSpritePopupGameOver.setScale(540.f / sz.x, 540.f / sz.y);
+        mSpritePopupGameOver.setPosition(Win_W / 2.f, Win_H / 2.f);
+    }
+
+    if (mTexturePopupPause.loadFromFile("assets/ui/hud/popup_pause.png")) {
+        mSpritePopupPause.setTexture(mTexturePopupPause);
+        sf::Vector2u sz = mTexturePopupPause.getSize();
+        mSpritePopupPause.setOrigin(sz.x / 2.f, sz.y / 2.f);
+        mSpritePopupPause.setScale(580.f / sz.x, 520.f / sz.y);
+        mSpritePopupPause.setPosition(Win_W / 2.f, Win_H / 2.f);
+    }
 }
 
 void CGAME::centerText(sf::Text& text) {
@@ -908,12 +933,18 @@ void CGAME::render() {
     mHUD.draw(mWindow);
 
     if (mPlayer.isDead()) {
-        mWindow.draw(mDeadBox);
+        if (mSpritePopupGameOver.getTexture())
+            mWindow.draw(mSpritePopupGameOver);
+        else
+            mWindow.draw(mDeadBox);
         mWindow.draw(mDeadText);
     }
 
     if (mPlayer.isFinish() && mCurrentLevel == Max_Level && !mShowLevelClear) {
-        mWindow.draw(mVictoryBox);
+        if (mSpritePopupLevelClear.getTexture())
+            mWindow.draw(mSpritePopupLevelClear);
+        else
+            mWindow.draw(mVictoryBox);
         mWindow.draw(mVictoryTitle);
         mWindow.draw(mVictorySubText);
 
@@ -952,7 +983,11 @@ void CGAME::render() {
         if (!mDraggingMusicSlider && !mDraggingSFXSlider)
             updatePauseSliders({});
 
-        mWindow.draw(mPauseBox);
+        if (mSpritePopupPause.getTexture())
+            mWindow.draw(mSpritePopupPause);
+        else
+            mWindow.draw(mPauseBox);
+
         mWindow.draw(mPauseTitle);
         mWindow.draw(mResumeText);
         mWindow.draw(mQuitFromPauseText);
@@ -971,7 +1006,11 @@ void CGAME::render() {
     if (mSelectingSaveSlot) {
         setupSaveSlotOptions();
 
-        mWindow.draw(mLevelClearBox);
+        if (mSpritePopupLevelClear.getTexture())
+            mWindow.draw(mSpritePopupLevelClear);
+        else
+            mWindow.draw(mLevelClearBox);
+
         mWindow.draw(mLevelClearTitle);
         mWindow.draw(mOpt1Text);
         mWindow.draw(mOpt2Text);
@@ -980,7 +1019,11 @@ void CGAME::render() {
     }
 
     if (mShowLevelClear) {
-        mWindow.draw(mLevelClearBox);
+        if (mSpritePopupLevelClear.getTexture())
+            mWindow.draw(mSpritePopupLevelClear);
+        else
+            mWindow.draw(mLevelClearBox);
+
         mWindow.draw(mLevelClearTitle);
         mWindow.draw(mLevelClearScore);
         mWindow.draw(mOpt1Text);

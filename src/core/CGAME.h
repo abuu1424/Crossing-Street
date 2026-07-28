@@ -110,8 +110,16 @@ class CGAME {
     bool               mDraggingMusicSlider = false;
     bool               mDraggingSFXSlider   = false;
 
-    //Sound (nhạc nền + 3 sound effect, xem SoundManager.h)
+    // Sound (nhạc nền + 3 sound effect, xem SoundManager.h)
     SoundManager mSound;
+
+    // Popup UI Panel Textures & Sprites
+    sf::Texture mTexturePopupLevelClear;
+    sf::Sprite  mSpritePopupLevelClear;
+    sf::Texture mTexturePopupGameOver;
+    sf::Sprite  mSpritePopupGameOver;
+    sf::Texture mTexturePopupPause;
+    sf::Sprite  mSpritePopupPause;
 
 public:
     explicit CGAME(sf::RenderWindow& window);

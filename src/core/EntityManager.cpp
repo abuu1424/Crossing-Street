@@ -5,10 +5,10 @@
 #include "CDINOSOUR.h"
 #include "CMAMMOTH.h"
 #include "CCAMEL.h"
-#include "CHORSE.h"
-#include "CCAR.h"
-#include "CTRUCK.h"
 #include "CSPHINX.h"
+#include "CHORSE.h"
+#include "CWOOD.h"
+#include "CRICKSHAW.h"
 
 // Animal
 #include "CBIRD.h"
@@ -16,11 +16,13 @@
 #include "CHORUS.h"
 #include "CPTERO.h"
 #include "CROW.h"
+#include "CARROW.h"
 #include "CDRONE.h"
 
 // Traffic
 #include "CTRAFFIC_LV1.h"
 #include "CTRAFFIC_LV2.h"
+
 
 #include "Utils.h"
 
@@ -43,14 +45,10 @@ CVEHICLE* EntityManager::createObstacle(ObstacleType type, float speed, float di
     case ObstacleType::DINOSAUR: return new CDINOSOUR(speed, direction);
     case ObstacleType::MAMMOTH: return new CMAMMOTH(speed, direction);
     case ObstacleType::CAMEL: return new CCAMEL(speed, direction);
-    case ObstacleType::HORSE: return new CHORSE(speed, direction);
-    case ObstacleType::CAR: return new CCAR(speed, direction);
-    case ObstacleType::TRUCK: return new CTRUCK(speed, direction);
     case ObstacleType::SPHINX: return new CSPHINX(speed, direction);
-    case ObstacleType::FLYCAR:
-    case ObstacleType::ROBOT:
-        printf("[EntityManager] WARNING: chua co class cho ObstacleType %d, dung DINOSAUR tam thoi\n", (int)type);
-        return new CDINOSOUR(speed, direction);
+    case ObstacleType::HORSE: return new CHORSE(speed, direction);
+    case ObstacleType::RICKSHAW: return new CRICKSHAW(speed, direction);
+    case ObstacleType::WOOD: return new CWOOD(speed, direction);
     }
     return new CDINOSOUR(speed, direction);
 }
@@ -61,11 +59,8 @@ CANIMAL* EntityManager::createAnimal(AnimalType type, float speed, float directi
     case AnimalType::EAGLE: return new CEAGLE(speed, direction);
     case AnimalType::HORUS: return new CHORUS(speed, direction);
     case AnimalType::PTERO: return new CPTERO(speed, direction);
-    case AnimalType::CROW:  return new CROW(speed, direction);
-    case AnimalType::DRONE: return new CDRONE(speed, direction);
-    case AnimalType::PIGEON:
-        printf("[EntityManager] WARNING: chua co class cho AnimalType::PIGEON, dung BIRD tam thoi\n");
-        return new CBIRD(speed, direction);
+    case AnimalType::ROW: return new CROW(speed, direction);
+    case AnimalType::ARROW: return new CARROW(speed, direction);
     }
     return new CBIRD(speed, direction);
 }

@@ -1,8 +1,8 @@
-#include "CROW.h"
-CROW::CROW(float speed, float direction) : CANIMAL(speed, direction) {}
-CROW::~CROW() { delete mAnim; }
+#include "CARROW.h"
+CARROW::CARROW(float speed, float direction) : CANIMAL(speed, direction) {}
+CARROW::~CARROW() { delete mAnim; }
 
-bool CROW::loadSprite(const std::string &path, float x, float y) {
+bool CARROW::loadSprite(const std::string &path, float x, float y) {
   if (!mTexture.loadFromFile(path)) {
     printf("FAILED : %s\n", path.c_str());
     return false;
@@ -13,7 +13,7 @@ bool CROW::loadSprite(const std::string &path, float x, float y) {
   mSprite.setPosition(x, y);
   return true;
 }
-void CROW::update(float dt) {
+void CARROW::update(float dt) {
   if (mAnim)
     mAnim->update(dt);
 }
