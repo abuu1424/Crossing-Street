@@ -49,27 +49,19 @@ add_executable(CrossingGame
         # Level 2
         src/obstacles/lv2/animal_lv2/CEAGLE.cpp
         src/obstacles/lv2/animal_lv2/CEAGLE.h
+        # Level 3
+        src/obstacles/lv3/animal_lv3/CHORSE.cpp
+        src/obstacles/lv3/animal_lv3/CHORSE.h
+        # Level 4
+        
+        
         src/obstacles/lv2/animal_lv2/CHORUS.cpp
         src/obstacles/lv2/animal_lv2/CHORUS.h
         src/obstacles/lv2/animal_lv2/CCAMEL.cpp
         src/obstacles/lv2/animal_lv2/CCAMEL.h
         src/obstacles/lv2/traffic_lv2/CTRAFFIC_LV2.cpp
         src/obstacles/lv2/traffic_lv2/CTRAFFIC_LV2.h
-        # Level 3
-        src/obstacles/lv3/vehicle_lv3/CHORSE.cpp
-        src/obstacles/lv3/vehicle_lv3/CHORSE.h
-        src/obstacles/lv3/vehicle_lv3/CRICKSHAW.cpp
-        src/obstacles/lv3/vehicle_lv3/CRICKSHAW.h
-        src/obstacles/lv3/vehicle_lv3/CWOOD.cpp
-        src/obstacles/lv3/vehicle_lv3/CWOOD.h
-        src/obstacles/lv3/animal_lv3/CROW.cpp
-        src/obstacles/lv3/animal_lv3/CROW.h
-        src/obstacles/lv3/animal_lv3/CARROW.cpp
-        src/obstacles/lv3/animal_lv3/CARROW.h
-        # Level 4
-        src/obstacles/lv4/animal_lv4/CPTERO.cpp
-        src/obstacles/lv4/animal_lv4/CPTERO.h
-)
+ "src/obstacles/lv4/animal_lv4/CPLANE.h" "src/obstacles/lv4/animal_lv4/CPLANE.cpp" "src/obstacles/lv4/animal_lv4/CMISSILE.h" "src/obstacles/lv4/animal_lv4/CMISSILE.cpp" "src/obstacles/lv4/car_lv4/CMOTOR.h" "src/obstacles/lv4/car_lv4/CMOTOR.cpp")
 
 #Include paths
 target_include_directories(CrossingGame PRIVATE
@@ -86,7 +78,6 @@ target_include_directories(CrossingGame PRIVATE
         src/obstacles/lv2/animal_lv2
         src/obstacles/lv2/traffic_lv2
         src/obstacles/lv3/animal_lv3
-        src/obstacles/lv3/vehicle_lv3
         src/obstacles/lv3/traffic_lv3
         src/obstacles/lv4/animal_lv4
         src/obstacles/lv4/car_lv4
