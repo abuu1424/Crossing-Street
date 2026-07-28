@@ -281,6 +281,14 @@ void CGAME::setupUI() {
         mSpritePopupPause.setScale(580.f / sz.x, 520.f / sz.y);
         mSpritePopupPause.setPosition(Win_W / 2.f, Win_H / 2.f);
     }
+
+    if (mTexturePopupQuitConfirm.loadFromFile("assets/ui/hud/quit_confirm_panel.png")) {
+        mSpritePopupQuitConfirm.setTexture(mTexturePopupQuitConfirm);
+        sf::Vector2u sz = mTexturePopupQuitConfirm.getSize();
+        mSpritePopupQuitConfirm.setOrigin(sz.x / 2.f, sz.y / 2.f);
+        mSpritePopupQuitConfirm.setScale(480.f / sz.x, 240.f / sz.y);
+        mSpritePopupQuitConfirm.setPosition(Win_W / 2.f, Win_H / 2.f);
+    }
 }
 
 void CGAME::centerText(sf::Text& text) {
@@ -972,7 +980,11 @@ void CGAME::render() {
 
     if (mShowQuitConfirm)
     {
-        mWindow.draw(mQuitBox);
+        if (mSpritePopupQuitConfirm.getTexture())
+            mWindow.draw(mSpritePopupQuitConfirm);
+        else
+            mWindow.draw(mQuitBox);
+
         mWindow.draw(mQuitTitle);
         mWindow.draw(mYesText);
         mWindow.draw(mNoText);

@@ -67,6 +67,16 @@ add_executable(CrossingGame
         src/obstacles/lv3/animal_lv3/CROW.cpp
         src/obstacles/lv3/animal_lv3/CARROW.cpp
         # Level 4
+        src/obstacles/lv4/vehicle_lv4/CBUS.cpp
+        src/obstacles/lv4/vehicle_lv4/CBUS.h
+        src/obstacles/lv4/vehicle_lv4/CCAR.cpp
+        src/obstacles/lv4/vehicle_lv4/CCAR.h
+        src/obstacles/lv4/vehicle_lv4/CMOTOR.cpp
+        src/obstacles/lv4/vehicle_lv4/CMOTOR.h
+        src/obstacles/lv4/animal_lv4/CMISSILE.cpp
+        src/obstacles/lv4/animal_lv4/CMISSILE.h
+        src/obstacles/lv4/animal_lv4/CPLANE.cpp
+        src/obstacles/lv4/animal_lv4/CPLANE.h
 )
 #Include paths
 target_include_directories(CrossingGame PRIVATE
@@ -86,7 +96,7 @@ target_include_directories(CrossingGame PRIVATE
         src/obstacles/lv3/vehicle_lv3
         src/obstacles/lv3/traffic_lv3
         src/obstacles/lv4/animal_lv4
-        src/obstacles/lv4/car_lv4
+        src/obstacles/lv4/vehicle_lv4
         src/obstacles/lv4/traffic_lv4
         src/obstacles/lv5/animal_lv5
         src/obstacles/lv5/car_lv5

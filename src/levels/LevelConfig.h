@@ -2,8 +2,8 @@
 #include <string>
 #include <vector>
 
-enum class ObstacleType { DINOSAUR, MAMMOTH, SPHINX, CAMEL, HORSE, RICKSHAW, WOOD };
-enum class AnimalType   { BIRD, PTERO, EAGLE, HORUS, ROW, ARROW };
+enum class ObstacleType { DINOSAUR, MAMMOTH, SPHINX, CAMEL, HORSE, RICKSHAW, WOOD, BUS, CAR, MOTOR };
+enum class AnimalType   { BIRD, PTERO, EAGLE, HORUS, ROW, ARROW, MISSILE, PLANE };
 
 struct LaneConfig {
     ObstacleType type;

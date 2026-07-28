@@ -120,6 +120,8 @@ class CGAME {
     sf::Sprite  mSpritePopupGameOver;
     sf::Texture mTexturePopupPause;
     sf::Sprite  mSpritePopupPause;
+    sf::Texture mTexturePopupQuitConfirm;
+    sf::Sprite  mSpritePopupQuitConfirm;
 
 public:
     explicit CGAME(sf::RenderWindow& window);
