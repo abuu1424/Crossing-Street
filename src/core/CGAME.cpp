@@ -5,7 +5,7 @@
 #include <cstdio>
 
 const float SPAWN_X = Win_W / 2.f - Player_W / 2.f;
-const float SPAWN_Y = 590.f;
+const float SPAWN_Y = Win_H - Player_H;
 
 CGAME::CGAME(sf::RenderWindow &window)
     : mWindow(window), mScore(0), mlevelTime(0.f) {
@@ -15,7 +15,7 @@ CGAME::CGAME(sf::RenderWindow &window)
 CGAME::~CGAME() { clearEntities(); }
 
 void CGAME::setupUI() {
-  mFont.loadFromFile("assets/font/pixel_operator/PixelOperator.ttf");
+  mFont.loadFromFile(Font_Path);
 
   // Sound
   mSound.loadEffects("assets/sounds/victory/vt1.ogg",
@@ -115,6 +115,8 @@ void CGAME::setupUI() {
   mQuitTitle.setString("Quit the game?");
   mQuitTitle.setCharacterSize(28);
   mQuitTitle.setFillColor(sf::Color::White);
+  mQuitTitle.setOutlineColor(sf::Color(20, 15, 10, 230));
+  mQuitTitle.setOutlineThickness(1.5f);
   sf::FloatRect qt = mQuitTitle.getLocalBounds();
   mQuitTitle.setOrigin(qt.left + qt.width / 2.f, qt.top + qt.height / 2.f);
   mQuitTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 40.f);
@@ -123,6 +125,8 @@ void CGAME::setupUI() {
   mYesText.setString("YES");
   mYesText.setCharacterSize(28);
   mYesText.setFillColor(sf::Color(255, 100, 100));
+  mYesText.setOutlineColor(sf::Color(20, 15, 10, 230));
+  mYesText.setOutlineThickness(1.5f);
   sf::FloatRect yt = mYesText.getLocalBounds();
   mYesText.setOrigin(yt.left + yt.width / 2.f, yt.top + yt.height / 2.f);
   mYesText.setPosition(Win_W / 2.f - 70.f, Win_H / 2.f + 30.f);
@@ -131,6 +135,8 @@ void CGAME::setupUI() {
   mNoText.setString("NO");
   mNoText.setCharacterSize(28);
   mNoText.setFillColor(sf::Color(150, 255, 150));
+  mNoText.setOutlineColor(sf::Color(20, 15, 10, 230));
+  mNoText.setOutlineThickness(1.5f);
   sf::FloatRect nt = mNoText.getLocalBounds();
   mNoText.setOrigin(nt.left + nt.width / 2.f, nt.top + nt.height / 2.f);
   mNoText.setPosition(Win_W / 2.f + 70.f, Win_H / 2.f + 30.f);
@@ -140,8 +146,11 @@ void CGAME::setupUI() {
   mMenuConfirmTitle.setString("Return to Menu?");
   mMenuConfirmTitle.setCharacterSize(28);
   mMenuConfirmTitle.setFillColor(sf::Color::White);
+  mMenuConfirmTitle.setOutlineColor(sf::Color(20, 15, 10, 230));
+  mMenuConfirmTitle.setOutlineThickness(1.5f);
   sf::FloatRect mt = mMenuConfirmTitle.getLocalBounds();
-  mMenuConfirmTitle.setOrigin(mt.left + mt.width / 2.f, mt.top + mt.height / 2.f);
+  mMenuConfirmTitle.setOrigin(mt.left + mt.width / 2.f,
+                              mt.top + mt.height / 2.f);
   mMenuConfirmTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 40.f);
 
   // Bảng Pause
@@ -346,14 +355,19 @@ void CGAME::setupSaveSlotOptions() {
   centerText(mOpt4Text);
 }
 
-sf::FloatRect shrinkBoxPercent(sf::FloatRect r, float percent) {
-  float dx = r.width * percent;
-  float dy = r.height * percent;
+sf::FloatRect shrinkBoxPercent(sf::FloatRect r, float percentX,
+                               float percentY) {
+  float dx = r.width * percentX;
+  float dy = r.height * percentY;
   r.left += dx;
   r.top += dy;
   r.width -= dx * 2.f;
   r.height -= dy * 2.f;
   return r;
+}
+
+sf::FloatRect shrinkBoxPercent(sf::FloatRect r, float percent) {
+  return shrinkBoxPercent(r, percent, percent);
 }
 
 bool sameLane(sf::FloatRect playerBox, sf::FloatRect objectBox) {
@@ -869,10 +883,10 @@ void CGAME::handleCollision() {
   if (mPlayer.isDead() || mPlayer.isFinish())
     return;
 
-  sf::FloatRect pb = shrinkBoxPercent(mPlayer.getBounds(), 0.22f);
+  sf::FloatRect pb = shrinkBoxPercent(mPlayer.getBounds(), 0.18f, 0.22f);
 
   for (auto *obs : mEntities.obstacles()) {
-    sf::FloatRect ob = shrinkBoxPercent(obs->getBounds(), 0.22f);
+    sf::FloatRect ob = shrinkBoxPercent(obs->getBounds(), 0.12f, 0.24f);
 
     if (sameLane(pb, ob) && pb.intersects(ob)) {
       mPlayer.setDead(true);
@@ -884,7 +898,7 @@ void CGAME::handleCollision() {
   }
 
   for (auto *ani : mEntities.animals()) {
-    sf::FloatRect ab = shrinkBoxPercent(ani->getBounds(), 0.22f);
+    sf::FloatRect ab = shrinkBoxPercent(ani->getBounds(), 0.15f, 0.22f);
 
     if (sameLane(pb, ab) && pb.intersects(ab)) {
       mPlayer.setDead(true);

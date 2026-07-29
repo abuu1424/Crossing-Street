@@ -26,7 +26,7 @@ const float Frame_Time = 0.12f;
 //File path
 const char Save_Path[] = "saves/save.txt";
 const char Score_Path[] = "saves/highscore.txt";
-const char Font_Path[] = "assets/font/pixel_operator/PixelOperator.ttf";
+const char Font_Path[] = "assets/font/pixel_operator/PixelOperator-Bold.ttf";
 
 //Era
 enum class Era

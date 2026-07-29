@@ -30,10 +30,15 @@ bool CANIMAL::loadSprite(const std::string& texturePath, float x, float y) {
     mSprite.setTextureRect(sf::IntRect(0, 0,
         mTexture.getSize().x,
         mTexture.getSize().y));
-    mSprite.setScale(
-        ANIMAL_W / static_cast<float>(mTexture.getSize().x),
-        ANIMAL_H / static_cast<float>(mTexture.getSize().y)
-    );
+    float scale = std::min(ANIMAL_W / static_cast<float>(mTexture.getSize().x),
+                           ANIMAL_H / static_cast<float>(mTexture.getSize().y));
+    if (mDirection > 0.f) {
+        mSprite.setScale(-scale, scale);
+        mSprite.setOrigin(static_cast<float>(mTexture.getSize().x), 0.f);
+    } else {
+        mSprite.setScale(scale, scale);
+        mSprite.setOrigin(0.f, 0.f);
+    }
     mSprite.setPosition(x, y);
     return true;
 }

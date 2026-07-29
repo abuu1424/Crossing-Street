@@ -5,7 +5,7 @@
 
 Menu::Menu() {
   // Font
-  if (!mFont.loadFromFile("assets/font/pixel_operator/PixelOperator.ttf"))
+  if (!mFont.loadFromFile(Font_Path))
     printf("FAILED font\n");
 
   // Background

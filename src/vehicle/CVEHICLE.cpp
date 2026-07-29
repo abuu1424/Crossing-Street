@@ -25,10 +25,15 @@ bool CVEHICLE::loadSprite(const std::string& path, float x, float y) {
         4, 1,
         Frame_Time);
 
-    mSprite.setScale(
-        96.f / static_cast<float>(frameW),
-        56.f / static_cast<float>(frameH)
-    );
+    float scale = std::min(96.f / static_cast<float>(frameW),
+                           56.f / static_cast<float>(frameH));
+    if (mDirection > 0.f) {
+        mSprite.setScale(-scale, scale);
+        mSprite.setOrigin(static_cast<float>(frameW), 0.f);
+    } else {
+        mSprite.setScale(scale, scale);
+        mSprite.setOrigin(0.f, 0.f);
+    }
     mSprite.setPosition(x, y);
     return true;
 }

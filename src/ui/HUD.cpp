@@ -1,4 +1,4 @@
-﻿#include "HUD.h"
+#include "HUD.h"
 #include "Utils.h"
 #include <iostream>
 #include <sstream>
@@ -17,6 +17,8 @@ void HUD::setupText(sf::Text& text, unsigned int size, float xRatio, float yRati
     text.setFont(mFont);
     text.setCharacterSize(size);
     text.setFillColor(sf::Color(255, 240, 200));
+    text.setOutlineColor(sf::Color(20, 15, 10, 230));
+    text.setOutlineThickness(1.5f);
 
     sf::FloatRect spriteBounds = mHudSprite.getGlobalBounds();
     float x = spriteBounds.left + spriteBounds.width  * xRatio;
@@ -86,9 +88,9 @@ void HUD::reloadHudBar(const std::string& hudPath) {
     float scaledWidth = mHudTexture.getSize().x * scale;
     mHudSprite.setPosition(Win_W / 2.f - scaledWidth / 2.f, -110.f);
 
-    setupText(mLevelText, 26, 275.f/1536.f, 495.f/1024.f, mLevelCenter);
-    setupText(mScoreText, 26, 800.f/1536.f, 495.f/1024.f, mScoreCenter);
-    setupText(mTimeText,  28, 1200.f/1536.f, 495.f/1024.f, mTimeCenter);
+    setupText(mLevelText, 22, 275.f/1536.f, 495.f/1024.f, mLevelCenter);
+    setupText(mScoreText, 22, 800.f/1536.f, 495.f/1024.f, mScoreCenter);
+    setupText(mTimeText,  24, 1200.f/1536.f, 495.f/1024.f, mTimeCenter);
 }
 
 sf::FloatRect HUD::getPauseIconBounds() const {
