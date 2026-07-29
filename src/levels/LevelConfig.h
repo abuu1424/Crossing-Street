@@ -2,8 +2,8 @@
 #include <string>
 #include <vector>
 
-enum class ObstacleType { DINOSAUR, MAMMOTH, SPHINX, CAMEL, HORSE, RICKSHAW, WOOD, BUS, CAR, MOTOR };
-enum class AnimalType   { BIRD, PTERO, EAGLE, HORUS, ROW, ARROW, MISSILE, PLANE };
+enum class ObstacleType { DINOSAUR, MAMMOTH, SPHINX, CAMEL, HORSE, RICKSHAW, WOOD, BUS, CAR, MOTOR, ECAR, ETRAIN };
+enum class AnimalType   { BIRD, PTERO, EAGLE, HORUS, ROW, ARROW, MISSILE, PLANE, DRONE, FLYCAR, UFO };
 
 struct LaneConfig {
     ObstacleType type;
@@ -44,5 +44,6 @@ LevelConfig getLevel1();
 LevelConfig getLevel2();
 LevelConfig getLevel3();
 LevelConfig getLevel4();
+LevelConfig getLevel5();
 
 LevelConfig getLevel(int level);

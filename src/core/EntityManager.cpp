@@ -12,6 +12,9 @@
 #include "CBUS.h"
 #include "CCAR.h"
 #include "CMOTOR.h"
+#include "CECAR.h"
+#include "CETRAIN.h"
+
 
 
 
@@ -25,6 +28,9 @@
 #include "CROW.h"
 #include "CMISSILE.h"
 #include "CPLANE.h"
+#include "CFLYCAR.h"
+#include "CDRONE.h"
+#include "CUFO.h"
 
   // Traffic
 #include "CTRAFFIC_LV1.h"
@@ -59,6 +65,8 @@ CVEHICLE *EntityManager::createObstacle(ObstacleType type, float speed,
     case ObstacleType::BUS: return new CBUS(speed, direction);
     case ObstacleType::CAR: return new CCAR(speed, direction);
     case ObstacleType::MOTOR: return new CMOTOR(speed, direction);
+    case ObstacleType::ECAR: return new CECAR(speed, direction);
+    case ObstacleType::ETRAIN: return new CETRAIN(speed, direction);
     }
     return new CDINOSOUR(speed, direction);
   }
@@ -73,6 +81,9 @@ CANIMAL *EntityManager::createAnimal(AnimalType type, float speed,
     case AnimalType::ARROW: return new CARROW(speed, direction);
     case AnimalType::MISSILE: return new CMISSILE(speed, direction);
     case AnimalType::PLANE: return new CPLANE(speed, direction);
+    case AnimalType::DRONE: return new CDRONE(speed, direction);
+    case AnimalType::FLYCAR:return new CFLYCAR(speed, direction);
+    case AnimalType::UFO: return new CUFO(speed, direction);
     }
     return new CBIRD(speed, direction);
   }

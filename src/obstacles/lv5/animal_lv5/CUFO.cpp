@@ -1,6 +1,6 @@
 #include "CUFO.h"
 CUFO::CUFO(float speed, float direction) : CANIMAL(speed, direction) {}
-CDRONE::~CDRONE() {
+CUFO::~CUFO() {
 	delete mAnim;
 }
 
@@ -12,7 +12,7 @@ bool CUFO::loadSprite(const std::string& path, float x, float y) {
 	}
 	delete mAnim;
 	mAnim = new Animation(mSprite, mTexture, 64, 64, 2, 2, Frame_Time);
-	mSprite.setScale(3.f, 3.f);
+	mSprite.setScale(1.5f, 1.5f);
 	mSprite.setPosition(x, y);
 	return true;
 }
