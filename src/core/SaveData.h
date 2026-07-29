@@ -34,6 +34,7 @@ public:
 
     static bool load(int slot, int& level, int& score);
     static bool load(int slot, int& level, int& score, float& playerX, float& playerY);
+    static bool load(int slot, int& level, int& score, float& playerX, float& playerY, std::string& saveName);
 
     static bool deleteSlot(int slot);
     static bool hasData(int slot);

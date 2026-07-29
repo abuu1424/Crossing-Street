@@ -63,6 +63,11 @@ bool SaveData::load(int slot, int& level, int& score) {
 }
 
 bool SaveData::load(int slot, int& level, int& score, float& playerX, float& playerY) {
+    std::string dummyName;
+    return load(slot, level, score, playerX, playerY, dummyName);
+}
+
+bool SaveData::load(int slot, int& level, int& score, float& playerX, float& playerY, std::string& saveName) {
     if (!isValidSlot(slot)) {
         printf("Invalid load slot %d\n", slot);
         return false;
@@ -76,6 +81,7 @@ bool SaveData::load(int slot, int& level, int& score, float& playerX, float& pla
 
     bool hasLevel = false;
     bool hasScore = false;
+    saveName = "";
 
     std::string line;
     while (std::getline(file, line)) {
@@ -88,7 +94,10 @@ bool SaveData::load(int slot, int& level, int& score, float& playerX, float& pla
         if (value.empty()) continue;
 
         try {
-            if (key == "level") {
+            if (key == "saveName") {
+                saveName = value;
+            }
+            else if (key == "level") {
                 level = std::stoi(value);
                 hasLevel = true;
             }
@@ -114,8 +123,8 @@ bool SaveData::load(int slot, int& level, int& score, float& playerX, float& pla
         return false;
     }
 
-    printf("Loaded slot %d: level=%d score=%d player=(%.1f, %.1f)\n",
-           slot, level, score, playerX, playerY);
+    printf("Loaded slot %d: level=%d score=%d player=(%.1f, %.1f) saveName=%s\n",
+           slot, level, score, playerX, playerY, saveName.c_str());
 
     return true;
 }

@@ -93,6 +93,7 @@ class CGAME {
     sf::RectangleShape mPauseBox;
     sf::Text mPauseTitle;
     sf::Text mResumeText;
+    sf::Text mMenuFromPauseText;
     sf::Text mQuitFromPauseText;
     sf::Text mPauseSettingsTitle;
     float    mPauseMusicVol = 50.f;
@@ -122,6 +123,8 @@ class CGAME {
     sf::Sprite  mSpritePopupPause;
     sf::Texture mTexturePopupQuitConfirm;
     sf::Sprite  mSpritePopupQuitConfirm;
+
+    sf::Clock   mResetCooldownClock;
 
 public:
     explicit CGAME(sf::RenderWindow& window);

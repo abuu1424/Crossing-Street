@@ -35,15 +35,15 @@ LevelConfig getLevel2() {
           75,
           80,
           {
-           {ObstacleType::SPHINX, 170.f, 1, 300.f,"assets/sprites/lv2_sp/animal/sphinx.png", 3, 420.f},
-           {ObstacleType::CAMEL, 170.f, -1, 180.f,"assets/sprites/lv2_sp/animal/lacda.png", 3, 430.f},
-           {ObstacleType::SPHINX, 170.f, 1, 185.f,"assets/sprites/lv2_sp/animal/sphinx.png", 2, 620.f},
-           {ObstacleType::CAMEL, 170.f, 1, 385,"assets/sprites/lv2_sp/animal/lacda_trai.png", 3, 630.f}
+           {ObstacleType::SPHINX, 180.f, 1, 300.f,"assets/sprites/lv2_sp/animal/sphinx.png", 3, 420.f},
+           {ObstacleType::CAMEL, 180.f, -1, 180.f,"assets/sprites/lv2_sp/animal/lacda.png", 3, 430.f},
+           {ObstacleType::SPHINX, 180.f, 1, 185.f,"assets/sprites/lv2_sp/animal/sphinx.png", 2, 620.f},
+           {ObstacleType::CAMEL, 180.f, 1, 385,"assets/sprites/lv2_sp/animal/lacda_trai.png", 3, 630.f}
           },
           {
-              {AnimalType::EAGLE, 180.f, 1, 170.f,"assets/sprites/lv2_sp/bird/kenkenaicap.png", 2, 520.f},
-              {AnimalType::HORUS, 180.f, 1, 180.f,"assets/sprites/lv2_sp/bird/chim2_trai.png", 2, 520.f},
-              {AnimalType::HORUS, 180.f, -1, 400.f,"assets/sprites/lv2_sp/bird/chim2.png", 2, 520.f},
+              {AnimalType::EAGLE, 280.f, 1, 170.f,"assets/sprites/lv2_sp/bird/kenkenaicap.png", 2, 520.f},
+              {AnimalType::HORUS, 280.f, 1, 180.f,"assets/sprites/lv2_sp/bird/chim2_trai.png", 2, 520.f},
+              {AnimalType::HORUS, 280.f, -1, 400.f,"assets/sprites/lv2_sp/bird/chim2.png", 2, 520.f},
           }
   };
 };
@@ -59,13 +59,18 @@ LevelConfig getLevel3() {
           75,
           80,
           {
-           {ObstacleType::RICKSHAW, 210.f, -1.f, 320.f,"assets/sprites/lv3_sp/vehicle/xe_keo.png", 3, 264.f},
-           {ObstacleType::WOOD, 190.f, -1.f, 280.f,"assets/sprites/lv3_sp/vehicle/khucgo.png", 3, 429.f},
-           {ObstacleType::HORSE, 240.f, -1.f, 400.f,"assets/sprites/lv3_sp/vehicle/xe_ngua.png", 2, 595.f}
+           {ObstacleType::RICKSHAW, 210.f, 1.f, 150.f,"assets/sprites/lv3_sp/vehicle/xe_keo.png", 4, 640.f},
+           {ObstacleType::WOOD, 190.f, 1.f, 215.f,"assets/sprites/lv3_sp/vehicle/khucgo.png", 3, 529.f},
+           {ObstacleType::HORSE, 240.f, 1.f, 505.f,"assets/sprites/lv3_sp/vehicle/xe_ngua.png", 3, 595.f},
+           {ObstacleType::RICKSHAW, 240.f, 1.f, 452.f,"assets/sprites/lv3_sp/vehicle/xe_keo.png", 3, 595.f},
+            {ObstacleType::HORSE, 240.f, 1.f, 135.f, "assets/sprites/lv3_sp/vehicle_lv3/xe_ngua.png", 4, 620.f}
           },
-          {{AnimalType::ARROW, 270.f, 1.f, 350.f,"assets/sprites/lv3_sp/animal/muiten.png", 3, 180.f},
-           {AnimalType::ROW, 230.f, 1.f, 340.f,"assets/sprites/lv3_sp/animal/qua.png", 3, 346.f},
-           {AnimalType::ARROW, 280.f, 1.f, 360.f,"assets/sprites/lv3_sp/animal/muiten.png", 3, 511.f}}
+          {
+            {AnimalType::ARROW, 270.f, 1.f, 450.f,"assets/sprites/lv3_sp/animal/muiten.png", 3, 180.f},
+           {AnimalType::ROW, 230.f, 1.f, 350.f,"assets/sprites/lv3_sp/animal/qua.png", 3, 346.f},
+           {AnimalType::ROW, 230.f, 1.f, 320.f,"assets/sprites/lv3_sp/animal/qua.png", 3, 346.f},
+           {AnimalType::ROW, 230.f, 1.f, 115.f,"assets/sprites/lv3_sp/animal/qua.png", 3, 346.f},
+           {AnimalType::ARROW, 280.f, 1.f, 385.f,"assets/sprites/lv3_sp/animal/muiten.png", 3, 511.f}}
   };
 }
 
@@ -80,13 +85,13 @@ LevelConfig getLevel4() {
           75,
           80,
           {
-           {ObstacleType::CAR, 210.f, 1.f, 320.f,"assets/sprites/lv4_sp/vehicle_lv4/xe_hoi.png", 3, 264.f},
-           {ObstacleType::BUS, 190.f, 1.f, 280.f,"assets/sprites/lv4_sp/vehicle_lv4/xe_buyt.png", 3, 429.f},
-           {ObstacleType::MOTOR, 240.f, 1.f, 400.f,"assets/sprites/lv4_sp/vehicle_lv4/xe_may.png", 2, 595.f}
+           {ObstacleType::CAR, 210.f, -1.f, 320.f,"assets/sprites/lv4_sp/vehicle_lv4/xe_hoi.png", 3, 264.f},
+           {ObstacleType::BUS, 190.f, -1.f, 280.f,"assets/sprites/lv4_sp/vehicle_lv4/xe_buyt.png", 3, 429.f},
+           {ObstacleType::MOTOR, 240.f, -1.f, 400.f,"assets/sprites/lv4_sp/vehicle_lv4/xe_may.png", 2, 595.f}
           },
-   {{AnimalType::PLANE, 270.f, 1.f, 350.f,"assets/sprites/lv4_sp/animal_lv4/may_bay.png", 3, 180.f},
+   {{AnimalType::PLANE, 270.f, -1.f, 350.f,"assets/sprites/lv4_sp/animal_lv4/may_bay.png", 3, 180.f},
            {AnimalType::MISSILE, 230.f, 1.f, 340.f,"assets/sprites/lv4_sp/animal_lv4/ten_lua.png", 3, 346.f},
-           {AnimalType::PLANE, 280.f, 1.f, 360.f,"assets/sprites/lv4_sp/animal_lv4/may_bay.png", 3, 511.f}}
+           {AnimalType::PLANE, 280.f, -1.f, 360.f,"assets/sprites/lv4_sp/animal_lv4/may_bay.png", 3, 511.f}}
   };
 }
 
