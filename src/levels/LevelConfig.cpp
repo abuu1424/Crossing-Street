@@ -94,10 +94,11 @@ LevelConfig getLevel5()
 {
  return {
    5,
-   "assets/sounds/lv2_sd/music_bg2.ogg",
-          "assets/sprites/lv4_sp/player/player_lv4.png",
+
+   "assets/background/lv5_bg/bg_lv5.png",
+          "assets/sounds/lv5_sd/.png",
+   "assets/sprites/lv5_sp/player/player_lv5.png",
           "assets/ui/hud/tuonglai.png",
-          "assets/sprites/lv5_sp/traffic/brazier1.png",
           "assets/sprites/lv5_sp/traffic/brazier.png",
           "assets/sprites/lv5_sp/traffic/light.png",
           80,
