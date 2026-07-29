@@ -135,6 +135,15 @@ void CGAME::setupUI() {
   mNoText.setOrigin(nt.left + nt.width / 2.f, nt.top + nt.height / 2.f);
   mNoText.setPosition(Win_W / 2.f + 70.f, Win_H / 2.f + 30.f);
 
+  // Bảng Menu Confirm
+  mMenuConfirmTitle.setFont(mFont);
+  mMenuConfirmTitle.setString("Return to Menu?");
+  mMenuConfirmTitle.setCharacterSize(28);
+  mMenuConfirmTitle.setFillColor(sf::Color::White);
+  sf::FloatRect mt = mMenuConfirmTitle.getLocalBounds();
+  mMenuConfirmTitle.setOrigin(mt.left + mt.width / 2.f, mt.top + mt.height / 2.f);
+  mMenuConfirmTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 40.f);
+
   // Bảng Pause
   // Bảng Pause — dùng size lớn hơn để chứa slider
   float pboxW = 450.f, pboxH = 340.f;
@@ -395,6 +404,7 @@ void CGAME::reset() {
   mlevelTime = 0.f;
   mLevelCleared = false;
   mShowLevelClear = false;
+  mShowMenuConfirm = false;
   mSelectingSaveSlot = false;
   mEnteringSaveName = false;
 
@@ -412,6 +422,7 @@ void CGAME::restartLevel() {
 
   mlevelTime = 0.f;
   mShowLevelClear = false;
+  mShowMenuConfirm = false;
   mSelectingSaveSlot = false;
   mEnteringSaveName = false;
 
@@ -461,16 +472,46 @@ void CGAME::handleEvents() {
       continue;
     }
 
+    // Bảng MENU confirm
+    if (mShowMenuConfirm) {
+      if (event.type == sf::Event::KeyPressed) {
+        if (event.key.code == sf::Keyboard::Escape ||
+            event.key.code == sf::Keyboard::N) {
+          mShowMenuConfirm = false;
+        } else if (event.key.code == sf::Keyboard::Y) {
+          mShowMenuConfirm = false;
+          mSound.stopAllEffects();
+          mSound.stopMusic();
+          mPaused = false;
+          mInMenu = true;
+        }
+      }
+
+      if (event.type == sf::Event::MouseButtonPressed &&
+          event.mouseButton.button == sf::Mouse::Left) {
+
+        if (mYesText.getGlobalBounds().contains(mouse)) {
+          mShowMenuConfirm = false;
+          mSound.stopAllEffects();
+          mSound.stopMusic();
+          mPaused = false;
+          mInMenu = true;
+        } else if (mNoText.getGlobalBounds().contains(mouse)) {
+          mShowMenuConfirm = false;
+        }
+      }
+
+      continue;
+    }
+
     // Bảng PAUSE
     if (mPaused) {
       if (event.type == sf::Event::KeyPressed) {
         if (event.key.code == sf::Keyboard::P) {
           mPaused = false;
         } else if (event.key.code == sf::Keyboard::M) {
-          mSound.stopAllEffects();
-          mSound.stopMusic();
           mPaused = false;
-          mInMenu = true;
+          mShowMenuConfirm = true;
         } else if (event.key.code == sf::Keyboard::Escape) {
           mPaused = false;
           mShowQuitConfirm = true;
@@ -482,10 +523,8 @@ void CGAME::handleEvents() {
         if (mResumeText.getGlobalBounds().contains(mouse)) {
           mPaused = false;
         } else if (mMenuFromPauseText.getGlobalBounds().contains(mouse)) {
-          mSound.stopAllEffects();
-          mSound.stopMusic();
           mPaused = false;
-          mInMenu = true;
+          mShowMenuConfirm = true;
         } else if (mQuitFromPauseText.getGlobalBounds().contains(mouse)) {
           mPaused = false;
           mShowQuitConfirm = true;
@@ -774,10 +813,7 @@ void CGAME::handleEvents() {
           }
         }
       } else if (event.key.code == sf::Keyboard::M) {
-        mSound.stopAllEffects();
-        mSound.stopMusic();
-        mPaused = false;
-        mInMenu = true;
+        mShowMenuConfirm = true;
       } else if (event.key.code == sf::Keyboard::P) {
         mPaused = true;
         mPauseMusicVol = mMenu.getMusicVolume();
@@ -916,7 +952,7 @@ void CGAME::checkFinish() {
 void CGAME::update(float dt) {
   if (mEnteringSaveName)
     return;
-  if (mShowQuitConfirm)
+  if (mShowQuitConfirm || mShowMenuConfirm)
     return;
   if (mPaused)
     return;
@@ -999,6 +1035,17 @@ void CGAME::render() {
       mWindow.draw(mQuitBox);
 
     mWindow.draw(mQuitTitle);
+    mWindow.draw(mYesText);
+    mWindow.draw(mNoText);
+  }
+
+  if (mShowMenuConfirm) {
+    if (mSpritePopupQuitConfirm.getTexture())
+      mWindow.draw(mSpritePopupQuitConfirm);
+    else
+      mWindow.draw(mQuitBox);
+
+    mWindow.draw(mMenuConfirmTitle);
     mWindow.draw(mYesText);
     mWindow.draw(mNoText);
   }

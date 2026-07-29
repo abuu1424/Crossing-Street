@@ -86,12 +86,14 @@ LevelConfig getLevel4() {
           80,
           {
            {ObstacleType::CAR, 210.f, -1.f, 320.f,"assets/sprites/lv4_sp/vehicle_lv4/xe_hoi.png", 3, 264.f},
+           {ObstacleType::CAR, 210.f, -1.f, 445.f,"assets/sprites/lv4_sp/vehicle_lv4/xe_hoi.png", 3, 264.f},
            {ObstacleType::BUS, 190.f, -1.f, 280.f,"assets/sprites/lv4_sp/vehicle_lv4/xe_buyt.png", 3, 429.f},
-           {ObstacleType::MOTOR, 240.f, -1.f, 400.f,"assets/sprites/lv4_sp/vehicle_lv4/xe_may.png", 2, 595.f}
+           {ObstacleType::MOTOR, 240.f, -1.f, 400.f,"assets/sprites/lv4_sp/vehicle_lv4/xe_may.png", 2, 595.f},
+           {ObstacleType::MOTOR, 240.f, -1.f, 150.f,"assets/sprites/lv4_sp/vehicle_lv4/xe_may.png", 2, 595.f}
           },
    {{AnimalType::PLANE, 270.f, -1.f, 350.f,"assets/sprites/lv4_sp/animal_lv4/may_bay.png", 3, 180.f},
-           {AnimalType::MISSILE, 230.f, 1.f, 340.f,"assets/sprites/lv4_sp/animal_lv4/ten_lua.png", 3, 346.f},
-           {AnimalType::PLANE, 280.f, -1.f, 360.f,"assets/sprites/lv4_sp/animal_lv4/may_bay.png", 3, 511.f}}
+           {AnimalType::MISSILE, 230.f, 1.f, 220.f,"assets/sprites/lv4_sp/animal_lv4/ten_lua.png", 3, 346.f},
+           {AnimalType::PLANE, 280.f, -1.f, 260.f,"assets/sprites/lv4_sp/animal_lv4/may_bay.png", 3, 511.f}}
   };
 }
 

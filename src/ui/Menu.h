@@ -64,6 +64,11 @@ class Menu
     sf::Text mLoadTitle;
     sf::Text mSlotTexts[3];
     sf::RectangleShape mPanelBox;
+    sf::Texture mPanelTexture;
+    sf::Sprite  mPanelSprite;
+    sf::Texture mSlotFrameTexture;
+    sf::Texture mSlotFrameHoverTexture;
+    sf::Sprite  mSlotFrameSprites[3];
     sf::Text mOverwriteHint;
     sf::Text mBackText;
 
