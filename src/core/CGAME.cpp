@@ -8,7 +8,7 @@ const float SPAWN_X = Win_W / 2.f - Player_W / 2.f;
 const float SPAWN_Y = Win_H - Player_H;
 
 CGAME::CGAME(sf::RenderWindow &window)
-    : mWindow(window), mScore(0), mlevelTime(0.f) {
+    : mWindow(window), mScore(0), mLevelStartScore(0), mlevelTime(0.f) {
   setupUI();
 }
 
@@ -403,6 +403,7 @@ void CGAME::reset() {
   mSound.stopMusic();
 
   mScore = 0;
+  mLevelStartScore = 0;
   mlevelTime = 0.f;
   mLevelCleared = false;
   mShowLevelClear = false;
@@ -431,6 +432,7 @@ void CGAME::restartLevel() {
   mPlayer.setDead(false);
   mPlayer.setFinish(false);
   mPlayer.setPosition(SPAWN_X, SPAWN_Y);
+  mScore = mLevelStartScore;
   loadLevel(mCurrentLevel);
   mHUD.update(mCurrentLevel, mScore, mlevelTime);
 }
@@ -666,6 +668,7 @@ void CGAME::handleEvents() {
           mPlayer.setFinish(false);
 
           if (mCurrentLevel < Max_Level) {
+            mLevelStartScore = mScore;
             loadLevel(mCurrentLevel + 1);
             mHUD.update(mCurrentLevel, mScore, mlevelTime);
             if (mActiveSlot > 0)
@@ -715,6 +718,7 @@ void CGAME::handleEvents() {
           mPlayer.setFinish(false);
 
           if (mCurrentLevel < Max_Level) {
+            mLevelStartScore = mScore;
             loadLevel(mCurrentLevel + 1);
             mHUD.update(mCurrentLevel, mScore, mlevelTime);
             mSound.stopLevelClear();
@@ -880,6 +884,7 @@ void CGAME::handleCollision() {
       mPlayer.setDead(true);
       mSound.stopMusic();
       mSound.playDead();
+      HighScore::updateIfHigher(mScore);
       printf("DEAD\n");
       return;
     }
@@ -892,6 +897,7 @@ void CGAME::handleCollision() {
       mPlayer.setDead(true);
       mSound.stopMusic();
       mSound.playDead();
+      HighScore::updateIfHigher(mScore);
       printf("DEAD\n");
       return;
     }
@@ -911,7 +917,8 @@ void CGAME::checkFinish() {
       timeRemaining = 0.f;
     int baseScore = 100 * mCurrentLevel;
     int timeBonus = static_cast<int>(timeRemaining) * 10;
-    mScore += baseScore + timeBonus;
+    mScore = mLevelStartScore + baseScore + timeBonus;
+    HighScore::updateIfHigher(mScore);
     printf("Level %d clear! +%d (base=%d, bonus=%d)\n", mCurrentLevel,
            baseScore + timeBonus, baseScore, timeBonus);
 
@@ -994,7 +1001,8 @@ void CGAME::update(float dt) {
       mPlayer.setDead(true);
       mSound.stopMusic();
       mSound.playDead();
-      printf("You ran out of time");
+      HighScore::updateIfHigher(mScore);
+      printf("You ran out of time\n");
     }
     mPlayer.Move(dt);
     mPlayer.update(dt);
@@ -1263,6 +1271,7 @@ bool CGAME::loadGame(int slot) {
     return false;
 
   mScore = score;
+  mLevelStartScore = score;
   mActiveSlot = slot;
   mCurrentSaveName =
       saveName.empty() ? ("Save Slot " + std::to_string(slot)) : saveName;

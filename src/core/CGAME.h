@@ -33,6 +33,7 @@ class CGAME {
   // HUD
   HUD mHUD;
   int mScore = 0;
+  int mLevelStartScore = 0;
   float mlevelTime = 0.f;
   // Helpers
   void loadLevel(int level);

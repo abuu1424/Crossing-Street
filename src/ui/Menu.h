@@ -23,7 +23,8 @@ enum class MenuScreen {
     MAIN,
     NEW_GAME_SELECT,
     LOAD,
-    SETTINGS
+    SETTINGS,
+    INFO
 };
 
 struct MenuButton {
@@ -168,6 +169,21 @@ class Menu
     void drawNewGameNamePopup(sf::RenderWindow& window);
     void handleNewGameNameEvent(const sf::Event& event, MenuResult& result);
 
+    // Info / Help Popup
+    MenuButton mBtnInfo;
+    sf::Text mInfoTitle;
+    sf::Text mInfoControlsTitle;
+    sf::Text mInfoControlsText[4];
+    sf::Text mInfoGameplayTitle;
+    sf::Text mInfoGameplayText[3];
+    MenuButton mBtnBackInfo;
+
+    void setupInfoMenu();
+    void drawInfoMenu(sf::RenderWindow& window);
+    void handleInfoEvent(const sf::Event& event,
+                         sf::RenderWindow& window,
+                         MenuResult& result);
+
     void setupSettingsMenu();
     void updateSlider(Slider& s, sf::Vector2f mouse, bool mouseDown);
     void drawSlider(sf::RenderWindow& w, Slider& s);
@@ -181,7 +197,8 @@ class Menu
                      const std::string& texPath,
                      const std::string& label,
                      float x, float y,
-                     const std::string& hoverTexPath = "");
+                     const std::string& hoverTexPath = "",
+                     unsigned int charSize = 26);
     void updateButton(MenuButton& btn,
                       sf::Vector2f mousePos,
                       float dt);
