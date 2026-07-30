@@ -70,10 +70,8 @@ class CGAME {
   bool mShowQuitConfirm = false;
   sf::RectangleShape mQuitBox;
   sf::Text mQuitTitle;
-  sf::Text mYesText;
-  sf::Text mNoText;
-  bool mYesHovered = false;
-  bool mNoHovered = false;
+  MenuButton mBtnYes;
+  MenuButton mBtnNo;
 
   // Bảng Menu Confirm
   bool mShowMenuConfirm = false;

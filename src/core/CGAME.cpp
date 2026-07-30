@@ -121,25 +121,13 @@ void CGAME::setupUI() {
   mQuitTitle.setOrigin(qt.left + qt.width / 2.f, qt.top + qt.height / 2.f);
   mQuitTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 40.f);
 
-  mYesText.setFont(mFont);
-  mYesText.setString("YES");
-  mYesText.setCharacterSize(28);
-  mYesText.setFillColor(sf::Color(255, 100, 100));
-  mYesText.setOutlineColor(sf::Color(20, 15, 10, 230));
-  mYesText.setOutlineThickness(1.5f);
-  sf::FloatRect yt = mYesText.getLocalBounds();
-  mYesText.setOrigin(yt.left + yt.width / 2.f, yt.top + yt.height / 2.f);
-  mYesText.setPosition(Win_W / 2.f - 70.f, Win_H / 2.f + 30.f);
+  mBtnYes.setup("assets/ui/menu/btn_yes.png", "YES", mFont,
+                Win_W / 2.f - 85.f, Win_H / 2.f + 35.f,
+                "assets/ui/menu/btn_yes_hover.png");
 
-  mNoText.setFont(mFont);
-  mNoText.setString("NO");
-  mNoText.setCharacterSize(28);
-  mNoText.setFillColor(sf::Color(150, 255, 150));
-  mNoText.setOutlineColor(sf::Color(20, 15, 10, 230));
-  mNoText.setOutlineThickness(1.5f);
-  sf::FloatRect nt = mNoText.getLocalBounds();
-  mNoText.setOrigin(nt.left + nt.width / 2.f, nt.top + nt.height / 2.f);
-  mNoText.setPosition(Win_W / 2.f + 70.f, Win_H / 2.f + 30.f);
+  mBtnNo.setup("assets/ui/menu/btn_no.png", "NO", mFont,
+               Win_W / 2.f + 85.f, Win_H / 2.f + 35.f,
+               "assets/ui/menu/btn_no_hover.png");
 
   // Bảng Menu Confirm
   mMenuConfirmTitle.setFont(mFont);
@@ -476,9 +464,9 @@ void CGAME::handleEvents() {
       if (event.type == sf::Event::MouseButtonPressed &&
           event.mouseButton.button == sf::Mouse::Left) {
 
-        if (mYesText.getGlobalBounds().contains(mouse)) {
+        if (mBtnYes.contains(mouse)) {
           mWindow.close();
-        } else if (mNoText.getGlobalBounds().contains(mouse)) {
+        } else if (mBtnNo.contains(mouse)) {
           mShowQuitConfirm = false;
         }
       }
@@ -504,13 +492,13 @@ void CGAME::handleEvents() {
       if (event.type == sf::Event::MouseButtonPressed &&
           event.mouseButton.button == sf::Mouse::Left) {
 
-        if (mYesText.getGlobalBounds().contains(mouse)) {
+        if (mBtnYes.contains(mouse)) {
           mShowMenuConfirm = false;
           mSound.stopAllEffects();
           mSound.stopMusic();
           mPaused = false;
           mInMenu = true;
-        } else if (mNoText.getGlobalBounds().contains(mouse)) {
+        } else if (mBtnNo.contains(mouse)) {
           mShowMenuConfirm = false;
         }
       }
@@ -583,7 +571,7 @@ void CGAME::handleEvents() {
           mSaveSlotPending = 0;
           continue;
         } else if (event.key.code == sf::Keyboard::R) {
-          if (mPlayer.isFinish()) {
+          if (mPlayer.isFinish() && mCurrentLevel == Max_Level) {
             reset();
           } else {
             restartLevel();
@@ -706,7 +694,7 @@ void CGAME::handleEvents() {
         } else if (event.key.code == sf::Keyboard::R) {
           if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
             mResetCooldownClock.restart();
-            if (mPlayer.isFinish() || mCurrentLevel == Max_Level) {
+            if (mPlayer.isFinish() && mCurrentLevel == Max_Level) {
               reset();
             } else {
               restartLevel();
@@ -964,13 +952,40 @@ void CGAME::checkFinish() {
 }
 
 void CGAME::update(float dt) {
+  sf::Vector2f mousePos = mWindow.mapPixelToCoords(sf::Mouse::getPosition(mWindow));
+
+  if (mShowQuitConfirm || mShowMenuConfirm) {
+    mBtnYes.update(mousePos, dt);
+    mBtnNo.update(mousePos, dt);
+    return;
+  }
+
+  auto updateHover = [](sf::Text &t, sf::Vector2f m, sf::Color normalColor) {
+    if (t.getGlobalBounds().contains(m)) {
+      t.setFillColor(sf::Color(255, 215, 0));
+      t.setScale(1.1f, 1.1f);
+    } else {
+      t.setFillColor(normalColor);
+      t.setScale(1.0f, 1.0f);
+    }
+  };
+
+  if (mPaused) {
+    updateHover(mResumeText, mousePos, sf::Color(150, 255, 150));
+    updateHover(mMenuFromPauseText, mousePos, sf::Color(220, 220, 220));
+    updateHover(mQuitFromPauseText, mousePos, sf::Color(255, 150, 150));
+    return;
+  }
+
+  if (mShowLevelClear) {
+    updateHover(mOpt1Text, mousePos, sf::Color::White);
+    updateHover(mOpt2Text, mousePos, sf::Color::White);
+    updateHover(mOpt3Text, mousePos, sf::Color::White);
+    updateHover(mOpt4Text, mousePos, sf::Color::White);
+    return;
+  }
+
   if (mEnteringSaveName)
-    return;
-  if (mShowQuitConfirm || mShowMenuConfirm)
-    return;
-  if (mPaused)
-    return;
-  if (mLevelCleared)
     return;
 
   if (!mPlayer.isDead() && !mPlayer.isFinish()) {
@@ -1049,8 +1064,8 @@ void CGAME::render() {
       mWindow.draw(mQuitBox);
 
     mWindow.draw(mQuitTitle);
-    mWindow.draw(mYesText);
-    mWindow.draw(mNoText);
+    mBtnYes.draw(mWindow);
+    mBtnNo.draw(mWindow);
   }
 
   if (mShowMenuConfirm) {
@@ -1060,8 +1075,8 @@ void CGAME::render() {
       mWindow.draw(mQuitBox);
 
     mWindow.draw(mMenuConfirmTitle);
-    mWindow.draw(mYesText);
-    mWindow.draw(mNoText);
+    mBtnYes.draw(mWindow);
+    mBtnNo.draw(mWindow);
   }
 
   if (mPaused) {

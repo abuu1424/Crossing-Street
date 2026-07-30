@@ -66,33 +66,9 @@ Menu::Menu() {
 Menu::~Menu() { delete mTitleAnim; }
 
 void Menu::setupButton(MenuButton &btn, const std::string &texPath,
-                       const std::string &label, float x, float y) {
-  if (!btn.texture.loadFromFile(texPath)) {
-    printf("No img, using fallback: %s\n", texPath.c_str());
-
-    sf::Image img;
-    img.create(300, 60, sf::Color(60, 60, 80, 220));
-    btn.texture.loadFromImage(img);
-  }
-
-  btn.sprite.setTexture(btn.texture);
-
-  float w = btn.texture.getSize().x;
-  float h = btn.texture.getSize().y;
-  btn.sprite.setOrigin(w / 2.f, h / 2.f);
-  btn.sprite.setPosition(x, y);
-  btn.sprite.setScale(btn.baseScale, btn.baseScale);
-
-  btn.label.setFont(mFont);
-  btn.label.setString(label);
-  btn.label.setCharacterSize(28);
-  btn.label.setFillColor(sf::Color::White);
-  btn.label.setOutlineColor(sf::Color::Black);
-  btn.label.setOutlineThickness(2.f);
-
-  sf::FloatRect lb = btn.label.getLocalBounds();
-  btn.label.setOrigin(lb.left + lb.width / 2.f, lb.top + lb.height / 2.f);
-  btn.label.setPosition(x, y);
+                       const std::string &label, float x, float y,
+                       const std::string &hoverTexPath) {
+  btn.setup(texPath, label, mFont, x, y, hoverTexPath);
 }
 
 void Menu::setupLoadMenu() {
@@ -140,15 +116,8 @@ void Menu::setupLoadMenu() {
   mLoadTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
   mLoadTitle.setPosition(Win_W / 2.f, 135.f);
 
-  mBackText.setFont(mFont);
-  mBackText.setString("BACK");
-  mBackText.setCharacterSize(28);
-  mBackText.setOutlineColor(sf::Color::Black);
-  mBackText.setOutlineThickness(2.f);
-  mBackText.setFillColor(sf::Color(220, 220, 220));
-  sf::FloatRect bb = mBackText.getLocalBounds();
-  mBackText.setOrigin(bb.left + bb.width / 2.f, bb.top + bb.height / 2.f);
-  mBackText.setPosition(Win_W / 2.f, 520.f);
+  setupButton(mBtnBack, "assets/ui/menu/btn_back.png", "BACK", Win_W / 2.f, 520.f,
+              "assets/ui/menu/btn_back_hover.png");
 
   mOverwriteHint.setFont(mFont);
   mOverwriteHint.setCharacterSize(20);
@@ -225,14 +194,7 @@ void Menu::refreshSaveSlots() {
 }
 
 void Menu::updateButton(MenuButton &btn, sf::Vector2f mousePos, float dt) {
-  sf::FloatRect bounds = btn.sprite.getGlobalBounds();
-  btn.hovered = bounds.contains(mousePos);
-
-  float target = btn.hovered ? btn.hoverScale : btn.baseScale;
-  btn.curScale += (target - btn.curScale) * 10.f * dt;
-
-  btn.sprite.setScale(btn.curScale, btn.curScale);
-  btn.label.setScale(btn.curScale, btn.curScale);
+  btn.update(mousePos, dt);
 }
 
 void Menu::handleLoadEvent(const sf::Event &event, sf::RenderWindow &window,
@@ -262,7 +224,7 @@ void Menu::handleLoadEvent(const sf::Event &event, sf::RenderWindow &window,
     }
   }
 
-  if (mBackText.getGlobalBounds().contains(mouse)) {
+  if (mBtnBack.sprite.getGlobalBounds().contains(mouse)) {
     mScreen = MenuScreen::MAIN;
   }
 }
@@ -340,7 +302,7 @@ void Menu::handleNewGameEvent(const sf::Event &event, sf::RenderWindow &window,
       return;
     }
   }
-  if (mBackText.getGlobalBounds().contains(mouse)) {
+  if (mBtnBack.sprite.getGlobalBounds().contains(mouse)) {
     mConfirmOverwriteSlot = -1;
     mScreen = MenuScreen::MAIN;
   }
@@ -388,11 +350,14 @@ void Menu::update(float dt, sf::RenderWindow &window) {
           mSlotFrameSprites[i].setTexture(mSlotFrameTexture);
         }
       }
+      updateButton(mBtnBack, mouse, dt);
     }
     return;
   }
-  if (mScreen == MenuScreen::SETTINGS)
+  if (mScreen == MenuScreen::SETTINGS) {
+    updateButton(mBtnBackSettings, mouse, dt);
     return;
+  }
 
   if (mTitleAnim)
     mTitleAnim->update(dt);
@@ -403,8 +368,7 @@ void Menu::update(float dt, sf::RenderWindow &window) {
 }
 
 void Menu::drawButton(sf::RenderWindow &w, MenuButton &btn) {
-  w.draw(btn.sprite);
-  w.draw(btn.label);
+  btn.draw(w);
 }
 
 void Menu::drawLoadMenu(sf::RenderWindow &window) {
@@ -418,7 +382,7 @@ void Menu::drawLoadMenu(sf::RenderWindow &window) {
     window.draw(mSlotFrameSprites[i]);
     window.draw(mSlotTexts[i]);
   }
-  window.draw(mBackText);
+  drawButton(window, mBtnBack);
 }
 
 void Menu::drawNewGameMenu(sf::RenderWindow &window) {
@@ -446,7 +410,7 @@ void Menu::drawNewGameMenu(sf::RenderWindow &window) {
     window.draw(mOverwriteHint);
   }
 
-  window.draw(mBackText);
+  drawButton(window, mBtnBack);
 }
 
 void Menu::drawNewGameNamePopup(sf::RenderWindow &window) {
@@ -553,16 +517,8 @@ void Menu::setupSettingsMenu() {
   mMuteText.setPosition(Win_W / 2.f - 200.f, 450.f);
 
   // Back
-  mBackSettingsText.setFont(mFont);
-  mBackSettingsText.setString("BACK");
-  mBackSettingsText.setCharacterSize(28);
-  mBackSettingsText.setFillColor(sf::Color(220, 220, 220));
-  mBackSettingsText.setOutlineColor(sf::Color::Black);
-  mBackSettingsText.setOutlineThickness(2.f);
-  sf::FloatRect bb = mBackSettingsText.getLocalBounds();
-  mBackSettingsText.setOrigin(bb.left + bb.width / 2.f,
-                              bb.top + bb.height / 2.f);
-  mBackSettingsText.setPosition(Win_W / 2.f, 540.f);
+  setupButton(mBtnBackSettings, "assets/ui/menu/btn_back.png", "BACK", Win_W / 2.f, 540.f,
+              "assets/ui/menu/btn_back_hover.png");
 
   // Cập nhật thumb lần đầu
   updateSlider(mMusicSlider, {}, false);
@@ -602,7 +558,7 @@ void Menu::drawSettingsMenu(sf::RenderWindow &window) {
 
   mMuteText.setString(mMuteAll ? "[M]  Mute: ON" : "[M]  Mute: OFF");
   window.draw(mMuteText);
-  window.draw(mBackSettingsText);
+  drawButton(window, mBtnBackSettings);
 }
 
 void Menu::handleSettingsEvent(const sf::Event &event, sf::RenderWindow &window,
@@ -629,7 +585,7 @@ void Menu::handleSettingsEvent(const sf::Event &event, sf::RenderWindow &window,
     }
 
     // Click Back
-    if (mBackSettingsText.getGlobalBounds().contains(mouse))
+    if (mBtnBackSettings.sprite.getGlobalBounds().contains(mouse))
       mScreen = MenuScreen::MAIN;
   }
 

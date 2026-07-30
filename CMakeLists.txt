@@ -89,6 +89,10 @@ add_executable(CrossingGame
         src/obstacles/lv5/animal_lv5/CFLYCAR.h
         src/obstacles/lv5/animal_lv5/CUFO.cpp
         src/obstacles/lv5/animal_lv5/CUFO.h
+        src/obstacles/lv4/traffic_lv4/CTRAFFIC_LV4.cpp
+        src/obstacles/lv4/traffic_lv4/CTRAFFIC_LV4.h
+        src/core/CTRAFFIC_LV5.cpp
+        src/core/CTRAFFIC_LV5.h
 )
 #Include paths
 target_include_directories(CrossingGame PRIVATE
