@@ -1,4 +1,3 @@
-c
 
 # Crossing Street — Time Crossing Arcade Game
 
