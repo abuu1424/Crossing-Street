@@ -127,6 +127,7 @@ class CGAME {
   sf::Sprite mSpritePopupQuitConfirm;
 
   sf::Clock mResetCooldownClock;
+  bool mDebugHitbox = false;
 
 public:
   explicit CGAME(sf::RenderWindow &window);

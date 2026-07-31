@@ -40,9 +40,9 @@
 EntityManager::~EntityManager() { clear(); }
 
 void EntityManager::clear() {
+  mTraffic.reset();
   mObstacles.clear();
   mAnimals.clear();
-  mTraffic.reset();
 }
 
 std::unique_ptr<CVEHICLE>
@@ -108,9 +108,12 @@ void EntityManager::spawnFromLevel(const LevelConfig &cfg) {
   clear();
 
   for (auto &lane : cfg.lanes) {
+    float laneOffset = static_cast<float>(rand() % 160 - 80);
     for (int i = 0; i < lane.count; i++) {
-      float x =
-          lane.direction > 0 ? i * lane.spacing : Win_W - i * lane.spacing;
+      float jitter = static_cast<float>(rand() % 80 - 40);
+      float x = lane.direction > 0
+                    ? (i * lane.spacing + laneOffset + jitter)
+                    : (Win_W - i * lane.spacing + laneOffset + jitter);
 
       auto obj = createObstacle(lane.type, lane.speed, lane.direction);
       obj->loadSprite(lane.spritePath, x, lane.y);
@@ -119,8 +122,12 @@ void EntityManager::spawnFromLevel(const LevelConfig &cfg) {
   }
 
   for (auto &ani : cfg.animals) {
+    float animalOffset = static_cast<float>(rand() % 160 - 80);
     for (int i = 0; i < ani.count; i++) {
-      float x = ani.direction > 0 ? i * ani.spacing : Win_W - i * ani.spacing;
+      float jitter = static_cast<float>(rand() % 80 - 40);
+      float x = ani.direction > 0
+                    ? (i * ani.spacing + animalOffset + jitter)
+                    : (Win_W - i * ani.spacing + animalOffset + jitter);
 
       auto obj = createAnimal(ani.type, ani.speed, ani.direction);
       obj->loadSprite(ani.spritePath, x, ani.y);

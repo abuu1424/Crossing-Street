@@ -15,15 +15,24 @@ void SoundManager::loadEffects(const std::string& victoryPath,
 }
 
 void SoundManager::playLevelMusic(const std::string& musicPath, float volume) {
+    if (mCurrentMusicPath == musicPath && mLevelMusic.getStatus() == sf::Music::Playing) {
+        mLevelMusic.setVolume(volume);
+        return;
+    }
+
     mLevelMusic.stop();
     if (mLevelMusic.openFromFile(musicPath)) {
+        mCurrentMusicPath = musicPath;
         mLevelMusic.setLoop(true);
         mLevelMusic.setVolume(volume);
         mLevelMusic.play();
     }
 }
 
-void SoundManager::stopMusic() { mLevelMusic.stop(); }
+void SoundManager::stopMusic() {
+    mLevelMusic.stop();
+    mCurrentMusicPath.clear();
+}
 
 void SoundManager::stopAllEffects() {
     mDeadSound.stop();

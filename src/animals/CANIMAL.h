@@ -22,4 +22,5 @@ public:
 	sf::Vector2f getPosition() const { return mSprite.getPosition(); }
 
     sf::FloatRect getBounds() const { return mSprite.getGlobalBounds(); }
+    virtual sf::FloatRect getHitbox() const;
 };

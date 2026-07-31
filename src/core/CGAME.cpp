@@ -470,6 +470,11 @@ void CGAME::handleEvents() {
       continue;
     }
 
+    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::V) {
+      mDebugHitbox = !mDebugHitbox;
+      printf("Debug Hitbox %s\n", mDebugHitbox ? "ON" : "OFF");
+    }
+
     sf::Vector2f mouse;
     if (event.type == sf::Event::MouseButtonPressed) {
       mouse = mWindow.mapPixelToCoords(
@@ -899,12 +904,12 @@ void CGAME::handleCollision() {
   if (mPlayer.isDead() || mPlayer.isFinish())
     return;
 
-  sf::FloatRect pb = shrinkBoxPercent(mPlayer.getBounds(), 0.18f, 0.22f);
+  sf::FloatRect pb = mPlayer.getHitbox();
 
   for (const auto &obs : mEntities.obstacles()) {
-    sf::FloatRect ob = shrinkBoxPercent(obs->getBounds(), 0.12f, 0.24f);
+    sf::FloatRect ob = obs->getHitbox();
 
-    if (sameLane(pb, ob) && pb.intersects(ob)) {
+    if (pb.intersects(ob)) {
       mPlayer.setDead(true);
       mSound.stopMusic();
       mSound.playDead();
@@ -915,9 +920,9 @@ void CGAME::handleCollision() {
   }
 
   for (const auto &ani : mEntities.animals()) {
-    sf::FloatRect ab = shrinkBoxPercent(ani->getBounds(), 0.15f, 0.22f);
+    sf::FloatRect ab = ani->getHitbox();
 
-    if (sameLane(pb, ab) && pb.intersects(ab)) {
+    if (pb.intersects(ab)) {
       mPlayer.setDead(true);
       mSound.stopMusic();
       mSound.playDead();
@@ -1048,6 +1053,23 @@ void CGAME::render() {
   mEntities.draw(mWindow);
 
   mPlayer.Draw(mWindow);
+
+  if (mDebugHitbox) {
+    auto drawRect = [&](sf::FloatRect r, sf::Color color) {
+      sf::RectangleShape rect(sf::Vector2f(r.width, r.height));
+      rect.setPosition(r.left, r.top);
+      rect.setFillColor(sf::Color::Transparent);
+      rect.setOutlineColor(color);
+      rect.setOutlineThickness(2.f);
+      mWindow.draw(rect);
+    };
+
+    drawRect(mPlayer.getHitbox(), sf::Color::Green);
+    for (const auto &obs : mEntities.obstacles())
+      drawRect(obs->getHitbox(), sf::Color::Red);
+    for (const auto &ani : mEntities.animals())
+      drawRect(ani->getHitbox(), sf::Color::Yellow);
+  }
 
   mHUD.draw(mWindow);
 

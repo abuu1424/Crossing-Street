@@ -24,4 +24,5 @@ private:
     sf::SoundBuffer mVictoryBuffer, mDeadBuffer, mLevelClearBuffer;
     sf::Sound mVictorySound, mDeadSound, mLevelClearSound;
     sf::Music mLevelMusic;
+    std::string mCurrentMusicPath;
 };

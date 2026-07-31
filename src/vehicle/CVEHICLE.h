@@ -25,6 +25,7 @@ public:
     virtual void Draw(sf::RenderWindow& w);
 
     sf::FloatRect getBounds() const;
+    virtual sf::FloatRect getHitbox() const;
 
     void stop()   { mIsStopped = true;  }  // đèn đỏ
     void resume() { mIsStopped = false; }  // đèn xanh

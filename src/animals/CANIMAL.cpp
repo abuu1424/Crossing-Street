@@ -44,3 +44,10 @@ bool CANIMAL::loadSprite(const std::string& texturePath, float x, float y) {
 void CANIMAL::update(float dt) {
     if (mAnim) mAnim->update(dt);
 }
+
+sf::FloatRect CANIMAL::getHitbox() const {
+    sf::FloatRect r = mSprite.getGlobalBounds();
+    float dx = r.width * 0.20f;
+    float dy = r.height * 0.28f;
+    return sf::FloatRect(r.left + dx, r.top + dy, r.width - dx * 2.f, r.height - dy * 2.f);
+}

@@ -23,6 +23,8 @@ CPEOPLE::~CPEOPLE() = default;
 
 //Load Sprite
 bool CPEOPLE::loadSprite(const std::string& texturePath) {
+    mRow = 0;
+    mIsMoving = false;
     const auto& texture = TextureManager::getInstance().getTexture(texturePath);
     mAnim = std::make_unique<Animation>(
         mSprite, texture,
@@ -36,6 +38,8 @@ bool CPEOPLE::loadSprite(const std::string& texturePath) {
 }
 
 void CPEOPLE::reloadSprite(const std::string& texturePath) {
+    mRow = 0;
+    mIsMoving = false;
     const auto& texture = TextureManager::getInstance().getTexture(texturePath);
     mAnim = std::make_unique<Animation>(mSprite, texture,
         64, 64, 4, 1, Frame_Time);
@@ -44,17 +48,21 @@ void CPEOPLE::reloadSprite(const std::string& texturePath) {
 }
 
 void CPEOPLE::update(float dt) {
-    if (!mAnim) return;
+    if (!mAnim || !mSprite.getTexture()) return;
+
+    unsigned int texH = mSprite.getTexture()->getSize().y;
+    int maxRows = std::max(1u, texH / 64u);
+    int validRow = mRow % maxRows;
 
     if (mIsMoving) {
         mAnim->update(dt);
         // Đổi sang đúng hàng
         sf::IntRect rect = mSprite.getTextureRect();
-        rect.top = mRow * 64;
+        rect.top = validRow * 64;
         mSprite.setTextureRect(rect);
     } else {
         // Đứng yên — hiện fram đầu tiên
-        mSprite.setTextureRect(sf::IntRect(0, mRow * 64, 64, 64));
+        mSprite.setTextureRect(sf::IntRect(0, validRow * 64, 64, 64));
     }
 }
 
@@ -101,6 +109,14 @@ sf::Vector2f CPEOPLE::getPosition() const
 sf::FloatRect CPEOPLE::getBounds() const
 {
     return mSprite.getGlobalBounds();
+}
+
+sf::FloatRect CPEOPLE::getHitbox() const
+{
+    sf::FloatRect r = mSprite.getGlobalBounds();
+    float dx = r.width * 0.28f;
+    float dy = r.height * 0.26f;
+    return sf::FloatRect(r.left + dx, r.top + dy, r.width - dx * 2.f, r.height - dy * 2.f);
 }
 
 bool CPEOPLE::isDead() const

@@ -27,6 +27,7 @@ public:
     void setPosition(float x, float y);
     sf::Vector2f  getPosition() const;
     sf::FloatRect getBounds() const;
+    sf::FloatRect getHitbox() const;
     bool isDead() const;
     bool isFinish() const;
     void setDead(bool dead);

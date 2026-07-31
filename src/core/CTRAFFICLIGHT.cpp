@@ -27,14 +27,18 @@ void CTRAFFICLIGHT::update(float dt) {
         if (mGreenTimer >= Green_Time) {
             mIsRed = true;
             mGreenTimer = 0.f;
-            for (auto& v : mVehicles) v->stop();
+            for (auto& v : mVehicles) {
+                if (v) v->stop();
+            }
         }
     } else {
         mRedTimer += dt;
         if (mRedTimer >= Red_Time) {
             mIsRed = false;
             mRedTimer = 0.f;
-            for (auto& v : mVehicles) v->resume();
+            for (auto& v : mVehicles) {
+                if (v) v->resume();
+            }
         }
     }
 }

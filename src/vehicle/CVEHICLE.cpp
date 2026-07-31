@@ -60,3 +60,10 @@ void CVEHICLE::Draw(sf::RenderWindow& w) {
 sf::FloatRect CVEHICLE::getBounds() const {
     return mSprite.getGlobalBounds();
 }
+
+sf::FloatRect CVEHICLE::getHitbox() const {
+    sf::FloatRect r = mSprite.getGlobalBounds();
+    float dx = r.width * 0.22f;
+    float dy = r.height * 0.28f;
+    return sf::FloatRect(r.left + dx, r.top + dy, r.width - dx * 2.f, r.height - dy * 2.f);
+}
