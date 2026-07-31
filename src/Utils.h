@@ -1,32 +1,32 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 //Window
-const int Win_W =  1280;
-const int Win_H = 720;
-const int FPS = 60;
+inline constexpr int Win_W = 1280;
+inline constexpr int Win_H = 720;
+inline constexpr int FPS = 60;
 
 //Game
-const int Max_Level = 5;
-const int Num_Lanes = 6;
-const int Lane_H = 80;
-const int Safe_Zone_H = 80;
+inline constexpr int Max_Level = 5;
+inline constexpr int Num_Lanes = 6;
+inline constexpr int Lane_H = 80;
+inline constexpr int Safe_Zone_H = 80;
 
 //Player
-const float Player_Speed = 200.f;
-const float Player_W = 48.f;
-const float Player_H = 64.f;
+inline constexpr float Player_Speed = 200.f;
+inline constexpr float Player_W = 48.f;
+inline constexpr float Player_H = 64.f;
 //Animal
-const float ANIMAL_W = 80.f;
-const float ANIMAL_H = 64.f;
-const float BASE_SPEED = 150.f;
-const float FRAME_TIME = 0.12f;
+inline constexpr float ANIMAL_W = 80.f;
+inline constexpr float ANIMAL_H = 64.f;
+inline constexpr float BASE_SPEED = 150.f;
+inline constexpr float FRAME_TIME = 0.12f;
 //Animation
-const float Frame_Time = 0.12f;
+inline constexpr float Frame_Time = 0.12f;
 
 //File path
-const char Save_Path[] = "saves/save.txt";
-const char Score_Path[] = "saves/highscore.txt";
-const char Font_Path[] = "assets/font/pixel_operator/PixelOperator-Bold.ttf";
+inline constexpr const char* Save_Path = "saves/save.txt";
+inline constexpr const char* Score_Path = "saves/highscore.txt";
+inline constexpr const char* Font_Path = "assets/font/pixel_operator/PixelOperator-Bold.ttf";
 
 //Era
 enum class Era
@@ -39,8 +39,8 @@ enum class Era
 };
 
 //TRAFFIC LIGHT
-const float Green_Time = 5.f;   // giây đèn xanh
-const float Red_Time   = 3.f;   // giây đèn đỏ
+inline constexpr float Green_Time = 5.f;   // giây đèn xanh
+inline constexpr float Red_Time   = 3.f;   // giây đèn đỏ
 
 //TIME SET
-const float Level_Time_Limit = 30.f;
+inline constexpr float Level_Time_Limit = 30.f;

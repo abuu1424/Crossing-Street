@@ -1,6 +1,6 @@
 #include "Animation.h"
-// Constructor mới
-Animation::Animation(sf::Sprite& sprite, sf::Texture& texture,
+
+Animation::Animation(sf::Sprite& sprite, const sf::Texture& texture,
                      int fw, int fh, int cols, int rows,
                      float frameTime, bool loop)
     : mSprite(sprite), mFrameTime(frameTime),

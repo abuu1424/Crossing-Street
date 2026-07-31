@@ -1,4 +1,5 @@
 #include "CMOTOR.h"
+#include <memory>
 
 CMOTOR::CMOTOR(float speed, float direction) : CVEHICLE(speed, direction) {}
 
@@ -8,8 +9,7 @@ bool CMOTOR::loadSprite(const std::string &path, float x, float y) {
     return false;
   }
 
-  delete mAnim;
-  mAnim = new Animation(mSprite, mTexture, 64, 64, // frameW, frameH
+  mAnim = std::make_unique<Animation>(mSprite, mTexture, 64, 64, // frameW, frameH
                         2, 2, Frame_Time);
   bool hasDirectionSuffix = (path.find("_phai") != std::string::npos ||
                              path.find("_trai") != std::string::npos);

@@ -1,24 +1,25 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <memory>
+#include <vector>
 #include "Animation.h"
 #include "Utils.h"
-#include <vector>
 
 class CVEHICLE;
 
 class CTRAFFICLIGHT {
 protected:
-    sf::Texture  mTexture;
-    sf::Sprite   mSprite;
-    Animation*   mAnim       = nullptr;
-    float        mGreenTimer = 0.f;
-    float        mRedTimer   = 0.f;
-    bool         mIsRed      = false;
+    sf::Texture                   mTexture;
+    sf::Sprite                    mSprite;
+    std::unique_ptr<Animation>    mAnim;
+    float                         mGreenTimer = 0.f;
+    float                         mRedTimer   = 0.f;
+    bool                          mIsRed      = false;
 
-    std::vector<CVEHICLE*>& mVehicles;
+    std::vector<std::unique_ptr<CVEHICLE>>& mVehicles;
 
 public:
-    CTRAFFICLIGHT(std::vector<CVEHICLE*>& vehicles);
+    CTRAFFICLIGHT(std::vector<std::unique_ptr<CVEHICLE>>& vehicles);
     virtual ~CTRAFFICLIGHT();
 
     virtual bool loadSprite(const std::string& path, float x, float y);

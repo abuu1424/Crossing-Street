@@ -1,5 +1,7 @@
 #include "CPEOPLE.h"
+#include "TextureManager.h"
 #include <cmath>
+#include <memory>
 
 CPEOPLE::CPEOPLE()
 {
@@ -17,20 +19,13 @@ CPEOPLE::CPEOPLE()
     loadSprite("assets/sprites/lv1_sp/player/player.png");
 }
 
-CPEOPLE::~CPEOPLE()
-{
-    delete mAnim;
-}
+CPEOPLE::~CPEOPLE() = default;
 
 //Load Sprite
 bool CPEOPLE::loadSprite(const std::string& texturePath) {
-    if (!mTexture.loadFromFile(texturePath)) {
-        printf("FAILED: %s\n", texturePath.c_str());
-        return false;
-    }
-    delete mAnim;
-    mAnim = new Animation(
-        mSprite, mTexture,
+    const auto& texture = TextureManager::getInstance().getTexture(texturePath);
+    mAnim = std::make_unique<Animation>(
+        mSprite, texture,
         64, 64,   // frameW, frameH
         4, 1,     // 4 cột, 1 hàng
         Frame_Time
@@ -41,12 +36,8 @@ bool CPEOPLE::loadSprite(const std::string& texturePath) {
 }
 
 void CPEOPLE::reloadSprite(const std::string& texturePath) {
-    if (!mTexture.loadFromFile(texturePath)) {
-        printf("FAILED reload sprite: %s\n", texturePath.c_str());
-        return;
-    }
-    delete mAnim;
-    mAnim = new Animation(mSprite, mTexture,
+    const auto& texture = TextureManager::getInstance().getTexture(texturePath);
+    mAnim = std::make_unique<Animation>(mSprite, texture,
         64, 64, 4, 1, Frame_Time);
     mSprite.setScale(Player_W / 64.f, Player_H / 64.f);
     //KO load vị trí mới

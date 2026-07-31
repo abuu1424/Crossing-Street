@@ -1,13 +1,14 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <memory>
 #include <string>
 #include "Utils.h"
 #include "Animation.h"
 
 class CPEOPLE {
-    sf::Sprite   mSprite;
-    sf::Texture  mTexture;
-    Animation *  mAnim = nullptr;
+    sf::Sprite                 mSprite;
+    sf::Texture                mTexture;
+    std::unique_ptr<Animation> mAnim;
 
     sf::Vector2f mPosition;
     float        mSpeed;

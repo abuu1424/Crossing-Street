@@ -1,5 +1,6 @@
 #include "Menu.h"
 #include "Utils.h"
+#include "TextureManager.h"
 #include <cmath>
 #include <cstdio>
 
@@ -9,35 +10,22 @@ Menu::Menu() {
     printf("FAILED font\n");
 
   // Background
-  if (!mBgTexture.loadFromFile("assets/ui/menu/menu_bg.png"))
-    printf("FAILED menu bg\n");
-  mBgSprite.setTexture(mBgTexture);
-  mBgSprite.setScale((float)Win_W / mBgTexture.getSize().x,
-                     (float)Win_H / mBgTexture.getSize().y);
+  const auto& bgTex = TextureManager::getInstance().getTexture("assets/ui/menu/menu_bg.png");
+  mBgSprite.setTexture(bgTex);
+  mBgSprite.setScale((float)Win_W / bgTex.getSize().x,
+                     (float)Win_H / bgTex.getSize().y);
 
   // Title
-
-  if (mTitleTexture.loadFromFile("assets/ui/menu/title.png")) {
-    printf("OK: %dx%d\n", mTitleTexture.getSize().x, mTitleTexture.getSize().y);
-    mTitleSprite.setTexture(mTitleTexture);
-    mTitleSprite.setTextureRect(sf::IntRect(0, 0, 350, 40));
-    mTitleSprite.setScale(3.f, 3.f);
-    mTitleSprite.setOrigin(350 / 2.f, 40 / 2.f);
-    mTitleSprite.setPosition(Win_W / 2.f, 120.f);
-    mTitleAnim = new Animation(mTitleSprite, mTitleTexture, 350, 40, 4, 4,
-                               0.12f, // frame
-                               true   // Loop
-    );
-  } else {
-    printf("FAILED TO LOAD TITLE");
-    mTitle.setFont(mFont);
-    mTitle.setString("CROSSING STREET");
-    mTitle.setCharacterSize(64);
-    mTitle.setFillColor(sf::Color(255, 215, 0));
-    sf::FloatRect tb = mTitle.getLocalBounds();
-    mTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
-    mTitle.setPosition(Win_W / 2.f, 160.f);
-  }
+  const auto& titleTex = TextureManager::getInstance().getTexture("assets/ui/menu/title.png");
+  mTitleSprite.setTexture(titleTex);
+  mTitleSprite.setTextureRect(sf::IntRect(0, 0, 350, 40));
+  mTitleSprite.setScale(3.f, 3.f);
+  mTitleSprite.setOrigin(350 / 2.f, 40 / 2.f);
+  mTitleSprite.setPosition(Win_W / 2.f, 120.f);
+  mTitleAnim = std::make_unique<Animation>(mTitleSprite, titleTex, 350, 40, 4, 4,
+                             0.12f, // frame
+                             true   // Loop
+  );
 
   // Buttons
   float btnY = 280.f;
@@ -68,7 +56,7 @@ Menu::Menu() {
   mMusic.play();
 }
 
-Menu::~Menu() { delete mTitleAnim; }
+Menu::~Menu() = default;
 
 void Menu::setupButton(MenuButton &btn, const std::string &texPath,
                        const std::string &label, float x, float y,

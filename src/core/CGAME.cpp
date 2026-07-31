@@ -9,6 +9,8 @@ const float SPAWN_Y = Win_H - Player_H;
 
 CGAME::CGAME(sf::RenderWindow &window)
     : mWindow(window), mScore(0), mLevelStartScore(0), mlevelTime(0.f) {
+  sf::View view(sf::FloatRect(0.f, 0.f, (float)Win_W, (float)Win_H));
+  mWindow.setView(view);
   setupUI();
 }
 
@@ -446,6 +448,28 @@ void CGAME::handleEvents() {
       continue;
     }
 
+    if (event.type == sf::Event::Resized) {
+      float windowRatio = (float)event.size.width / (float)event.size.height;
+      float viewRatio = (float)Win_W / (float)Win_H;
+      sf::View view(sf::FloatRect(0.f, 0.f, (float)Win_W, (float)Win_H));
+      float sizeX = 1.f;
+      float sizeY = 1.f;
+      float posX = 0.f;
+      float posY = 0.f;
+
+      if (windowRatio >= viewRatio) {
+        sizeX = viewRatio / windowRatio;
+        posX = (1.f - sizeX) / 2.f;
+      } else {
+        sizeY = windowRatio / viewRatio;
+        posY = (1.f - sizeY) / 2.f;
+      }
+
+      view.setViewport(sf::FloatRect(posX, posY, sizeX, sizeY));
+      mWindow.setView(view);
+      continue;
+    }
+
     sf::Vector2f mouse;
     if (event.type == sf::Event::MouseButtonPressed) {
       mouse = mWindow.mapPixelToCoords(
@@ -877,7 +901,7 @@ void CGAME::handleCollision() {
 
   sf::FloatRect pb = shrinkBoxPercent(mPlayer.getBounds(), 0.18f, 0.22f);
 
-  for (auto *obs : mEntities.obstacles()) {
+  for (const auto &obs : mEntities.obstacles()) {
     sf::FloatRect ob = shrinkBoxPercent(obs->getBounds(), 0.12f, 0.24f);
 
     if (sameLane(pb, ob) && pb.intersects(ob)) {
@@ -890,7 +914,7 @@ void CGAME::handleCollision() {
     }
   }
 
-  for (auto *ani : mEntities.animals()) {
+  for (const auto &ani : mEntities.animals()) {
     sf::FloatRect ab = shrinkBoxPercent(ani->getBounds(), 0.15f, 0.22f);
 
     if (sameLane(pb, ab) && pb.intersects(ab)) {

@@ -1,26 +1,22 @@
 #include "CVEHICLE.h"
+#include "TextureManager.h"
 #include <cstdio>
+#include <memory>
 
 CVEHICLE::CVEHICLE(float speed, float direction)
     : mSpeed(speed), mDirection(direction), mIsStopped(false) {}
 
-CVEHICLE::~CVEHICLE() {
-    delete mAnim;
-}
+CVEHICLE::~CVEHICLE() = default;
 
 bool CVEHICLE::loadSprite(const std::string& path, float x, float y) {
-    if (!mTexture.loadFromFile(path)) {
-        printf("FAILED: %s\n", path.c_str());
-        return false;
-    }
+    const auto& texture = TextureManager::getInstance().getTexture(path);
 
     // Tự tính frameW — giả sử spritesheet 4 cột 1 hàng
     // Subclass override nếu layout khác
-    int frameW = mTexture.getSize().x / 4;
-    int frameH = mTexture.getSize().y;
+    int frameW = texture.getSize().x / 4;
+    int frameH = texture.getSize().y;
 
-    delete mAnim;
-    mAnim = new Animation(mSprite, mTexture,
+    mAnim = std::make_unique<Animation>(mSprite, texture,
         frameW, frameH,
         4, 1,
         Frame_Time);

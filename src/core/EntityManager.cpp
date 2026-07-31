@@ -1,5 +1,6 @@
 #include "EntityManager.h"
 #include <cstdio>
+#include <memory>
 
 // Obstacle
 #include "CBUS.h"
@@ -39,73 +40,68 @@
 EntityManager::~EntityManager() { clear(); }
 
 void EntityManager::clear() {
-  for (auto *o : mObstacles)
-    delete o;
-  for (auto *a : mAnimals)
-    delete a;
-  delete mTraffic;
-
   mObstacles.clear();
   mAnimals.clear();
-  mTraffic = nullptr;
+  mTraffic.reset();
 }
 
-CVEHICLE *EntityManager::createObstacle(ObstacleType type, float speed,
-                                        float direction) {
+std::unique_ptr<CVEHICLE>
+EntityManager::createObstacle(ObstacleType type, float speed, float direction) {
   switch (type) {
   case ObstacleType::DINOSAUR:
-    return new CDINOSOUR(speed, direction);
+    return std::make_unique<CDINOSOUR>(speed, direction);
   case ObstacleType::MAMMOTH:
-    return new CMAMMOTH(speed, direction);
+    return std::make_unique<CMAMMOTH>(speed, direction);
   case ObstacleType::CAMEL:
-    return new CCAMEL(speed, direction);
+    return std::make_unique<CCAMEL>(speed, direction);
   case ObstacleType::SPHINX:
-    return new CSPHINX(speed, direction);
+    return std::make_unique<CSPHINX>(speed, direction);
   case ObstacleType::HORSE:
-    return new CHORSE(speed, direction);
+    return std::make_unique<CHORSE>(speed, direction);
   case ObstacleType::RICKSHAW:
-    return new CRICKSHAW(speed, direction);
+    return std::make_unique<CRICKSHAW>(speed, direction);
   case ObstacleType::WOOD:
-    return new CWOOD(speed, direction);
+    return std::make_unique<CWOOD>(speed, direction);
   case ObstacleType::BUS:
-    return new CBUS(speed, direction);
+    return std::make_unique<CBUS>(speed, direction);
   case ObstacleType::CAR:
-    return new CCAR(speed, direction);
+    return std::make_unique<CCAR>(speed, direction);
   case ObstacleType::MOTOR:
-    return new CMOTOR(speed, direction);
+    return std::make_unique<CMOTOR>(speed, direction);
   case ObstacleType::ECAR:
-    return new CECAR(speed, direction);
+    return std::make_unique<CECAR>(speed, direction);
   case ObstacleType::ETRAIN:
-    return new CETRAIN(speed, direction);
+    return std::make_unique<CETRAIN>(speed, direction);
   }
-  return new CDINOSOUR(speed, direction);
+  return std::make_unique<CDINOSOUR>(speed, direction);
 }
 
-CANIMAL *EntityManager::createAnimal(AnimalType type, float speed,
-                                     float direction) {
+std::unique_ptr<CANIMAL>
+EntityManager::createAnimal(AnimalType type, float speed, float direction) {
   switch (type) {
   case AnimalType::BIRD:
-    return new CBIRD(speed, direction);
+  case AnimalType::PTERO:
+    return std::make_unique<CBIRD>(speed, direction);
   case AnimalType::EAGLE:
-    return new CEAGLE(speed, direction);
+    return std::make_unique<CEAGLE>(speed, direction);
   case AnimalType::HORUS:
-    return new CHORUS(speed, direction);
+    return std::make_unique<CHORUS>(speed, direction);
   case AnimalType::ROW:
-    return new CROW(speed, direction);
+    return std::make_unique<CROW>(speed, direction);
   case AnimalType::ARROW:
-    return new CARROW(speed, direction);
+    return std::make_unique<CARROW>(speed, direction);
   case AnimalType::MISSILE:
-    return new CMISSILE(speed, direction);
+    return std::make_unique<CMISSILE>(speed, direction);
   case AnimalType::PLANE:
-    return new CPLANE(speed, direction);
+    return std::make_unique<CPLANE>(speed, direction);
   case AnimalType::DRONE:
-    return new CDRONE(speed, direction);
+    return std::make_unique<CDRONE>(speed, direction);
   case AnimalType::FLYCAR:
-    return new CFLYCAR(speed, direction);
+    return std::make_unique<CFLYCAR>(speed, direction);
   case AnimalType::UFO:
-    return new CUFO(speed, direction);
+    return std::make_unique<CUFO>(speed, direction);
   }
-  return new CBIRD(speed, direction);
+  return std::make_unique<CBIRD>(speed, direction);
 }
 
 void EntityManager::spawnFromLevel(const LevelConfig &cfg) {
@@ -116,9 +112,9 @@ void EntityManager::spawnFromLevel(const LevelConfig &cfg) {
       float x =
           lane.direction > 0 ? i * lane.spacing : Win_W - i * lane.spacing;
 
-      CVEHICLE *obj = createObstacle(lane.type, lane.speed, lane.direction);
+      auto obj = createObstacle(lane.type, lane.speed, lane.direction);
       obj->loadSprite(lane.spritePath, x, lane.y);
-      mObstacles.push_back(obj);
+      mObstacles.push_back(std::move(obj));
     }
   }
 
@@ -126,32 +122,32 @@ void EntityManager::spawnFromLevel(const LevelConfig &cfg) {
     for (int i = 0; i < ani.count; i++) {
       float x = ani.direction > 0 ? i * ani.spacing : Win_W - i * ani.spacing;
 
-      CANIMAL *obj = createAnimal(ani.type, ani.speed, ani.direction);
+      auto obj = createAnimal(ani.type, ani.speed, ani.direction);
       obj->loadSprite(ani.spritePath, x, ani.y);
-      mAnimals.push_back(obj);
+      mAnimals.push_back(std::move(obj));
     }
   }
 
   if (cfg.level == 2)
-    mTraffic = new CTRAFFIC_LV2(mObstacles);
+    mTraffic = std::make_unique<CTRAFFIC_LV2>(mObstacles);
   else if (cfg.level == 3)
-    mTraffic = new CTRAFFIC_LV3(mObstacles);
+    mTraffic = std::make_unique<CTRAFFIC_LV3>(mObstacles);
   else if (cfg.level == 4)
-    mTraffic = new CTRAFFIC_LV4(mObstacles);
+    mTraffic = std::make_unique<CTRAFFIC_LV4>(mObstacles);
   else if (cfg.level == 5)
-    mTraffic = new CTRAFFIC_LV5(mObstacles);
+    mTraffic = std::make_unique<CTRAFFIC_LV5>(mObstacles);
   else
-    mTraffic = new CTRAFFIC_LV1(mObstacles);
+    mTraffic = std::make_unique<CTRAFFIC_LV1>(mObstacles);
   mTraffic->loadSprite(cfg.trafficRedPath, cfg.trafficGreenPath, cfg.trafficX,
                        cfg.trafficY);
 }
 
 void EntityManager::update(float dt) {
-  for (auto *obs : mObstacles) {
+  for (auto &obs : mObstacles) {
     obs->Move(dt);
     obs->update(dt);
   }
-  for (auto *ani : mAnimals) {
+  for (auto &ani : mAnimals) {
     ani->Move(dt);
     ani->update(dt);
   }
@@ -161,9 +157,9 @@ void EntityManager::update(float dt) {
 }
 
 void EntityManager::draw(sf::RenderWindow &window) const {
-  for (auto *obs : mObstacles)
+  for (auto &obs : mObstacles)
     obs->Draw(window);
-  for (auto *ani : mAnimals)
+  for (auto &ani : mAnimals)
     ani->Draw(window);
   if (mTraffic)
     mTraffic->Draw(window);

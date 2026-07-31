@@ -5,6 +5,7 @@
 #include "SaveData.h"
 #include <vector>
 #include "Animation.h"
+#include "TextureManager.h"
 
 enum class MenuResult {
     NONE,
@@ -29,8 +30,8 @@ enum class MenuScreen {
 
 struct MenuButton {
     sf::Sprite sprite;
-    sf::Texture texture;
-    sf::Texture textureHover;
+    const sf::Texture* pTexture = nullptr;
+    const sf::Texture* pHoverTexture = nullptr;
     sf::Text label;
     float baseScale  = 1.f;   // scale bình thường
     float hoverScale = 1.15f; // scale khi hover
@@ -41,21 +42,17 @@ struct MenuButton {
     void setup(const std::string &texPath, const std::string &textLabel,
                sf::Font &font, float x, float y,
                const std::string &hoverTexPath = "", unsigned int charSize = 26) {
-        if (!texture.loadFromFile(texPath)) {
-            printf("No img, using fallback: %s\n", texPath.c_str());
-            sf::Image img;
-            img.create(160, 50, sf::Color(60, 60, 80, 220));
-            texture.loadFromImage(img);
-        }
+        pTexture = &TextureManager::getInstance().getTexture(texPath);
 
         hasHoverTex = false;
-        if (!hoverTexPath.empty() && textureHover.loadFromFile(hoverTexPath)) {
+        if (!hoverTexPath.empty()) {
+            pHoverTexture = &TextureManager::getInstance().getTexture(hoverTexPath);
             hasHoverTex = true;
         }
 
-        sprite.setTexture(texture);
-        float w = texture.getSize().x;
-        float h = texture.getSize().y;
+        sprite.setTexture(*pTexture);
+        float w = pTexture->getSize().x;
+        float h = pTexture->getSize().y;
         sprite.setOrigin(w / 2.f, h / 2.f);
         sprite.setPosition(x, y);
         sprite.setScale(baseScale, baseScale);
@@ -76,8 +73,8 @@ struct MenuButton {
         sf::FloatRect bounds = sprite.getGlobalBounds();
         hovered = bounds.contains(mousePos);
 
-        if (hasHoverTex) {
-            sprite.setTexture(hovered ? textureHover : texture);
+        if (hasHoverTex && pHoverTexture && pTexture) {
+            sprite.setTexture(hovered ? *pHoverTexture : *pTexture);
         }
 
         float target = hovered ? hoverScale : baseScale;
@@ -108,7 +105,7 @@ class Menu
     sf::Text mTitle;
     sf::Texture mTitleTexture;
     sf::Sprite mTitleSprite;
-    Animation *mTitleAnim = nullptr;
+    std::unique_ptr<Animation> mTitleAnim;
 
 
     // Buttons

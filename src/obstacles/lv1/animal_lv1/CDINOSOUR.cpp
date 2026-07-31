@@ -1,4 +1,5 @@
 #include "CDINOSOUR.h"
+#include <memory>
 
 CDINOSOUR::CDINOSOUR(float speed, float direction)
     : CVEHICLE(speed, direction) {}
@@ -9,8 +10,7 @@ bool CDINOSOUR::loadSprite(const std::string& path, float x, float y) {
         return false;
     }
 
-    delete mAnim;
-    mAnim = new Animation(mSprite, mTexture,
+    mAnim = std::make_unique<Animation>(mSprite, mTexture,
         64, 64,   // frameW, frameH
         2, 2,
         Frame_Time

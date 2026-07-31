@@ -1,4 +1,5 @@
 #include "CANIMAL.h"
+#include "TextureManager.h"
 
 CANIMAL::CANIMAL(float speed, float direction)
     : mSpeed(speed), mDirection(direction) {
@@ -22,19 +23,16 @@ void CANIMAL::Draw(sf::RenderWindow& w) {
 }
 
 bool CANIMAL::loadSprite(const std::string& texturePath, float x, float y) {
-    if (!mTexture.loadFromFile(texturePath)) {
-        printf("FAILED: %s\n", texturePath.c_str());
-        return false;
-    }
-    mSprite.setTexture(mTexture);
+    const auto& texture = TextureManager::getInstance().getTexture(texturePath);
+    mSprite.setTexture(texture);
     mSprite.setTextureRect(sf::IntRect(0, 0,
-        mTexture.getSize().x,
-        mTexture.getSize().y));
-    float scale = std::min(ANIMAL_W / static_cast<float>(mTexture.getSize().x),
-                           ANIMAL_H / static_cast<float>(mTexture.getSize().y));
+        texture.getSize().x,
+        texture.getSize().y));
+    float scale = std::min(ANIMAL_W / static_cast<float>(texture.getSize().x),
+                           ANIMAL_H / static_cast<float>(texture.getSize().y));
     if (mDirection > 0.f) {
         mSprite.setScale(-scale, scale);
-        mSprite.setOrigin(static_cast<float>(mTexture.getSize().x), 0.f);
+        mSprite.setOrigin(static_cast<float>(texture.getSize().x), 0.f);
     } else {
         mSprite.setScale(scale, scale);
         mSprite.setOrigin(0.f, 0.f);
@@ -44,5 +42,5 @@ bool CANIMAL::loadSprite(const std::string& texturePath, float x, float y) {
 }
 
 void CANIMAL::update(float dt) {
-    // Subclass override de goi mAnim.update(dt)
+    if (mAnim) mAnim->update(dt);
 }

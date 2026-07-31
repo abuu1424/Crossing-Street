@@ -1,20 +1,15 @@
 #include "CTRAFFIC_LV2.h"
-CTRAFFIC_LV2::CTRAFFIC_LV2(std::vector<CVEHICLE*>& vehicles)
+#include "TextureManager.h"
+
+CTRAFFIC_LV2::CTRAFFIC_LV2(std::vector<std::unique_ptr<CVEHICLE>>& vehicles)
     : CTRAFFICLIGHT(vehicles) {}
 
 bool CTRAFFIC_LV2::loadSprite(const std::string& redPath, const std::string& greenPath, float x, float y) {
-    if (!mTextureRed.loadFromFile(redPath)) {
-        printf("FAILED red: %s\n", redPath.c_str());
-        return false;
-    }
-    if (!mTextureGreen.loadFromFile(greenPath)) {
-        printf("FAILED green: %s\n", greenPath.c_str());
-        return false;
-    }
+    mTextureRed = &TextureManager::getInstance().getTexture(redPath);
+    mTextureGreen = &TextureManager::getInstance().getTexture(greenPath);
 
     // Mặc định bắt đầu bằng đèn xanh
-    delete mAnim;
-    mAnim = new Animation(mSprite, mTextureGreen,
+    mAnim = std::make_unique<Animation>(mSprite, *mTextureGreen,
         64, 64, 4, 2, 0.1f);
 
     mSprite.setScale(1.5f, 1.5f);
@@ -23,10 +18,10 @@ bool CTRAFFIC_LV2::loadSprite(const std::string& redPath, const std::string& gre
 }
 void CTRAFFIC_LV2::Draw(sf::RenderWindow& w) {
     // Đổi texture theo trạng thái
-    if (mIsRed) {
-        mSprite.setTexture(mTextureRed);
-    } else {
-        mSprite.setTexture(mTextureGreen);
+    if (mIsRed && mTextureRed) {
+        mSprite.setTexture(*mTextureRed);
+    } else if (mTextureGreen) {
+        mSprite.setTexture(*mTextureGreen);
     }
     w.draw(mSprite);
 }

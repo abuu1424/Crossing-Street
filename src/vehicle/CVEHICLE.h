@@ -1,19 +1,19 @@
 
-#ifndef CROSSINGGAME_CVEHICLE_H
-#define CROSSINGGAME_CVEHICLE_H
+#pragma once
 
 #include <SFML/Graphics.hpp>
+#include <memory>
 #include "Animation.h"
 #include "Utils.h"
 
 class CVEHICLE {
 protected:
-    sf::Texture  mTexture;
-    sf::Sprite   mSprite;
-    Animation*   mAnim      = nullptr;
-    float        mSpeed;
-    float        mDirection;  // 1 = phải, -1 = trái
-    bool         mIsStopped; // đèn đỏ → dừng lại
+    sf::Texture                mTexture;
+    sf::Sprite                 mSprite;
+    std::unique_ptr<Animation> mAnim;
+    float                      mSpeed;
+    float                      mDirection;  // 1 = phải, -1 = trái
+    bool                       mIsStopped; // đèn đỏ → dừng lại
 
 public:
     CVEHICLE(float speed = 150.f, float direction = 1.f);
@@ -35,4 +35,3 @@ public:
     sf::Vector2f getPosition() const { return mSprite.getPosition(); }
     void setPosition(float x, float y) { mSprite.setPosition(x, y); }
 };
-#endif //CROSSINGGAME_CVEHICLE_H

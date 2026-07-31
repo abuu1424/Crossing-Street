@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <memory>
 #include <SFML/Graphics.hpp>
 #include "LevelConfig.h"
 #include "CVEHICLE.h"
@@ -18,15 +19,15 @@ public:
 
     void clear();
 
-    const std::vector<CVEHICLE*>& obstacles() const { return mObstacles; }
-    const std::vector<CANIMAL*>&  animals()   const { return mAnimals; }
-    CTRAFFICLIGHT* traffic() const { return mTraffic; }
+    const std::vector<std::unique_ptr<CVEHICLE>>& obstacles() const { return mObstacles; }
+    const std::vector<std::unique_ptr<CANIMAL>>&  animals()   const { return mAnimals; }
+    CTRAFFICLIGHT* traffic() const { return mTraffic.get(); }
 
 private:
-    std::vector<CVEHICLE*> mObstacles;
-    std::vector<CANIMAL*>  mAnimals;
-    CTRAFFICLIGHT*         mTraffic = nullptr;
+    std::vector<std::unique_ptr<CVEHICLE>> mObstacles;
+    std::vector<std::unique_ptr<CANIMAL>>  mAnimals;
+    std::unique_ptr<CTRAFFICLIGHT>         mTraffic;
 
-    static CVEHICLE* createObstacle(ObstacleType type, float speed, float direction);
-    static CANIMAL*  createAnimal(AnimalType type, float speed, float direction);
+    static std::unique_ptr<CVEHICLE> createObstacle(ObstacleType type, float speed, float direction);
+    static std::unique_ptr<CANIMAL>  createAnimal(AnimalType type, float speed, float direction);
 };

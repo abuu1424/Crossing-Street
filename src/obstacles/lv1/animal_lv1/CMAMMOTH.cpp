@@ -1,6 +1,5 @@
 #include "CMAMMOTH.h"
-
-#include "CMAMMOTH.h"
+#include <memory>
 
 CMAMMOTH::CMAMMOTH(float speed, float direction)
     : CVEHICLE(speed, direction) {}
@@ -11,8 +10,7 @@ bool CMAMMOTH::loadSprite(const std::string& path, float x, float y) {
         return false;
     }
 
-    delete mAnim;
-    mAnim = new Animation(mSprite, mTexture,
+    mAnim = std::make_unique<Animation>(mSprite, mTexture,
         64, 64,   // frameW, frameH
         2, 2,
         Frame_Time
