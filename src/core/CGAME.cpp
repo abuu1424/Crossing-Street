@@ -18,11 +18,16 @@ CGAME::~CGAME() { clearEntities(); }
 
 void CGAME::setupUI() {
   mFont.loadFromFile(Font_Path);
+  mCutscene.init(mFont, &mSound);
 
   // Sound
   mSound.loadEffects("assets/sounds/victory/vt1.ogg",
                      "assets/sounds/dead/dead.ogg",
                      "assets/sounds/victory/level_clear.ogg");
+
+  mSound.loadElevatorSounds("assets/sounds/elevator/elevator_door.ogg",
+                            "assets/sounds/elevator/elevator_move.ogg",
+                            "assets/sounds/elevator/elevator_ding.ogg");
 
   // Bảng DEAD
   float boxW = 400.f, boxH = 150.f;
@@ -698,10 +703,8 @@ void CGAME::handleEvents() {
 
           if (mCurrentLevel < Max_Level) {
             mLevelStartScore = mScore;
-            loadLevel(mCurrentLevel + 1);
-            mHUD.update(mCurrentLevel, mScore, mlevelTime);
-            if (mActiveSlot > 0)
-              saveGame(mActiveSlot);
+            mInCutscene = true;
+            mCutscene.start(mCurrentLevel, mCurrentLevel + 1);
           } else {
             mShowLevelClear = false;
             mPlayer.setFinish(true);
@@ -748,11 +751,8 @@ void CGAME::handleEvents() {
 
           if (mCurrentLevel < Max_Level) {
             mLevelStartScore = mScore;
-            loadLevel(mCurrentLevel + 1);
-            mHUD.update(mCurrentLevel, mScore, mlevelTime);
-            mSound.stopLevelClear();
-            if (mActiveSlot > 0)
-              saveGame(mActiveSlot);
+            mInCutscene = true;
+            mCutscene.start(mCurrentLevel, mCurrentLevel + 1);
           } else {
             mPlayer.setFinish(true);
             mSound.playVictory();
@@ -988,6 +988,19 @@ void CGAME::checkFinish() {
 }
 
 void CGAME::update(float dt) {
+  if (mInCutscene) {
+    mCutscene.update(dt);
+    if (mCutscene.isFinished()) {
+      mInCutscene = false;
+      int nextLvl = mCutscene.getTargetLevel();
+      loadLevel(nextLvl);
+      mHUD.update(mCurrentLevel, mScore, mlevelTime);
+      if (mActiveSlot > 0)
+        saveGame(mActiveSlot);
+    }
+    return;
+  }
+
   sf::Vector2f mousePos = mWindow.mapPixelToCoords(sf::Mouse::getPosition(mWindow));
 
   if (mShowQuitConfirm || mShowMenuConfirm) {
@@ -1047,6 +1060,16 @@ void CGAME::update(float dt) {
 
 void CGAME::render() {
   mWindow.clear();
+
+  if (mInCutscene) {
+    mWindow.draw(mBgSprite);
+    mEntities.draw(mWindow);
+    mPlayer.Draw(mWindow);
+    mHUD.draw(mWindow);
+    mCutscene.render(mWindow);
+    mWindow.display();
+    return;
+  }
 
   mWindow.draw(mBgSprite);
 

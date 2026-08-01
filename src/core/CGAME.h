@@ -1,5 +1,6 @@
 #pragma once
 #include "CPEOPLE.h"
+#include "ElevatorCutscene.h"
 #include "EntityManager.h"
 #include "HUD.h"
 #include "LevelConfig.h"
@@ -25,6 +26,10 @@ class CGAME {
   CPEOPLE mPlayer;
 
   EntityManager mEntities;
+
+  // Cutscene Thang Máy
+  ElevatorCutscene mCutscene;
+  bool mInCutscene = false;
 
   // Trạng thái
   bool mLevelCleared = false;
