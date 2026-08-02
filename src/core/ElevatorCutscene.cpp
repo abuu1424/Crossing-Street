@@ -85,6 +85,12 @@ void ElevatorCutscene::setupLayout() {
     mFlashOverlay.setSize(sf::Vector2f(static_cast<float>(Win_W), static_cast<float>(Win_H)));
     mFlashOverlay.setPosition(0.f, 0.f);
     mFlashOverlay.setFillColor(sf::Color(255, 255, 255, 0));
+
+    // Popup Skip Button (Phong cách đồng bộ với các Popup khác)
+    mSkipButton.setup("assets/ui/menu/btn_yes.png", "SKIP [ENTER]", mFont,
+                     static_cast<float>(Win_W) - 110.f,
+                     static_cast<float>(Win_H) - 45.f,
+                     "assets/ui/menu/btn_yes_hover.png", 18);
 }
 
 void ElevatorCutscene::start(int fromLevel, int toLevel) {
@@ -126,6 +132,26 @@ void ElevatorCutscene::start(int fromLevel, int toLevel) {
     updateLedDisplay();
 }
 
+void ElevatorCutscene::skip() {
+    if (mPhase == ElevatorPhase::FINISHED || mPhase == ElevatorPhase::IDLE)
+        return;
+
+    if (mSound) {
+        mSound->stopElevatorMove();
+        mSound->stopAllEffects();
+    }
+
+    mIsMorphed = true;
+    mPhase = ElevatorPhase::FINISHED;
+}
+
+bool ElevatorCutscene::isSkipButtonClicked(sf::Vector2f mousePos) const {
+    if (mPhase == ElevatorPhase::FINISHED || mPhase == ElevatorPhase::IDLE)
+        return false;
+
+    return mSkipButton.contains(mousePos);
+}
+
 void ElevatorCutscene::updateLedDisplay() {
     int displayLevel = (mPhase == ElevatorPhase::DOOR_CLOSING) ? mFromLevel : mToLevel;
     int idx = std::max(0, std::min(displayLevel - 1, static_cast<int>(mFloors.size()) - 1));
@@ -136,10 +162,11 @@ void ElevatorCutscene::updateLedDisplay() {
     mLedText.setPosition(Win_W / 2.f, mLedPanel.getPosition().y + 21.f);
 }
 
-void ElevatorCutscene::update(float dt) {
+void ElevatorCutscene::update(float dt, sf::Vector2f mousePos) {
     if (mPhase == ElevatorPhase::IDLE || mPhase == ElevatorPhase::FINISHED)
         return;
 
+    mSkipButton.update(mousePos, dt);
     mPhaseTimer += dt;
 
     switch (mPhase) {
@@ -255,7 +282,7 @@ void ElevatorCutscene::render(sf::RenderWindow& window) {
     // 1. Overlay Nền Tối Toàn Màn Hình
     window.draw(mBgOverlay);
 
-    // 2. Phông Nền Background Gốc Của Các Level Cuộn Dọc (Có Rung Lắc mShakeOffset)
+    // 2. Phông Nền Background Gốc CỦA CÁC LEVEL Cuộn Dọc (Có Rung Lắc mShakeOffset)
     float panelH = static_cast<float>(Win_H);
     for (int i = 0; i < static_cast<int>(mFloors.size()); ++i) {
         float panelY = (i - mScrollOffset) * panelH;
@@ -311,4 +338,7 @@ void ElevatorCutscene::render(sf::RenderWindow& window) {
     mLedText.setPosition(Win_W / 2.f + mShakeOffset.x, mLedPanel.getPosition().y + 21.f);
     window.draw(mLedPanel);
     window.draw(mLedText);
+
+    // 8. Popup Skip Button UI
+    mSkipButton.draw(window);
 }

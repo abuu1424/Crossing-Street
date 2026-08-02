@@ -4,6 +4,7 @@
 #include <vector>
 #include "LevelConfig.h"
 #include "Utils.h"
+#include "MenuButton.h"
 
 enum class ElevatorPhase {
     IDLE,
@@ -23,11 +24,13 @@ public:
     void init(const sf::Font& font, SoundManager* sound = nullptr);
     void setSoundManager(SoundManager* sound) { mSound = sound; }
     void start(int fromLevel, int toLevel);
-    void update(float dt);
+    void update(float dt, sf::Vector2f mousePos = sf::Vector2f(0.f, 0.f));
     void render(sf::RenderWindow& window);
+    void skip();
 
     bool isFinished() const { return mPhase == ElevatorPhase::FINISHED; }
     bool isActive() const { return mPhase != ElevatorPhase::IDLE && mPhase != ElevatorPhase::FINISHED; }
+    bool isSkipButtonClicked(sf::Vector2f mousePos) const;
     int getTargetLevel() const { return mToLevel; }
 
 private:
@@ -56,6 +59,9 @@ private:
     sf::Texture mDoorPixelTexture;
     sf::Texture mEraCardTextures[5];
     sf::Sprite mEraCardSprites[5];
+
+    // Popup Skip Button UI
+    MenuButton mSkipButton;
 
     // Thông tin các tầng thời kỳ bảo tàng (Toàn bộ bằng Tiếng Anh)
     struct EraFloorInfo {

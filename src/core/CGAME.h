@@ -54,13 +54,20 @@ class CGAME {
   // Bảng DEAD
   sf::Font mFont;
   sf::Text mDeadText;
+  sf::Text mDeadSubText;
+  sf::Text mDeadScore;
   sf::RectangleShape mDeadBox;
+  MenuButton mBtnDeadRestart;
+  MenuButton mBtnDeadMenu;
   // Bảng VICTORY
   sf::RectangleShape mVictoryBox;
   sf::Text mVictoryTitle;
   sf::Text mVictorySubText;
+  sf::Text mVictoryStarsText;
   sf::Text mVictoryScore;
   sf::Text mVictoryHighScore;
+  MenuButton mBtnVictoryPlayAgain;
+  MenuButton mBtnVictoryMenu;
 
   // Bảng nhập tên file save
   bool mEnteringSaveName = false;
