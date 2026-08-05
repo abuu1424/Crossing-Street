@@ -1,6 +1,7 @@
 #pragma once
 #include "CPEOPLE.h"
 #include "CollisionEffect.h"
+#include "DeathCutscene.h"
 #include "ElevatorCutscene.h"
 #include "EntityManager.h"
 #include "HUD.h"
@@ -33,9 +34,11 @@ class CGAME {
   std::string mCollisionSpritePath;
   std::vector<std::unique_ptr<CollisionEffect>> mEffects;
 
-  // Cutscene Thang Máy
+  // Cutscenes
   ElevatorCutscene mCutscene;
   bool mInCutscene = false;
+
+  DeathCutscene mDeathCutscene;
 
   // Trạng thái
   bool mIsDying = false;

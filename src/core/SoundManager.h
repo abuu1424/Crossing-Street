@@ -27,6 +27,10 @@ public:
     void stopElevatorMove();
     void playElevatorDing();
 
+    // Sound Death Cutscenes Cho 5 Level
+    void loadLevelDeathSounds();
+    void playLevelDeathSound(int level);
+
     void setMusicVolume(float v);
     void setSFXVolume(float v);
 
@@ -36,6 +40,9 @@ private:
 
     sf::SoundBuffer mElevatorDoorBuffer, mElevatorMoveBuffer, mElevatorDingBuffer;
     sf::Sound mElevatorDoorSound, mElevatorMoveSound, mElevatorDingSound;
+
+    sf::SoundBuffer mLevelDeathBuffers[5];
+    sf::Sound mLevelDeathSounds[5];
 
     sf::Music mLevelMusic;
     std::string mCurrentMusicPath;

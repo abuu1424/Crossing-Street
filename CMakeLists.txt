@@ -29,27 +29,29 @@ add_executable(CrossingGame ${SOURCES})
 target_include_directories(CrossingGame PRIVATE
     src
     src/core
-    src/obstacles
-    src/obstacles/lv1
-    src/obstacles/lv2
-    src/obstacles/lv3
-    src/obstacles/lv4
-    src/obstacles/lv5
-    src/obstacles/lv1/animal_lv1
-    src/obstacles/lv1/traffic_lv1
-    src/obstacles/lv2/animal_lv2
-    src/obstacles/lv2/traffic_lv2
-    src/obstacles/lv3/animal_lv3
-    src/obstacles/lv3/vehicle_lv3
-    src/obstacles/lv3/traffic_lv3
-    src/obstacles/lv4/animal_lv4
-    src/obstacles/lv4/vehicle_lv4
-    src/obstacles/lv4/traffic_lv4
-    src/obstacles/lv5/animal_lv5
-    src/obstacles/lv5/vehicle_lv5
-    src/obstacles/lv5/traffic_lv5
-    src/vehicle
-    src/animals
+    src/utils
+    src/entities
+    src/entities/base
+    src/entities/obstacles
+    src/entities/obstacles/lv1
+    src/entities/obstacles/lv2
+    src/entities/obstacles/lv3
+    src/entities/obstacles/lv4
+    src/entities/obstacles/lv5
+    src/entities/obstacles/lv1/animal_lv1
+    src/entities/obstacles/lv1/traffic_lv1
+    src/entities/obstacles/lv2/animal_lv2
+    src/entities/obstacles/lv2/traffic_lv2
+    src/entities/obstacles/lv3/animal_lv3
+    src/entities/obstacles/lv3/vehicle_lv3
+    src/entities/obstacles/lv3/traffic_lv3
+    src/entities/obstacles/lv4/animal_lv4
+    src/entities/obstacles/lv4/vehicle_lv4
+    src/entities/obstacles/lv4/traffic_lv4
+    src/entities/obstacles/lv5/animal_lv5
+    src/entities/obstacles/lv5/vehicle_lv5
+    src/entities/obstacles/lv5/traffic_lv5
+    src/cutscenes
     src/levels
     src/ui
 )
