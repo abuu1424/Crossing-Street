@@ -1,5 +1,6 @@
 #pragma once
 #include "CPEOPLE.h"
+#include "CollisionEffect.h"
 #include "ElevatorCutscene.h"
 #include "EntityManager.h"
 #include "HUD.h"
@@ -9,6 +10,7 @@
 #include "SoundManager.h"
 #include "Utils.h"
 #include <SFML/Graphics.hpp>
+#include <memory>
 #include <vector>
 
 class CGAME {
@@ -27,11 +29,16 @@ class CGAME {
 
   EntityManager mEntities;
 
+  // Collision Effects
+  std::string mCollisionSpritePath;
+  std::vector<std::unique_ptr<CollisionEffect>> mEffects;
+
   // Cutscene Thang Máy
   ElevatorCutscene mCutscene;
   bool mInCutscene = false;
 
   // Trạng thái
+  bool mIsDying = false;
   bool mLevelCleared = false;
   int mCurrentLevel = 1;
 
@@ -125,7 +132,7 @@ class CGAME {
   bool mDraggingMusicSlider = false;
   bool mDraggingSFXSlider = false;
 
-  // Sound (nhạc nền + 3 sound effect, xem SoundManager.h)
+  // Sound
   SoundManager mSound;
 
   // Popup UI Panel Textures & Sprites

@@ -410,15 +410,20 @@ bool sameLane(sf::FloatRect playerBox, sf::FloatRect objectBox) {
   return std::abs(playerCenterY - objectCenterY) < 40.f;
 }
 
-void CGAME::clearEntities() { mEntities.clear(); }
+void CGAME::clearEntities() { 
+  mEntities.clear();
+  mEffects.clear();
+}
 
 void CGAME::loadLevel(int level) {
   clearEntities();
   LevelConfig cfg = getLevel(level);
 
+  mIsDying = false;
   mLevelCleared = false;
   mCurrentLevel = cfg.level;
   mlevelTime = 0.f;
+  mCollisionSpritePath = cfg.collisionSpritePath;
 
   // Background
   if (!mBgTexture.loadFromFile(cfg.backgroundPath))
@@ -450,6 +455,7 @@ void CGAME::reset() {
   mScore = 0;
   mLevelStartScore = 0;
   mlevelTime = 0.f;
+  mIsDying = false;
   mLevelCleared = false;
   mShowLevelClear = false;
   mShowMenuConfirm = false;
@@ -1034,20 +1040,24 @@ void CGAME::handleEvents() {
 }
 
 void CGAME::handleCollision() {
-  if (mPlayer.isDead() || mPlayer.isFinish())
+  if (mPlayer.isDead() || mPlayer.isFinish() || mIsDying)
     return;
 
   sf::FloatRect pb = mPlayer.getHitbox();
+
+  auto triggerDeath = [&](sf::Vector2f hitPos) {
+    mIsDying = true;
+    mEffects.push_back(std::make_unique<CollisionEffect>(mCollisionSpritePath, hitPos, 4, 0, 0.07f, 2.5f));
+    mSound.stopMusic();
+    mSound.playDead();
+  };
 
   for (const auto &obs : mEntities.obstacles()) {
     sf::FloatRect ob = obs->getHitbox();
 
     if (pb.intersects(ob)) {
-      mPlayer.setDead(true);
-      mSound.stopMusic();
-      mSound.playDead();
-      HighScore::updateIfHigher(mScore);
-      printf("DEAD\n");
+      sf::Vector2f hitPos(pb.left + pb.width / 2.f, pb.top + pb.height / 2.f);
+      triggerDeath(hitPos);
       return;
     }
   }
@@ -1056,11 +1066,8 @@ void CGAME::handleCollision() {
     sf::FloatRect ab = ani->getHitbox();
 
     if (pb.intersects(ab)) {
-      mPlayer.setDead(true);
-      mSound.stopMusic();
-      mSound.playDead();
-      HighScore::updateIfHigher(mScore);
-      printf("DEAD\n");
+      sf::Vector2f hitPos(pb.left + pb.width / 2.f, pb.top + pb.height / 2.f);
+      triggerDeath(hitPos);
       return;
     }
   }
@@ -1121,6 +1128,25 @@ void CGAME::checkFinish() {
 }
 
 void CGAME::update(float dt) {
+  for (auto it = mEffects.begin(); it != mEffects.end(); ) {
+    (*it)->update(dt);
+    if ((*it)->isFinished()) {
+      it = mEffects.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  if (mIsDying) {
+    if (mEffects.empty()) {
+      mIsDying = false;
+      mPlayer.setDead(true);
+      HighScore::updateIfHigher(mScore);
+      printf("DEAD\n");
+    }
+    return;
+  }
+
   sf::Vector2f mousePos =
       mWindow.mapPixelToCoords(sf::Mouse::getPosition(mWindow));
 
@@ -1183,13 +1209,14 @@ void CGAME::update(float dt) {
   if (mEnteringSaveName)
     return;
 
-  if (!mPlayer.isDead() && !mPlayer.isFinish()) {
+  if (!mPlayer.isDead() && !mPlayer.isFinish() && !mIsDying) {
     mlevelTime += dt;
     if (mlevelTime >= Level_Time_Limit) {
-      mPlayer.setDead(true);
+      mIsDying = true;
+      sf::Vector2f hitPos(mPlayer.getPosition().x, mPlayer.getPosition().y);
+      mEffects.push_back(std::make_unique<CollisionEffect>(mCollisionSpritePath, hitPos, 4, 0, 0.07f, 2.5f));
       mSound.stopMusic();
       mSound.playDead();
-      HighScore::updateIfHigher(mScore);
       printf("You ran out of time\n");
     }
     mPlayer.Move(dt);
@@ -1222,6 +1249,10 @@ void CGAME::render() {
   mEntities.draw(mWindow);
 
   mPlayer.Draw(mWindow);
+
+  for (const auto &effect : mEffects) {
+    effect->draw(mWindow);
+  }
 
   if (mDebugHitbox) {
     auto drawRect = [&](sf::FloatRect r, sf::Color color) {
