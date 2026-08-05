@@ -1,30 +1,39 @@
-# Build output
+# Build outputs & temporary build directories
 build/
 build_win/
-cmake-build-debug/
-cmake-build-release/
+cmake-build-*/
+out/
+bin/
 
-# Compiled files
+# Compiled files & binaries
 *.o
+*.obj
 *.exe
 *.out
-
-# SFML (mỗi người tự cài, không commit lên)
-SFML*/
-SFML-*/
+*.app
+*.gch
+*.pch
+*.elf
+*.dylib
+*.so
 *.dll
 *.lib
 *.a
-*.dylib
 
-# macOS
-.DS_Store
-.AppleDouble
+# C++ Language Server & Tooling caches
+.cache/
+compile_commands.json
+compile_flags.txt
 
-# IDE — CLion
+# IDEs & Editor configurations
+.vscode/
 .idea/
+CMakeSettings.json
+*.swp
+*~
+*.bak
 
-# IDE — Visual Studio
+# Visual Studio files
 .vs/
 *.suo
 *.user
@@ -33,9 +42,22 @@ SFML-*/
 *.vcxproj.filters
 *.vcxproj.user
 
-# vcpkg
-vcpkg
+# External libraries / Dependencies
+SFML*/
+SFML-*/
+vcpkg/
 vcpkg_installed/
 
-# Saves (không commit file save cá nhân)
-saves/*.txt
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.LSOverride
+Icon?
+Thumbs.db
+ehthumbs.db
+
+# Game saves & runtime logs
+saves/
+*.log

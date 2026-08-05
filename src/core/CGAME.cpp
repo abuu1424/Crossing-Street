@@ -8,7 +8,9 @@ const float SPAWN_X = Win_W / 2.f - Player_W / 2.f;
 const float SPAWN_Y = Win_H - Player_H;
 
 CGAME::CGAME(sf::RenderWindow &window)
-    : mWindow(window), mScore(0), mlevelTime(0.f) {
+    : mWindow(window), mScore(0), mLevelStartScore(0), mlevelTime(0.f) {
+  sf::View view(sf::FloatRect(0.f, 0.f, (float)Win_W, (float)Win_H));
+  mWindow.setView(view);
   setupUI();
 }
 
@@ -16,69 +18,116 @@ CGAME::~CGAME() { clearEntities(); }
 
 void CGAME::setupUI() {
   mFont.loadFromFile(Font_Path);
+  mCutscene.init(mFont, &mSound);
 
   // Sound
   mSound.loadEffects("assets/sounds/victory/vt1.ogg",
                      "assets/sounds/dead/dead.ogg",
                      "assets/sounds/victory/level_clear.ogg");
 
-  // Bảng DEAD
-  float boxW = 400.f, boxH = 150.f;
+  mSound.loadElevatorSounds("assets/sounds/elevator/elevator_door.ogg",
+                            "assets/sounds/elevator/elevator_move.ogg",
+                            "assets/sounds/elevator/elevator_ding.ogg");
+
+  mSound.loadLevelDeathSounds();
+
+  // Bảng GAME OVER (DEAD) Cao cấp
+  float boxW = 540.f, boxH = 340.f;
   mDeadBox.setSize(sf::Vector2f(boxW, boxH));
-  mDeadBox.setFillColor(sf::Color(0, 0, 0, 180));
+  mDeadBox.setFillColor(sf::Color(25, 12, 18, 235));
+  mDeadBox.setOutlineColor(sf::Color(255, 60, 60));
+  mDeadBox.setOutlineThickness(3.5f);
   mDeadBox.setOrigin(boxW / 2.f, boxH / 2.f);
   mDeadBox.setPosition(Win_W / 2.f, Win_H / 2.f);
 
   mDeadText.setFont(mFont);
-  mDeadText.setString("YOU DIED!\nPress R to restart");
-  mDeadText.setCharacterSize(36);
-  mDeadText.setFillColor(sf::Color::Red);
+  mDeadText.setString("GAME OVER");
+  mDeadText.setCharacterSize(48);
+  mDeadText.setFillColor(sf::Color(255, 70, 70));
+  mDeadText.setOutlineColor(sf::Color(20, 0, 0));
+  mDeadText.setOutlineThickness(2.f);
   sf::FloatRect db = mDeadText.getLocalBounds();
   mDeadText.setOrigin(db.left + db.width / 2.f, db.top + db.height / 2.f);
-  mDeadText.setPosition(Win_W / 2.f, Win_H / 2.f);
+  mDeadText.setPosition(Win_W / 2.f, Win_H / 2.f - 105.f);
 
-  // Bảng VICTORY
-  // Bảng VICTORY
-  float vboxW = 500.f, vboxH = 260.f;
+  mDeadSubText.setFont(mFont);
+  mDeadSubText.setString("Failed to cross the street!");
+  mDeadSubText.setCharacterSize(22);
+  mDeadSubText.setFillColor(sf::Color(220, 200, 200));
+  sf::FloatRect dsb = mDeadSubText.getLocalBounds();
+  mDeadSubText.setOrigin(dsb.left + dsb.width / 2.f,
+                         dsb.top + dsb.height / 2.f);
+  mDeadSubText.setPosition(Win_W / 2.f, Win_H / 2.f - 55.f);
+
+  mDeadScore.setFont(mFont);
+  mDeadScore.setString("SCORE: 0");
+  mDeadScore.setCharacterSize(24);
+  mDeadScore.setFillColor(sf::Color(255, 215, 0));
+
+  mBtnDeadRestart.setup("assets/ui/menu/btn_yes.png", "RESTART", mFont,
+                        Win_W / 2.f - 130.f, Win_H / 2.f + 85.f,
+                        "assets/ui/menu/btn_yes_hover.png", 18);
+
+  mBtnDeadMenu.setup("assets/ui/menu/btn_yes.png", "MAIN MENU", mFont,
+                     Win_W / 2.f + 130.f, Win_H / 2.f + 85.f,
+                     "assets/ui/menu/btn_yes_hover.png", 18);
+
+  float vboxW = 620.f, vboxH = 400.f;
   mVictoryBox.setSize(sf::Vector2f(vboxW, vboxH));
-  mVictoryBox.setFillColor(sf::Color(0, 0, 0, 200));
-  mVictoryBox.setOutlineColor(sf::Color(255, 215, 0));
-  mVictoryBox.setOutlineThickness(3.f);
+  mVictoryBox.setFillColor(sf::Color(10, 14, 24, 235));
+  mVictoryBox.setOutlineColor(sf::Color(0, 210, 255, 230));
+  mVictoryBox.setOutlineThickness(3.5f);
   mVictoryBox.setOrigin(vboxW / 2.f, vboxH / 2.f);
   mVictoryBox.setPosition(Win_W / 2.f, Win_H / 2.f);
 
   mVictoryTitle.setFont(mFont);
   mVictoryTitle.setString("VICTORY!");
-  mVictoryTitle.setCharacterSize(52);
-  mVictoryTitle.setFillColor(sf::Color(255, 215, 0));
+  mVictoryTitle.setCharacterSize(50);
+  mVictoryTitle.setFillColor(sf::Color(255, 215, 0)); // Vàng sáng neon
+  mVictoryTitle.setOutlineColor(sf::Color(20, 10, 0));
+  mVictoryTitle.setOutlineThickness(2.f);
   sf::FloatRect vt = mVictoryTitle.getLocalBounds();
   mVictoryTitle.setOrigin(vt.left + vt.width / 2.f, vt.top + vt.height / 2.f);
-  mVictoryTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 85.f);
+  mVictoryTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 140.f);
 
   mVictorySubText.setFont(mFont);
-  mVictorySubText.setString("You escaped through time!\nPress R to play again");
+  mVictorySubText.setString("You Escaped Through Time!");
   mVictorySubText.setCharacterSize(20);
-  mVictorySubText.setFillColor(sf::Color::White);
+  mVictorySubText.setFillColor(sf::Color(180, 225, 255)); // Cyan / Trắng sáng
   sf::FloatRect vs = mVictorySubText.getLocalBounds();
   mVictorySubText.setOrigin(vs.left + vs.width / 2.f, vs.top + vs.height / 2.f);
-  mVictorySubText.setPosition(Win_W / 2.f, Win_H / 2.f - 20.f);
+  mVictorySubText.setPosition(Win_W / 2.f, Win_H / 2.f - 90.f);
+
+  mVictoryStarsText.setFont(mFont);
+  mVictoryStarsText.setCharacterSize(22);
+  mVictoryStarsText.setFillColor(sf::Color(255, 220, 50));
 
   mVictoryScore.setFont(mFont);
-  mVictoryScore.setString("SCORE: 0");
-  mVictoryScore.setCharacterSize(26);
-  mVictoryScore.setFillColor(sf::Color::White);
+  mVictoryScore.setString("FINAL SCORE: 0");
+  mVictoryScore.setCharacterSize(24);
+  mVictoryScore.setFillColor(sf::Color(0, 230, 255));
   sf::FloatRect sc = mVictoryScore.getLocalBounds();
   mVictoryScore.setOrigin(sc.left + sc.width / 2.f, sc.top + sc.height / 2.f);
-  mVictoryScore.setPosition(Win_W / 2.f, Win_H / 2.f + 45.f);
+  mVictoryScore.setPosition(Win_W / 2.f, Win_H / 2.f + 5.f);
 
   mVictoryHighScore.setFont(mFont);
   mVictoryHighScore.setString("HIGH SCORE: 0");
-  mVictoryHighScore.setCharacterSize(26);
+  mVictoryHighScore.setCharacterSize(24);
   mVictoryHighScore.setFillColor(sf::Color(255, 215, 0));
   sf::FloatRect hs = mVictoryHighScore.getLocalBounds();
   mVictoryHighScore.setOrigin(hs.left + hs.width / 2.f,
                               hs.top + hs.height / 2.f);
-  mVictoryHighScore.setPosition(Win_W / 2.f, Win_H / 2.f + 85.f);
+  mVictoryHighScore.setPosition(Win_W / 2.f, Win_H / 2.f + 48.f);
+
+  // Hai nút nằm ngang cùng kích thước, cùng thiết kế chữ nhật crimson red pixel
+  // art
+  mBtnVictoryPlayAgain.setup("assets/ui/menu/btn_yes.png", "PLAY AGAIN",
+                             mFont, Win_W / 2.f - 135.f, Win_H / 2.f + 130.f,
+                             "assets/ui/menu/btn_yes_hover.png", 18);
+
+  mBtnVictoryMenu.setup("assets/ui/menu/btn_yes.png", "MAIN MENU",
+                        mFont, Win_W / 2.f + 135.f, Win_H / 2.f + 130.f,
+                        "assets/ui/menu/btn_yes_hover.png", 18);
 
   // Bảng nhập tên save
   float sboxW = 450.f, sboxH = 180.f;
@@ -121,13 +170,11 @@ void CGAME::setupUI() {
   mQuitTitle.setOrigin(qt.left + qt.width / 2.f, qt.top + qt.height / 2.f);
   mQuitTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 40.f);
 
-  mBtnYes.setup("assets/ui/menu/btn_yes.png", "YES", mFont,
-                Win_W / 2.f - 85.f, Win_H / 2.f + 35.f,
-                "assets/ui/menu/btn_yes_hover.png");
+  mBtnYes.setup("assets/ui/menu/btn_yes.png", "YES", mFont, Win_W / 2.f - 85.f,
+                Win_H / 2.f + 35.f, "assets/ui/menu/btn_yes_hover.png");
 
-  mBtnNo.setup("assets/ui/menu/btn_no.png", "NO", mFont,
-               Win_W / 2.f + 85.f, Win_H / 2.f + 35.f,
-               "assets/ui/menu/btn_no_hover.png");
+  mBtnNo.setup("assets/ui/menu/btn_no.png", "NO", mFont, Win_W / 2.f + 85.f,
+               Win_H / 2.f + 35.f, "assets/ui/menu/btn_no_hover.png");
 
   // Bảng Menu Confirm
   mMenuConfirmTitle.setFont(mFont);
@@ -365,15 +412,21 @@ bool sameLane(sf::FloatRect playerBox, sf::FloatRect objectBox) {
   return std::abs(playerCenterY - objectCenterY) < 40.f;
 }
 
-void CGAME::clearEntities() { mEntities.clear(); }
+void CGAME::clearEntities() { 
+  mEntities.clear();
+  mEffects.clear();
+}
 
 void CGAME::loadLevel(int level) {
   clearEntities();
   LevelConfig cfg = getLevel(level);
 
+  mDeathCutscene.reset();
+  mIsDying = false;
   mLevelCleared = false;
   mCurrentLevel = cfg.level;
   mlevelTime = 0.f;
+  mCollisionSpritePath = cfg.collisionSpritePath;
 
   // Background
   if (!mBgTexture.loadFromFile(cfg.backgroundPath))
@@ -402,8 +455,11 @@ void CGAME::reset() {
   mSound.stopAllEffects();
   mSound.stopMusic();
 
+  mDeathCutscene.reset();
   mScore = 0;
+  mLevelStartScore = 0;
   mlevelTime = 0.f;
+  mIsDying = false;
   mLevelCleared = false;
   mShowLevelClear = false;
   mShowMenuConfirm = false;
@@ -431,6 +487,7 @@ void CGAME::restartLevel() {
   mPlayer.setDead(false);
   mPlayer.setFinish(false);
   mPlayer.setPosition(SPAWN_X, SPAWN_Y);
+  mScore = mLevelStartScore;
   loadLevel(mCurrentLevel);
   mHUD.update(mCurrentLevel, mScore, mlevelTime);
 }
@@ -444,10 +501,132 @@ void CGAME::handleEvents() {
       continue;
     }
 
+    if (event.type == sf::Event::Resized) {
+      float windowRatio = (float)event.size.width / (float)event.size.height;
+      float viewRatio = (float)Win_W / (float)Win_H;
+      sf::View view(sf::FloatRect(0.f, 0.f, (float)Win_W, (float)Win_H));
+      float sizeX = 1.f;
+      float sizeY = 1.f;
+      float posX = 0.f;
+      float posY = 0.f;
+
+      if (windowRatio >= viewRatio) {
+        sizeX = viewRatio / windowRatio;
+        posX = (1.f - sizeX) / 2.f;
+      } else {
+        sizeY = windowRatio / viewRatio;
+        posY = (1.f - sizeY) / 2.f;
+      }
+
+      view.setViewport(sf::FloatRect(posX, posY, sizeX, sizeY));
+      mWindow.setView(view);
+      continue;
+    }
+
+    if (event.type == sf::Event::KeyPressed &&
+        event.key.code == sf::Keyboard::V) {
+      mDebugHitbox = !mDebugHitbox;
+      printf("Debug Hitbox %s\n", mDebugHitbox ? "ON" : "OFF");
+    }
+
     sf::Vector2f mouse;
     if (event.type == sf::Event::MouseButtonPressed) {
       mouse = mWindow.mapPixelToCoords(
           sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+    }
+
+    // Cutscene Thang Máy (Cho phép Skip bằng nút hoặc phím Enter)
+    if (mInCutscene) {
+      if (event.type == sf::Event::KeyPressed) {
+        if (event.key.code == sf::Keyboard::Enter ||
+            event.key.code == sf::Keyboard::Return ||
+            event.key.code == sf::Keyboard::Space) {
+          mCutscene.skip();
+        }
+      }
+
+      if (event.type == sf::Event::MouseButtonPressed &&
+          event.mouseButton.button == sf::Mouse::Left) {
+        if (mCutscene.isSkipButtonClicked(mouse)) {
+          mCutscene.skip();
+        }
+      }
+
+      continue;
+    }
+
+    // Bảng GAME OVER (DEAD)
+    if (mPlayer.isDead()) {
+      if (event.type == sf::Event::KeyPressed) {
+        if (event.key.code == sf::Keyboard::R ||
+            event.key.code == sf::Keyboard::Enter ||
+            event.key.code == sf::Keyboard::Space) {
+          if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
+            mResetCooldownClock.restart();
+            restartLevel();
+          }
+        } else if (event.key.code == sf::Keyboard::M ||
+                   event.key.code == sf::Keyboard::Escape) {
+          mSound.stopAllEffects();
+          mSound.stopMusic();
+          mPaused = false;
+          mInMenu = true;
+        }
+      }
+
+      if (event.type == sf::Event::MouseButtonPressed &&
+          event.mouseButton.button == sf::Mouse::Left) {
+        if (mBtnDeadRestart.contains(mouse)) {
+          if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
+            mResetCooldownClock.restart();
+            restartLevel();
+          }
+        } else if (mBtnDeadMenu.contains(mouse)) {
+          mSound.stopAllEffects();
+          mSound.stopMusic();
+          mPaused = false;
+          mInMenu = true;
+        }
+      }
+
+      continue;
+    }
+
+    // Bảng VICTORY Cao cấp
+    if (mPlayer.isFinish() && mCurrentLevel == Max_Level && !mShowLevelClear) {
+      if (event.type == sf::Event::KeyPressed) {
+        if (event.key.code == sf::Keyboard::R ||
+            event.key.code == sf::Keyboard::Enter ||
+            event.key.code == sf::Keyboard::Space) {
+          if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
+            mResetCooldownClock.restart();
+            reset();
+          }
+        } else if (event.key.code == sf::Keyboard::M ||
+                   event.key.code == sf::Keyboard::Escape) {
+          mSound.stopAllEffects();
+          mSound.stopMusic();
+          mPaused = false;
+          mInMenu = true;
+        }
+      }
+
+      if (event.type == sf::Event::MouseButtonPressed &&
+          event.mouseButton.button == sf::Mouse::Left) {
+        if (mBtnVictoryPlayAgain.contains(mouse)) {
+          if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
+            mResetCooldownClock.restart();
+            reset();
+          }
+        } else if (mBtnVictoryMenu.contains(mouse)) {
+          mSound.stopAllEffects();
+          mSound.stopMusic();
+          mPaused = false;
+          mInMenu = true;
+        }
+      }
+
+      continue;
     }
 
     // Bảng QUIT confirm
@@ -666,10 +845,9 @@ void CGAME::handleEvents() {
           mPlayer.setFinish(false);
 
           if (mCurrentLevel < Max_Level) {
-            loadLevel(mCurrentLevel + 1);
-            mHUD.update(mCurrentLevel, mScore, mlevelTime);
-            if (mActiveSlot > 0)
-              saveGame(mActiveSlot);
+            mLevelStartScore = mScore;
+            mInCutscene = true;
+            mCutscene.start(mCurrentLevel, mCurrentLevel + 1);
           } else {
             mShowLevelClear = false;
             mPlayer.setFinish(true);
@@ -715,11 +893,9 @@ void CGAME::handleEvents() {
           mPlayer.setFinish(false);
 
           if (mCurrentLevel < Max_Level) {
-            loadLevel(mCurrentLevel + 1);
-            mHUD.update(mCurrentLevel, mScore, mlevelTime);
-            mSound.stopLevelClear();
-            if (mActiveSlot > 0)
-              saveGame(mActiveSlot);
+            mLevelStartScore = mScore;
+            mInCutscene = true;
+            mCutscene.start(mCurrentLevel, mCurrentLevel + 1);
           } else {
             mPlayer.setFinish(true);
             mSound.playVictory();
@@ -868,31 +1044,33 @@ void CGAME::handleEvents() {
 }
 
 void CGAME::handleCollision() {
-  if (mPlayer.isDead() || mPlayer.isFinish())
+  if (mPlayer.isDead() || mPlayer.isFinish() || mIsDying || mDeathCutscene.isActive())
     return;
 
-  sf::FloatRect pb = shrinkBoxPercent(mPlayer.getBounds(), 0.18f, 0.22f);
+  sf::FloatRect pb = mPlayer.getHitbox();
 
-  for (auto *obs : mEntities.obstacles()) {
-    sf::FloatRect ob = shrinkBoxPercent(obs->getBounds(), 0.12f, 0.24f);
+  auto triggerDeath = [&](sf::Vector2f hitPos) {
+    mSound.stopMusic();
+    mSound.playLevelDeathSound(mCurrentLevel);
+    mDeathCutscene.start(hitPos, mCurrentLevel);
+  };
 
-    if (sameLane(pb, ob) && pb.intersects(ob)) {
-      mPlayer.setDead(true);
-      mSound.stopMusic();
-      mSound.playDead();
-      printf("DEAD\n");
+  for (const auto &obs : mEntities.obstacles()) {
+    sf::FloatRect ob = obs->getHitbox();
+
+    if (pb.intersects(ob)) {
+      sf::Vector2f hitPos(pb.left + pb.width / 2.f, pb.top + pb.height / 2.f);
+      triggerDeath(hitPos);
       return;
     }
   }
 
-  for (auto *ani : mEntities.animals()) {
-    sf::FloatRect ab = shrinkBoxPercent(ani->getBounds(), 0.15f, 0.22f);
+  for (const auto &ani : mEntities.animals()) {
+    sf::FloatRect ab = ani->getHitbox();
 
-    if (sameLane(pb, ab) && pb.intersects(ab)) {
-      mPlayer.setDead(true);
-      mSound.stopMusic();
-      mSound.playDead();
-      printf("DEAD\n");
+    if (pb.intersects(ab)) {
+      sf::Vector2f hitPos(pb.left + pb.width / 2.f, pb.top + pb.height / 2.f);
+      triggerDeath(hitPos);
       return;
     }
   }
@@ -911,7 +1089,8 @@ void CGAME::checkFinish() {
       timeRemaining = 0.f;
     int baseScore = 100 * mCurrentLevel;
     int timeBonus = static_cast<int>(timeRemaining) * 10;
-    mScore += baseScore + timeBonus;
+    mScore = mLevelStartScore + baseScore + timeBonus;
+    HighScore::updateIfHigher(mScore);
     printf("Level %d clear! +%d (base=%d, bonus=%d)\n", mCurrentLevel,
            baseScore + timeBonus, baseScore, timeBonus);
 
@@ -952,11 +1131,56 @@ void CGAME::checkFinish() {
 }
 
 void CGAME::update(float dt) {
-  sf::Vector2f mousePos = mWindow.mapPixelToCoords(sf::Mouse::getPosition(mWindow));
+  for (auto it = mEffects.begin(); it != mEffects.end(); ) {
+    (*it)->update(dt);
+    if ((*it)->isFinished()) {
+      it = mEffects.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  if (mIsDying) {
+    if (mEffects.empty()) {
+      mIsDying = false;
+      mPlayer.setDead(true);
+      HighScore::updateIfHigher(mScore);
+      printf("DEAD\n");
+    }
+    return;
+  }
+
+  sf::Vector2f mousePos =
+      mWindow.mapPixelToCoords(sf::Mouse::getPosition(mWindow));
+
+  if (mInCutscene) {
+    mCutscene.update(dt, mousePos);
+    if (mCutscene.isFinished()) {
+      mInCutscene = false;
+      int nextLvl = mCutscene.getTargetLevel();
+      loadLevel(nextLvl);
+      mHUD.update(mCurrentLevel, mScore, mlevelTime);
+      if (mActiveSlot > 0)
+        saveGame(mActiveSlot);
+    }
+    return;
+  }
 
   if (mShowQuitConfirm || mShowMenuConfirm) {
     mBtnYes.update(mousePos, dt);
     mBtnNo.update(mousePos, dt);
+    return;
+  }
+
+  if (mPlayer.isDead()) {
+    mBtnDeadRestart.update(mousePos, dt);
+    mBtnDeadMenu.update(mousePos, dt);
+    return;
+  }
+
+  if (mPlayer.isFinish() && mCurrentLevel == Max_Level && !mShowLevelClear) {
+    mBtnVictoryPlayAgain.update(mousePos, dt);
+    mBtnVictoryMenu.update(mousePos, dt);
     return;
   }
 
@@ -988,13 +1212,23 @@ void CGAME::update(float dt) {
   if (mEnteringSaveName)
     return;
 
-  if (!mPlayer.isDead() && !mPlayer.isFinish()) {
+  if (mDeathCutscene.isActive()) {
+    mDeathCutscene.update(dt);
+    if (mDeathCutscene.isFinished()) {
+      mIsDying = true;
+      mSound.playDead();
+    }
+    return;
+  }
+
+  if (!mPlayer.isDead() && !mPlayer.isFinish() && !mIsDying && !mDeathCutscene.isActive()) {
     mlevelTime += dt;
     if (mlevelTime >= Level_Time_Limit) {
-      mPlayer.setDead(true);
+      sf::Vector2f hitPos(mPlayer.getPosition().x + Player_W / 2.f, mPlayer.getPosition().y + Player_H / 2.f);
       mSound.stopMusic();
-      mSound.playDead();
-      printf("You ran out of time");
+      mSound.playLevelDeathSound(mCurrentLevel);
+      mDeathCutscene.start(hitPos, mCurrentLevel);
+      printf("You ran out of time\n");
     }
     mPlayer.Move(dt);
     mPlayer.update(dt);
@@ -1011,31 +1245,163 @@ void CGAME::update(float dt) {
 void CGAME::render() {
   mWindow.clear();
 
+  if (mInCutscene) {
+    mWindow.draw(mBgSprite);
+    mEntities.draw(mWindow);
+    mPlayer.Draw(mWindow);
+    mHUD.draw(mWindow);
+    mCutscene.render(mWindow);
+    mWindow.display();
+    return;
+  }
+
+  if (mDeathCutscene.isActive()) {
+    sf::View currentView = mWindow.getView();
+    sf::View shakeView = currentView;
+    shakeView.move(mDeathCutscene.getShakeOffset());
+    mWindow.setView(shakeView);
+
+    mWindow.draw(mBgSprite);
+    mEntities.draw(mWindow);
+
+    if (!mDeathCutscene.shouldHidePlayer()) {
+      mPlayer.Draw(mWindow);
+    }
+
+    mDeathCutscene.render(mWindow);
+    mHUD.draw(mWindow);
+
+    mWindow.setView(currentView);
+    mWindow.display();
+    return;
+  }
+
   mWindow.draw(mBgSprite);
 
   mEntities.draw(mWindow);
 
   mPlayer.Draw(mWindow);
 
+  for (const auto &effect : mEffects) {
+    effect->draw(mWindow);
+  }
+
+  if (mDebugHitbox) {
+    auto drawRect = [&](sf::FloatRect r, sf::Color color) {
+      sf::RectangleShape rect(sf::Vector2f(r.width, r.height));
+      rect.setPosition(r.left, r.top);
+      rect.setFillColor(sf::Color::Transparent);
+      rect.setOutlineColor(color);
+      rect.setOutlineThickness(2.f);
+      mWindow.draw(rect);
+    };
+
+    drawRect(mPlayer.getHitbox(), sf::Color::Green);
+    for (const auto &obs : mEntities.obstacles())
+      drawRect(obs->getHitbox(), sf::Color::Red);
+    for (const auto &ani : mEntities.animals())
+      drawRect(ani->getHitbox(), sf::Color::Yellow);
+  }
+
   mHUD.draw(mWindow);
 
   if (mPlayer.isDead()) {
-    if (mSpritePopupGameOver.getTexture())
-      mWindow.draw(mSpritePopupGameOver);
-    else
-      mWindow.draw(mDeadBox);
+    mWindow.draw(mDeadBox);
     mWindow.draw(mDeadText);
+    mWindow.draw(mDeadSubText);
+
+    mDeadScore.setString("SCORE: " + std::to_string(mScore));
+    sf::FloatRect ds = mDeadScore.getLocalBounds();
+    mDeadScore.setOrigin(ds.left + ds.width / 2.f, ds.top + ds.height / 2.f);
+    mDeadScore.setPosition(Win_W / 2.f, Win_H / 2.f - 5.f);
+    mWindow.draw(mDeadScore);
+
+    mBtnDeadRestart.draw(mWindow);
+    mBtnDeadMenu.draw(mWindow);
   }
 
   if (mPlayer.isFinish() && mCurrentLevel == Max_Level && !mShowLevelClear) {
-    if (mSpritePopupLevelClear.getTexture())
-      mWindow.draw(mSpritePopupLevelClear);
-    else
-      mWindow.draw(mVictoryBox);
+    // 1. Nền Panel Sci-Fi HUD Xanh đen tối, mờ nhẹ
+    mWindow.draw(mVictoryBox);
+
+    // 2. Viền kim loại phụ bên trong & Chi tiết cơ khí góc (Sci-Fi HUD Accents)
+    float vboxW = 620.f, vboxH = 400.f;
+    sf::RectangleShape innerFrame(sf::Vector2f(vboxW - 16.f, vboxH - 16.f));
+    innerFrame.setOrigin((vboxW - 16.f) / 2.f, (vboxH - 16.f) / 2.f);
+    innerFrame.setPosition(Win_W / 2.f, Win_H / 2.f);
+    innerFrame.setFillColor(sf::Color::Transparent);
+    innerFrame.setOutlineColor(sf::Color(0, 180, 230, 120));
+    innerFrame.setOutlineThickness(1.5f);
+    mWindow.draw(innerFrame);
+
+    // Dải Highlight kim loại trên & dưới HUD
+    sf::RectangleShape topBar(sf::Vector2f(vboxW - 24.f, 3.f));
+    topBar.setPosition(Win_W / 2.f - (vboxW - 24.f) / 2.f,
+                       Win_H / 2.f - vboxH / 2.f + 4.f);
+    topBar.setFillColor(sf::Color(0, 230, 255, 200));
+    mWindow.draw(topBar);
+
+    sf::RectangleShape botBar(sf::Vector2f(vboxW - 24.f, 3.f));
+    botBar.setPosition(Win_W / 2.f - (vboxW - 24.f) / 2.f,
+                       Win_H / 2.f + vboxH / 2.f - 7.f);
+    botBar.setFillColor(sf::Color(0, 80, 130, 180));
+    mWindow.draw(botBar);
+
+    // Chi tiết góc cơ khí L-bracket cyan/glow ở 4 góc HUD
+    float cornerSize = 14.f;
+    auto drawCorner = [&](float cx, float cy) {
+      sf::RectangleShape c1(sf::Vector2f(cornerSize, 3.f));
+      c1.setPosition(cx, cy);
+      c1.setFillColor(sf::Color(0, 240, 255));
+      sf::RectangleShape c2(sf::Vector2f(3.f, cornerSize));
+      c2.setPosition(cx, cy);
+      c2.setFillColor(sf::Color(0, 240, 255));
+      mWindow.draw(c1);
+      mWindow.draw(c2);
+    };
+
+    float leftX = Win_W / 2.f - vboxW / 2.f - 2.f;
+    float rightX = Win_W / 2.f + vboxW / 2.f + 2.f;
+    float topY = Win_H / 2.f - vboxH / 2.f - 2.f;
+    float botY = Win_H / 2.f + vboxH / 2.f + 2.f;
+
+    drawCorner(leftX, topY);
+    drawCorner(rightX - cornerSize, topY);
+    drawCorner(leftX, botY - cornerSize);
+    drawCorner(rightX - cornerSize, botY - cornerSize);
+
+    // 3. Title & Subtitle (Pure English Pixel Art)
+    mVictoryTitle.setString("VICTORY!");
+    sf::FloatRect vt = mVictoryTitle.getLocalBounds();
+    mVictoryTitle.setOrigin(vt.left + vt.width / 2.f, vt.top + vt.height / 2.f);
     mWindow.draw(mVictoryTitle);
+
+    mVictorySubText.setString("You Escaped Through Time!");
+    sf::FloatRect vs = mVictorySubText.getLocalBounds();
+    mVictorySubText.setOrigin(vs.left + vs.width / 2.f,
+                              vs.top + vs.height / 2.f);
     mWindow.draw(mVictorySubText);
 
-    mVictoryScore.setString("SCORE: " + std::to_string(mScore));
+    // 4. Rank Badge
+    std::string rankName = "TIME MASTER";
+    sf::Color rankColor = sf::Color(255, 215, 0);
+    if (mScore < 1000) {
+      rankName = "TIME SURVIVOR";
+      rankColor = sf::Color(200, 215, 230);
+    } else if (mScore < 2000) {
+      rankName = "TIME EXPLORER";
+      rankColor = sf::Color(255, 230, 100);
+    }
+    mVictoryStarsText.setString("RANK: " + rankName);
+    mVictoryStarsText.setFillColor(rankColor);
+    sf::FloatRect st = mVictoryStarsText.getLocalBounds();
+    mVictoryStarsText.setOrigin(st.left + st.width / 2.f,
+                                st.top + st.height / 2.f);
+    mVictoryStarsText.setPosition(Win_W / 2.f, Win_H / 2.f - 42.f);
+    mWindow.draw(mVictoryStarsText);
+
+    // 5. Score & High Score
+    mVictoryScore.setString("FINAL SCORE: " + std::to_string(mScore));
     sf::FloatRect sc = mVictoryScore.getLocalBounds();
     mVictoryScore.setOrigin(sc.left + sc.width / 2.f, sc.top + sc.height / 2.f);
 
@@ -1047,6 +1413,10 @@ void CGAME::render() {
 
     mWindow.draw(mVictoryScore);
     mWindow.draw(mVictoryHighScore);
+
+    // 6. Hai Nút nằm ngang ở phía dưới (CHƠI LẠI | MENU CHÍNH)
+    mBtnVictoryPlayAgain.draw(mWindow);
+    mBtnVictoryMenu.draw(mWindow);
   }
 
   if (mEnteringSaveName) {
@@ -1263,6 +1633,7 @@ bool CGAME::loadGame(int slot) {
     return false;
 
   mScore = score;
+  mLevelStartScore = score;
   mActiveSlot = slot;
   mCurrentSaveName =
       saveName.empty() ? ("Save Slot " + std::to_string(slot)) : saveName;

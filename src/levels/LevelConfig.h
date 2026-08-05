@@ -2,42 +2,67 @@
 #include <string>
 #include <vector>
 
-enum class ObstacleType { DINOSAUR, MAMMOTH, SPHINX, CAMEL, HORSE, RICKSHAW, WOOD, BUS, CAR, MOTOR, ECAR, ETRAIN };
-enum class AnimalType   { BIRD, PTERO, EAGLE, HORUS, ROW, ARROW, MISSILE, PLANE, DRONE, FLYCAR, UFO };
+enum class ObstacleType {
+  DINOSAUR,
+  MAMMOTH,
+  SPHINX,
+  CAMEL,
+  HORSE,
+  RICKSHAW,
+  WOOD,
+  BUS,
+  CAR,
+  MOTOR,
+  ECAR,
+  ETRAIN
+};
+enum class AnimalType {
+  BIRD,
+  PTERO,
+  EAGLE,
+  HORUS,
+  ROW,
+  ARROW,
+  MISSILE,
+  PLANE,
+  DRONE,
+  FLYCAR,
+  UFO
+};
 
 struct LaneConfig {
-    ObstacleType type;
-    float speed;
-    float direction;
-    float y;
-    std::string spritePath;
-    int   count;
-    float spacing;
+  ObstacleType type;
+  float speed;
+  float direction;
+  float y;
+  std::string spritePath;
+  int count;
+  float spacing;
 };
 
 struct AnimalConfig {
-    AnimalType type;
-    float speed;
-    float direction;
-    float y;
-    std::string spritePath;
-    int   count;
-    float spacing;
+  AnimalType type;
+  float speed;
+  float direction;
+  float y;
+  std::string spritePath;
+  int count;
+  float spacing;
 };
 
-
 struct LevelConfig {
-    int         level;
-    std::string backgroundPath;
-    std::string musicPath;
-    std::string playerSpritePath;
-    std::string hudBarPath;
-    std::string trafficRedPath;
-    std::string trafficGreenPath;
-    float trafficX;
-    float trafficY;
-    std::vector<LaneConfig>   lanes;
-    std::vector<AnimalConfig> animals;
+  int level;
+  std::string backgroundPath;
+  std::string musicPath;
+  std::string playerSpritePath;
+  std::string hudBarPath;
+  std::string trafficRedPath;
+  std::string trafficGreenPath;
+  std::string collisionSpritePath;
+  float trafficX;
+  float trafficY;
+  std::vector<LaneConfig> lanes;
+  std::vector<AnimalConfig> animals;
 };
 
 LevelConfig getLevel1();

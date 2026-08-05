@@ -2,9 +2,11 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <string>
-#include "SaveData.h"
 #include <vector>
+#include "SaveData.h"
 #include "Animation.h"
+#include "TextureManager.h"
+#include "MenuButton.h"
 
 enum class MenuResult {
     NONE,
@@ -23,77 +25,8 @@ enum class MenuScreen {
     MAIN,
     NEW_GAME_SELECT,
     LOAD,
-    SETTINGS
-};
-
-struct MenuButton {
-    sf::Sprite sprite;
-    sf::Texture texture;
-    sf::Texture textureHover;
-    sf::Text label;
-    float baseScale  = 1.f;   // scale bình thường
-    float hoverScale = 1.15f; // scale khi hover
-    float curScale   = 1.f;   // scale hiện tại
-    bool  hovered    = false;
-    bool  hasHoverTex = false;
-
-    void setup(const std::string &texPath, const std::string &textLabel,
-               sf::Font &font, float x, float y,
-               const std::string &hoverTexPath = "", unsigned int charSize = 26) {
-        if (!texture.loadFromFile(texPath)) {
-            printf("No img, using fallback: %s\n", texPath.c_str());
-            sf::Image img;
-            img.create(160, 50, sf::Color(60, 60, 80, 220));
-            texture.loadFromImage(img);
-        }
-
-        hasHoverTex = false;
-        if (!hoverTexPath.empty() && textureHover.loadFromFile(hoverTexPath)) {
-            hasHoverTex = true;
-        }
-
-        sprite.setTexture(texture);
-        float w = texture.getSize().x;
-        float h = texture.getSize().y;
-        sprite.setOrigin(w / 2.f, h / 2.f);
-        sprite.setPosition(x, y);
-        sprite.setScale(baseScale, baseScale);
-
-        label.setFont(font);
-        label.setString(textLabel);
-        label.setCharacterSize(charSize);
-        label.setFillColor(sf::Color::White);
-        label.setOutlineColor(sf::Color::Black);
-        label.setOutlineThickness(2.f);
-
-        sf::FloatRect lb = label.getLocalBounds();
-        label.setOrigin(lb.left + lb.width / 2.f, lb.top + lb.height / 2.f);
-        label.setPosition(x, y);
-    }
-
-    void update(sf::Vector2f mousePos, float dt) {
-        sf::FloatRect bounds = sprite.getGlobalBounds();
-        hovered = bounds.contains(mousePos);
-
-        if (hasHoverTex) {
-            sprite.setTexture(hovered ? textureHover : texture);
-        }
-
-        float target = hovered ? hoverScale : baseScale;
-        curScale += (target - curScale) * 12.f * dt;
-
-        sprite.setScale(curScale, curScale);
-        label.setScale(curScale, curScale);
-    }
-
-    void draw(sf::RenderWindow &w) const {
-        w.draw(sprite);
-        w.draw(label);
-    }
-
-    bool contains(sf::Vector2f pos) const {
-        return sprite.getGlobalBounds().contains(pos);
-    }
+    SETTINGS,
+    INFO
 };
 
 class Menu
@@ -107,7 +40,7 @@ class Menu
     sf::Text mTitle;
     sf::Texture mTitleTexture;
     sf::Sprite mTitleSprite;
-    Animation *mTitleAnim = nullptr;
+    std::unique_ptr<Animation> mTitleAnim;
 
 
     // Buttons
@@ -168,6 +101,21 @@ class Menu
     void drawNewGameNamePopup(sf::RenderWindow& window);
     void handleNewGameNameEvent(const sf::Event& event, MenuResult& result);
 
+    // Info / Help Popup
+    MenuButton mBtnInfo;
+    sf::Text mInfoTitle;
+    sf::Text mInfoControlsTitle;
+    sf::Text mInfoControlsText[4];
+    sf::Text mInfoGameplayTitle;
+    sf::Text mInfoGameplayText[3];
+    MenuButton mBtnBackInfo;
+
+    void setupInfoMenu();
+    void drawInfoMenu(sf::RenderWindow& window);
+    void handleInfoEvent(const sf::Event& event,
+                         sf::RenderWindow& window,
+                         MenuResult& result);
+
     void setupSettingsMenu();
     void updateSlider(Slider& s, sf::Vector2f mouse, bool mouseDown);
     void drawSlider(sf::RenderWindow& w, Slider& s);
@@ -181,7 +129,8 @@ class Menu
                      const std::string& texPath,
                      const std::string& label,
                      float x, float y,
-                     const std::string& hoverTexPath = "");
+                     const std::string& hoverTexPath = "",
+                     unsigned int charSize = 26);
     void updateButton(MenuButton& btn,
                       sf::Vector2f mousePos,
                       float dt);

@@ -1,5 +1,8 @@
 #pragma once
 #include "CPEOPLE.h"
+#include "CollisionEffect.h"
+#include "DeathCutscene.h"
+#include "ElevatorCutscene.h"
 #include "EntityManager.h"
 #include "HUD.h"
 #include "LevelConfig.h"
@@ -8,6 +11,7 @@
 #include "SoundManager.h"
 #include "Utils.h"
 #include <SFML/Graphics.hpp>
+#include <memory>
 #include <vector>
 
 class CGAME {
@@ -26,13 +30,25 @@ class CGAME {
 
   EntityManager mEntities;
 
+  // Collision Effects
+  std::string mCollisionSpritePath;
+  std::vector<std::unique_ptr<CollisionEffect>> mEffects;
+
+  // Cutscenes
+  ElevatorCutscene mCutscene;
+  bool mInCutscene = false;
+
+  DeathCutscene mDeathCutscene;
+
   // Trạng thái
+  bool mIsDying = false;
   bool mLevelCleared = false;
   int mCurrentLevel = 1;
 
   // HUD
   HUD mHUD;
   int mScore = 0;
+  int mLevelStartScore = 0;
   float mlevelTime = 0.f;
   // Helpers
   void loadLevel(int level);
@@ -48,13 +64,20 @@ class CGAME {
   // Bảng DEAD
   sf::Font mFont;
   sf::Text mDeadText;
+  sf::Text mDeadSubText;
+  sf::Text mDeadScore;
   sf::RectangleShape mDeadBox;
+  MenuButton mBtnDeadRestart;
+  MenuButton mBtnDeadMenu;
   // Bảng VICTORY
   sf::RectangleShape mVictoryBox;
   sf::Text mVictoryTitle;
   sf::Text mVictorySubText;
+  sf::Text mVictoryStarsText;
   sf::Text mVictoryScore;
   sf::Text mVictoryHighScore;
+  MenuButton mBtnVictoryPlayAgain;
+  MenuButton mBtnVictoryMenu;
 
   // Bảng nhập tên file save
   bool mEnteringSaveName = false;
@@ -112,7 +135,7 @@ class CGAME {
   bool mDraggingMusicSlider = false;
   bool mDraggingSFXSlider = false;
 
-  // Sound (nhạc nền + 3 sound effect, xem SoundManager.h)
+  // Sound
   SoundManager mSound;
 
   // Popup UI Panel Textures & Sprites
@@ -126,6 +149,7 @@ class CGAME {
   sf::Sprite mSpritePopupQuitConfirm;
 
   sf::Clock mResetCooldownClock;
+  bool mDebugHitbox = false;
 
 public:
   explicit CGAME(sf::RenderWindow &window);

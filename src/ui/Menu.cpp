@@ -1,5 +1,6 @@
 #include "Menu.h"
 #include "Utils.h"
+#include "TextureManager.h"
 #include <cmath>
 #include <cstdio>
 
@@ -9,35 +10,22 @@ Menu::Menu() {
     printf("FAILED font\n");
 
   // Background
-  if (!mBgTexture.loadFromFile("assets/ui/menu/menu_bg.png"))
-    printf("FAILED menu bg\n");
-  mBgSprite.setTexture(mBgTexture);
-  mBgSprite.setScale((float)Win_W / mBgTexture.getSize().x,
-                     (float)Win_H / mBgTexture.getSize().y);
+  const auto& bgTex = TextureManager::getInstance().getTexture("assets/ui/menu/menu_bg.png");
+  mBgSprite.setTexture(bgTex);
+  mBgSprite.setScale((float)Win_W / bgTex.getSize().x,
+                     (float)Win_H / bgTex.getSize().y);
 
   // Title
-
-  if (mTitleTexture.loadFromFile("assets/ui/menu/title.png")) {
-    printf("OK: %dx%d\n", mTitleTexture.getSize().x, mTitleTexture.getSize().y);
-    mTitleSprite.setTexture(mTitleTexture);
-    mTitleSprite.setTextureRect(sf::IntRect(0, 0, 350, 40));
-    mTitleSprite.setScale(3.f, 3.f);
-    mTitleSprite.setOrigin(350 / 2.f, 40 / 2.f);
-    mTitleSprite.setPosition(Win_W / 2.f, 120.f);
-    mTitleAnim = new Animation(mTitleSprite, mTitleTexture, 350, 40, 4, 4,
-                               0.12f, // frame
-                               true   // Loop
-    );
-  } else {
-    printf("FAILED TO LOAD TITLE");
-    mTitle.setFont(mFont);
-    mTitle.setString("CROSSING STREET");
-    mTitle.setCharacterSize(64);
-    mTitle.setFillColor(sf::Color(255, 215, 0));
-    sf::FloatRect tb = mTitle.getLocalBounds();
-    mTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
-    mTitle.setPosition(Win_W / 2.f, 160.f);
-  }
+  const auto& titleTex = TextureManager::getInstance().getTexture("assets/ui/menu/title.png");
+  mTitleSprite.setTexture(titleTex);
+  mTitleSprite.setTextureRect(sf::IntRect(0, 0, 350, 40));
+  mTitleSprite.setScale(3.f, 3.f);
+  mTitleSprite.setOrigin(350 / 2.f, 40 / 2.f);
+  mTitleSprite.setPosition(Win_W / 2.f, 120.f);
+  mTitleAnim = std::make_unique<Animation>(mTitleSprite, titleTex, 350, 40, 4, 4,
+                             0.12f, // frame
+                             true   // Loop
+  );
 
   // Buttons
   float btnY = 280.f;
@@ -51,9 +39,14 @@ Menu::Menu() {
   setupButton(mBtnSetting, "assets/ui/menu/btn_setting.png", "SETTINGS",
               Win_W / 2.f, btnY + gap * 3);
 
+  // Icon ? button (Info/Help) ở góc trên bên phải — dùng texture gỗ chuẩn
+  setupButton(mBtnInfo, "assets/ui/menu/btn_info.png", "?",
+              Win_W - 65.f, 65.f, "", 36);
+
   setupLoadMenu();
   setupSettingsMenu();
   setupNewGameNamePopup();
+  setupInfoMenu();
 
   // Nhạc nền
   if (!mMusic.openFromFile("assets/sounds/menu/menu_music.ogg"))
@@ -63,12 +56,13 @@ Menu::Menu() {
   mMusic.play();
 }
 
-Menu::~Menu() { delete mTitleAnim; }
+Menu::~Menu() = default;
 
 void Menu::setupButton(MenuButton &btn, const std::string &texPath,
                        const std::string &label, float x, float y,
-                       const std::string &hoverTexPath) {
-  btn.setup(texPath, label, mFont, x, y, hoverTexPath);
+                       const std::string &hoverTexPath,
+                       unsigned int charSize) {
+  btn.setup(texPath, label, mFont, x, y, hoverTexPath, charSize);
 }
 
 void Menu::setupLoadMenu() {
@@ -243,6 +237,10 @@ void Menu::handleEvent(const sf::Event &event, sf::RenderWindow &window,
     handleSettingsEvent(event, window, result);
     return;
   }
+  if (mScreen == MenuScreen::INFO) {
+    handleInfoEvent(event, window, result);
+    return;
+  }
 
   if (event.type == sf::Event::MouseButtonPressed &&
       event.mouseButton.button == sf::Mouse::Left) {
@@ -264,6 +262,8 @@ void Menu::handleEvent(const sf::Event &event, sf::RenderWindow &window,
       result = MenuResult::QUIT;
     } else if (mBtnSetting.sprite.getGlobalBounds().contains(mouse)) {
       mScreen = MenuScreen::SETTINGS;
+    } else if (mBtnInfo.sprite.getGlobalBounds().contains(mouse)) {
+      mScreen = MenuScreen::INFO;
     }
   }
 }
@@ -358,6 +358,10 @@ void Menu::update(float dt, sf::RenderWindow &window) {
     updateButton(mBtnBackSettings, mouse, dt);
     return;
   }
+  if (mScreen == MenuScreen::INFO) {
+    updateButton(mBtnBackInfo, mouse, dt);
+    return;
+  }
 
   if (mTitleAnim)
     mTitleAnim->update(dt);
@@ -365,6 +369,7 @@ void Menu::update(float dt, sf::RenderWindow &window) {
   updateButton(mBtnLoad, mouse, dt);
   updateButton(mBtnSetting, mouse, dt);
   updateButton(mBtnQuit, mouse, dt);
+  updateButton(mBtnInfo, mouse, dt);
 }
 
 void Menu::drawButton(sf::RenderWindow &w, MenuButton &btn) {
@@ -438,6 +443,10 @@ void Menu::draw(sf::RenderWindow &window) {
     drawSettingsMenu(window);
     return;
   }
+  if (mScreen == MenuScreen::INFO) {
+    drawInfoMenu(window);
+    return;
+  }
   window.draw(mBgSprite);
   if (mTitleAnim)
     window.draw(mTitleSprite);
@@ -447,6 +456,7 @@ void Menu::draw(sf::RenderWindow &window) {
   drawButton(window, mBtnLoad);
   drawButton(window, mBtnSetting);
   drawButton(window, mBtnQuit);
+  drawButton(window, mBtnInfo);
 }
 
 void Menu::setupSettingsMenu() {
@@ -632,4 +642,106 @@ void Menu::handleSettingsEvent(const sf::Event &event, sf::RenderWindow &window,
 
   updateSlider(mMusicSlider, mouse, mouseDown);
   updateSlider(mSFXSlider, mouse, mouseDown);
+}
+
+void Menu::setupInfoMenu() {
+  mInfoTitle.setFont(mFont);
+  mInfoTitle.setString("GAME INFORMATION & CONTROLS");
+  mInfoTitle.setCharacterSize(32);
+  mInfoTitle.setFillColor(sf::Color(255, 215, 0));
+  mInfoTitle.setOutlineColor(sf::Color::Black);
+  mInfoTitle.setOutlineThickness(3.f);
+  sf::FloatRect tb = mInfoTitle.getLocalBounds();
+  mInfoTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
+  mInfoTitle.setPosition(Win_W / 2.f, 220.f);
+
+  // Section 1: Controls
+  mInfoControlsTitle.setFont(mFont);
+  mInfoControlsTitle.setString("CONTROLS");
+  mInfoControlsTitle.setCharacterSize(24);
+  mInfoControlsTitle.setFillColor(sf::Color(100, 200, 255));
+  mInfoControlsTitle.setOutlineColor(sf::Color::Black);
+  mInfoControlsTitle.setOutlineThickness(2.f);
+  mInfoControlsTitle.setPosition(Win_W / 2.f - 260.f, 255.f);
+
+  std::string controls[] = {
+      "W / A / S / D  or  Arrow Keys : Move Player",
+      "P : Pause / Resume Game",
+      "R : Restart Level (In-game / Game Over)",
+      "ESC : Quit Dialog / Back"
+  };
+
+  for (int i = 0; i < 4; i++) {
+    mInfoControlsText[i].setFont(mFont);
+    mInfoControlsText[i].setString(controls[i]);
+    mInfoControlsText[i].setCharacterSize(18);
+    mInfoControlsText[i].setFillColor(sf::Color::White);
+    mInfoControlsText[i].setOutlineColor(sf::Color::Black);
+    mInfoControlsText[i].setOutlineThickness(1.5f);
+    mInfoControlsText[i].setPosition(Win_W / 2.f - 240.f, 282.f + i * 22.f);
+  }
+
+  // Section 2: Gameplay & Rules
+  mInfoGameplayTitle.setFont(mFont);
+  mInfoGameplayTitle.setString("GAMEPLAY & FEATURES");
+  mInfoGameplayTitle.setCharacterSize(24);
+  mInfoGameplayTitle.setFillColor(sf::Color(100, 200, 255));
+  mInfoGameplayTitle.setOutlineColor(sf::Color::Black);
+  mInfoGameplayTitle.setOutlineThickness(2.f);
+  mInfoGameplayTitle.setPosition(Win_W / 2.f - 260.f, 380.f);
+
+  std::string gameplay[] = {
+      "Cross 5 Eras : Prehistoric -> Ancient -> Medieval -> Modern -> Future",
+      "Red Traffic Lights temporarily stop obstacles for safe passage",
+      "F1 - F3 : Quick Save Slot 1-3   |   F4 - F6 : Quick Load Slot 1-3"
+  };
+
+  for (int i = 0; i < 3; i++) {
+    mInfoGameplayText[i].setFont(mFont);
+    mInfoGameplayText[i].setString(gameplay[i]);
+    mInfoGameplayText[i].setCharacterSize(18);
+    mInfoGameplayText[i].setFillColor(sf::Color::White);
+    mInfoGameplayText[i].setOutlineColor(sf::Color::Black);
+    mInfoGameplayText[i].setOutlineThickness(1.5f);
+    mInfoGameplayText[i].setPosition(Win_W / 2.f - 240.f, 407.f + i * 22.f);
+  }
+
+  // Back Button
+  setupButton(mBtnBackInfo, "assets/ui/menu/btn_back.png", "BACK", Win_W / 2.f, 515.f,
+              "assets/ui/menu/btn_back_hover.png");
+}
+
+void Menu::drawInfoMenu(sf::RenderWindow &window) {
+  window.draw(mBgSprite);
+  window.draw(mPanelSprite);
+  window.draw(mInfoTitle);
+
+  window.draw(mInfoControlsTitle);
+  for (int i = 0; i < 4; i++) {
+    window.draw(mInfoControlsText[i]);
+  }
+
+  window.draw(mInfoGameplayTitle);
+  for (int i = 0; i < 3; i++) {
+    window.draw(mInfoGameplayText[i]);
+  }
+
+  drawButton(window, mBtnBackInfo);
+}
+
+void Menu::handleInfoEvent(const sf::Event &event, sf::RenderWindow &window,
+                           MenuResult &result) {
+  if (event.type == sf::Event::MouseButtonPressed &&
+      event.mouseButton.button == sf::Mouse::Left) {
+    sf::Vector2f mouse = window.mapPixelToCoords(
+        sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+    if (mBtnBackInfo.sprite.getGlobalBounds().contains(mouse)) {
+      mScreen = MenuScreen::MAIN;
+    }
+  }
+  if (event.type == sf::Event::KeyPressed) {
+    if (event.key.code == sf::Keyboard::Escape) {
+      mScreen = MenuScreen::MAIN;
+    }
+  }
 }
