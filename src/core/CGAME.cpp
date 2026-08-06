@@ -555,80 +555,6 @@ void CGAME::handleEvents() {
       continue;
     }
 
-    // Bảng GAME OVER (DEAD)
-    if (mPlayer.isDead()) {
-      if (event.type == sf::Event::KeyPressed) {
-        if (event.key.code == sf::Keyboard::R ||
-            event.key.code == sf::Keyboard::Enter ||
-            event.key.code == sf::Keyboard::Space) {
-          if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
-            mResetCooldownClock.restart();
-            restartLevel();
-          }
-        } else if (event.key.code == sf::Keyboard::M ||
-                   event.key.code == sf::Keyboard::Escape) {
-          mSound.stopAllEffects();
-          mSound.stopMusic();
-          mPaused = false;
-          mInMenu = true;
-        }
-      }
-
-      if (event.type == sf::Event::MouseButtonPressed &&
-          event.mouseButton.button == sf::Mouse::Left) {
-        if (mBtnDeadRestart.contains(mouse)) {
-          if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
-            mResetCooldownClock.restart();
-            restartLevel();
-          }
-        } else if (mBtnDeadMenu.contains(mouse)) {
-          mSound.stopAllEffects();
-          mSound.stopMusic();
-          mPaused = false;
-          mInMenu = true;
-        }
-      }
-
-      continue;
-    }
-
-    // Bảng VICTORY Cao cấp
-    if (mPlayer.isFinish() && mCurrentLevel == Max_Level && !mShowLevelClear) {
-      if (event.type == sf::Event::KeyPressed) {
-        if (event.key.code == sf::Keyboard::R ||
-            event.key.code == sf::Keyboard::Enter ||
-            event.key.code == sf::Keyboard::Space) {
-          if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
-            mResetCooldownClock.restart();
-            reset();
-          }
-        } else if (event.key.code == sf::Keyboard::M ||
-                   event.key.code == sf::Keyboard::Escape) {
-          mSound.stopAllEffects();
-          mSound.stopMusic();
-          mPaused = false;
-          mInMenu = true;
-        }
-      }
-
-      if (event.type == sf::Event::MouseButtonPressed &&
-          event.mouseButton.button == sf::Mouse::Left) {
-        if (mBtnVictoryPlayAgain.contains(mouse)) {
-          if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
-            mResetCooldownClock.restart();
-            reset();
-          }
-        } else if (mBtnVictoryMenu.contains(mouse)) {
-          mSound.stopAllEffects();
-          mSound.stopMusic();
-          mPaused = false;
-          mInMenu = true;
-        }
-      }
-
-      continue;
-    }
-
     // Bảng QUIT confirm
     if (mShowQuitConfirm) {
       if (event.type == sf::Event::KeyPressed) {
@@ -679,6 +605,82 @@ void CGAME::handleEvents() {
           mInMenu = true;
         } else if (mBtnNo.contains(mouse)) {
           mShowMenuConfirm = false;
+        }
+      }
+
+      continue;
+    }
+
+    // Bảng GAME OVER (DEAD)
+    if (mPlayer.isDead()) {
+      if (event.type == sf::Event::KeyPressed) {
+        if (event.key.code == sf::Keyboard::R ||
+            event.key.code == sf::Keyboard::Enter ||
+            event.key.code == sf::Keyboard::Space) {
+          if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
+            mResetCooldownClock.restart();
+            restartLevel();
+          }
+        } else if (event.key.code == sf::Keyboard::M) {
+          mSound.stopAllEffects();
+          mSound.stopMusic();
+          mPaused = false;
+          mInMenu = true;
+        } else if (event.key.code == sf::Keyboard::Escape) {
+          mShowQuitConfirm = true;
+        }
+      }
+
+      if (event.type == sf::Event::MouseButtonPressed &&
+          event.mouseButton.button == sf::Mouse::Left) {
+        if (mBtnDeadRestart.contains(mouse)) {
+          if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
+            mResetCooldownClock.restart();
+            restartLevel();
+          }
+        } else if (mBtnDeadMenu.contains(mouse)) {
+          mSound.stopAllEffects();
+          mSound.stopMusic();
+          mPaused = false;
+          mInMenu = true;
+        }
+      }
+
+      continue;
+    }
+
+    // Bảng VICTORY Cao cấp
+    if (mPlayer.isFinish() && mCurrentLevel == Max_Level && !mShowLevelClear) {
+      if (event.type == sf::Event::KeyPressed) {
+        if (event.key.code == sf::Keyboard::R ||
+            event.key.code == sf::Keyboard::Enter ||
+            event.key.code == sf::Keyboard::Space) {
+          if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
+            mResetCooldownClock.restart();
+            reset();
+          }
+        } else if (event.key.code == sf::Keyboard::M) {
+          mSound.stopAllEffects();
+          mSound.stopMusic();
+          mPaused = false;
+          mInMenu = true;
+        } else if (event.key.code == sf::Keyboard::Escape) {
+          mShowQuitConfirm = true;
+        }
+      }
+
+      if (event.type == sf::Event::MouseButtonPressed &&
+          event.mouseButton.button == sf::Mouse::Left) {
+        if (mBtnVictoryPlayAgain.contains(mouse)) {
+          if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
+            mResetCooldownClock.restart();
+            reset();
+          }
+        } else if (mBtnVictoryMenu.contains(mouse)) {
+          mSound.stopAllEffects();
+          mSound.stopMusic();
+          mPaused = false;
+          mInMenu = true;
         }
       }
 
