@@ -21,6 +21,8 @@ void DeathCutscene::start(sf::Vector2f playerPos, int level) {
   float frameTime = 0.07f;
   float scale = 2.5f;
 
+  sf::Vector2f originOffset(-1.f, -1.f);
+
   switch (level) {
   case 1:
     // Quái vật nuốt chửng (12 frames, 4x3)
@@ -32,13 +34,14 @@ void DeathCutscene::start(sf::Vector2f playerPos, int level) {
     mHidePlayerRatio = 0.45f;
     break;
   case 2:
-    // Nổ bụi vàng / Cát lún (8 frames, 4x2)
+    // Nổ bụi vàng / Cát lún (12 frames, 4x3)
     texturePath = "assets/sprites/lv2_sp/collision/collision_2.png";
     cols = 4;
-    rows = 2;
+    rows = 3;
     frameTime = 0.07f;
-    mTotalDuration = 8 * frameTime;
+    mTotalDuration = 12 * frameTime;
     mHidePlayerRatio = 0.35f;
+    originOffset = sf::Vector2f(64.f, 98.f);
     break;
   case 3:
     // Lốc xoáy lá cây (8 frames, 4x2)
@@ -83,8 +86,11 @@ void DeathCutscene::start(sf::Vector2f playerPos, int level) {
 
     mAnim = std::make_unique<Animation>(mSprite, mTexture, fw, fh, cols, rows,
                                         frameTime, false);
-    mSprite.setOrigin(static_cast<float>(fw) / 2.f,
-                      static_cast<float>(fh) / 2.f);
+    if (originOffset.x < 0.f) {
+      originOffset = sf::Vector2f(static_cast<float>(fw) / 2.f,
+                                 static_cast<float>(fh) / 2.f);
+    }
+    mSprite.setOrigin(originOffset);
     mSprite.setScale(scale, scale);
     mSprite.setPosition(mPosition);
 
