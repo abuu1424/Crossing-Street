@@ -2,56 +2,74 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include <memory>
 #include <string>
 
 enum class HazardType {
     NONE,
-    DINO_STAMPEDE, // Level 1: Prehistoric
-    SANDSTORM,     // Level 2: Ancient Egypt
-    ARROW_RAIN,    // Level 3: Medieval
-    RUSH_HOUR,     // Level 4: Modern City
-    LASER_SCAN     // Level 5: Sci-Fi / Cyberpunk
+    DINO_STAMPEDE,  // Level 1: Prehistoric
+    SANDSTORM,      // Level 2: Desert
+    ARROW_RAIN,     // Level 3: Medieval
+    RUSH_HOUR,      // Level 4: Modern City (Thundercloud)
+    LASER_SCAN      // Level 5: Sci-Fi
 };
+
+class SoundManager;
 
 struct SandParticle {
     sf::Vector2f position;
-    float speed;
-    float radius;
+    float speed, radius, alpha;
     int colorIdx;
-    float alpha;
 };
 
 struct WindStreak {
     sf::Vector2f position;
-    float speed;
-    float scaleX;
-    float scaleY;
-    float alpha;
+    float speed, scaleX, scaleY, alpha;
 };
 
 struct ArrowTarget {
     sf::Vector2f position;
-    float warningTimer;
-    float maxWarningTime;
-    bool active;
-    bool struck;
-    float arrowY;
-};
-
-struct StampedeDino {
-    int textureIdx;
-    float xOffset;
-    float laneY;
-    float scale;
+    float warningTimer, maxWarningTime, arrowY;
+    bool active, struck;
+    bool soundPlayed = false;
 };
 
 struct LaserLane {
-    float laneY;
-    float warningTimer;
-    float maxWarningTime;
-    float activeTimer;
+    float laneY, warningTimer, maxWarningTime, activeTimer;
     bool active;
+    bool soundPlayed = false;
+};
+
+struct HerdAnimal {
+    float posX, laneY, speed, scale;
+    int textureIdx, direction;
+    int frameCount, frameW, frameH;
+    float animTimer = 0.f;
+    int currentFrame = 0;
+    int animCols = 2;
+    bool offScreen = false;
+};
+
+struct HerdLane {
+    float laneY, warningTimer, maxWarningTime;
+    int direction;
+    bool active;
+    std::vector<HerdAnimal> animals;
+};
+
+// Level 4: Thundercloud - vertical lightning strike down to a lane
+struct LightningStrike {
+    float laneY;
+    float strikeX;
+    float warningTimer;  // flashes warning before strike
+    float activeTimer;   // strike is lethal while > 0
+    bool active;
+    bool soundPlayed = false;
+};
+
+struct RainDrop {
+    sf::Vector2f position;
+    float speed;
+    float length;
 };
 
 class HazardManager {
@@ -59,72 +77,69 @@ public:
     HazardManager();
     ~HazardManager() = default;
 
-    void init(const sf::Font& font);
+    void init(const sf::Font& font, SoundManager* sound = nullptr);
+    void setSoundManager(SoundManager* sound) { mSound = sound; }
     void startLevel(int levelNumber);
     void reset();
 
-    void update(float dt, const sf::Vector2f& playerPos, std::vector<std::pair<sf::FloatRect, float>>& extraObstacleHitboxes);
+    void update(float dt, const sf::Vector2f& playerPos,
+                std::vector<std::pair<sf::FloatRect, float>>& extraHitboxes);
     void draw(sf::RenderWindow& window) const;
     void drawUI(sf::RenderWindow& window) const;
 
-    // Shake offset for window view
-    sf::Vector2f getShakeOffset() const { return mShakeOffset; }
-
-    // Wind drift applied to player during Sandstorm
+    sf::Vector2f getShakeOffset()     const { return mShakeOffset; }
     sf::Vector2f getPlayerWindDrift() const { return mWindDrift; }
-
-    // Multiplier for vehicle speeds during Rush Hour
-    float getSpeedMultiplier() const { return mSpeedMultiplier; }
-
-    bool isWarningActive() const { return mIsWarning; }
-    bool isHazardActive() const { return mIsActive; }
+    float        getSpeedMultiplier() const { return mSpeedMultiplier; }
+    bool         isWarningActive()    const { return mIsWarning; }
+    bool         isHazardActive()     const { return mIsActive; }
 
 private:
-    HazardType mCurrentHazard = HazardType::NONE;
-    int mCurrentLevel = 1;
-    sf::Font mFont;
+    SoundManager* mSound         = nullptr;
+    HazardType    mCurrentHazard = HazardType::NONE;
+    int           mCurrentLevel  = 1;
+    sf::Font      mFont;
 
-    float mCooldownTimer = 10.0f;
-    float mWarningTimer = 0.0f;
-    float mActiveTimer = 0.0f;
+    float mCooldownTimer = 10.f;
+    float mWarningTimer  = 0.f;
+    float mActiveTimer   = 0.f;
+    bool  mIsWarning     = false;
+    bool  mIsActive      = false;
 
-    bool mIsWarning = false;
-    bool mIsActive = false;
+    sf::Vector2f mPlayerPos       = {0.f, 0.f};
+    sf::Vector2f mShakeOffset     = {0.f, 0.f};
+    sf::Vector2f mWindDrift       = {0.f, 0.f};
+    float        mSpeedMultiplier = 1.f;
 
-    // Visuals & Effects
-    sf::Vector2f mPlayerPos = {0.f, 0.f};
-    sf::Vector2f mShakeOffset = {0.f, 0.f};
-    sf::Vector2f mWindDrift = {0.f, 0.f};
-    float mSpeedMultiplier = 1.0f;
+    sf::Text           mWarningText;
+    sf::RectangleShape mWarningBox;
 
-    // Level 1: Stampede (2 Lanes with mixed Dino types)
-    float mStampedeProgress = 0.f;
+    // Level 1: Herd Stampede
     std::vector<sf::Texture> mDinoTextures;
-    std::vector<StampedeDino> mStampedeDinos;
+    struct DinoFrameInfo { int frameCount, frameW, frameH; };
+    std::vector<DinoFrameInfo> mDinoFrameData;
+    std::vector<HerdLane>      mHerdLanes;
 
     // Level 2: Sandstorm
     std::vector<SandParticle> mSandParticles;
-    std::vector<WindStreak> mWindStreaks;
-    sf::RectangleShape mSandOverlay;
-    sf::Texture mSandParticleTexture;
-    sf::Texture mWindTexture;
+    std::vector<WindStreak>   mWindStreaks;
+    sf::Texture               mWindTexture;
 
     // Level 3: Arrow Rain
     std::vector<ArrowTarget> mArrowTargets;
-    sf::Texture mArrowTexture;
-    sf::Texture mReticleTexture;
+    sf::Texture              mArrowTexture;
+    sf::Texture              mReticleTexture;
 
-    // Level 4: Rush Hour
-    sf::RectangleShape mRushHourBanner;
-    sf::Text mRushHourText;
+    // Level 4: Thundercloud & Heavy Rain
+    sf::Texture                  mThundercloudTexture;
+    sf::Texture                  mLightningTexture;
+    float                        mCloudPosX     = -200.f;
+    float                        mLightningTimer = 0.f;
+    std::vector<LightningStrike> mLightningStrikes;
+    std::vector<RainDrop>        mRainDrops;
 
-    // Level 5: Sci-Fi Per-Lane Lasers
+    // Level 5: Laser
     std::vector<LaserLane> mLaserLanes;
-    sf::Texture mLaserTexture;
-
-    // Warning Banner Text
-    sf::Text mWarningText;
-    sf::RectangleShape mWarningBox;
+    sf::Texture            mLaserTexture;
 
     void triggerHazard();
     void endHazard();

@@ -19,7 +19,7 @@ CGAME::~CGAME() { clearEntities(); }
 void CGAME::setupUI() {
   mFont.loadFromFile(Font_Path);
   mCutscene.init(mFont, &mSound);
-  mHazardManager.init(mFont);
+  mHazardManager.init(mFont, &mSound);
 
   // Sound
   mSound.loadEffects("assets/sounds/victory/vt1.ogg",
@@ -31,6 +31,7 @@ void CGAME::setupUI() {
                             "assets/sounds/elevator/elevator_ding.ogg");
 
   mSound.loadLevelDeathSounds();
+  mSound.loadHazardSounds();
 
   // Bảng GAME OVER (DEAD) Cao cấp
   float boxW = 540.f, boxH = 340.f;

@@ -31,6 +31,17 @@ public:
     void loadLevelDeathSounds();
     void playLevelDeathSound(int level);
 
+    // Sound Hazard Cho 5 Level
+    void loadHazardSounds();
+    void playHazardSound(int level);
+    void stopHazardSounds();
+    void playDinoRoar();
+    void playStampede();
+    void playSandstorm();
+    void playArrowVolley();
+    void playRushHour();
+    void playLaserBeam();
+
     void setMusicVolume(float v);
     void setSFXVolume(float v);
 
@@ -43,6 +54,12 @@ private:
 
     sf::SoundBuffer mLevelDeathBuffers[5];
     sf::Sound mLevelDeathSounds[5];
+
+    sf::SoundBuffer mHazardBuffers[5];
+    sf::Sound mHazardSounds[5];
+
+    sf::SoundBuffer mDinoRoarBuffer;
+    sf::Sound mDinoRoarSound;
 
     sf::Music mLevelMusic;
     std::string mCurrentMusicPath;

@@ -73,8 +73,10 @@ void SoundManager::stopAllEffects() {
     mElevatorDoorSound.stop();
     mElevatorMoveSound.stop();
     mElevatorDingSound.stop();
+    mDinoRoarSound.stop();
     for (int i = 0; i < 5; ++i) {
         mLevelDeathSounds[i].stop();
+        mHazardSounds[i].stop();
     }
 }
 
@@ -106,6 +108,82 @@ void SoundManager::setMusicVolume(float v) {
     mLevelMusic.setVolume(v);
 }
 
+void SoundManager::loadHazardSounds() {
+    const std::string hazardPaths[5] = {
+        "assets/sounds/hazards/stampede.wav",
+        "assets/sounds/hazards/sandstorm.wav",
+        "assets/sounds/hazards/arrow_volley.wav",
+        "assets/sounds/hazards/rush_hour.wav",
+        "assets/sounds/hazards/laser_beam.wav"
+    };
+
+    for (int i = 0; i < 5; ++i) {
+        if (mHazardBuffers[i].loadFromFile(hazardPaths[i])) {
+            mHazardSounds[i].setBuffer(mHazardBuffers[i]);
+            mHazardSounds[i].setVolume(70.f);
+        }
+    }
+
+    if (mDinoRoarBuffer.loadFromFile("assets/sounds/hazards/dino_roar.wav")) {
+        mDinoRoarSound.setBuffer(mDinoRoarBuffer);
+        mDinoRoarSound.setVolume(85.f);
+    }
+}
+
+void SoundManager::playHazardSound(int level) {
+    switch (level) {
+    case 1: playStampede(); break;
+    case 2: playSandstorm(); break;
+    case 3: playArrowVolley(); break;
+    case 4: playRushHour(); break;
+    case 5: playLaserBeam(); break;
+    default: break;
+    }
+}
+
+void SoundManager::stopHazardSounds() {
+    mDinoRoarSound.stop();
+    for (int i = 0; i < 5; ++i) {
+        mHazardSounds[i].stop();
+    }
+}
+
+void SoundManager::playDinoRoar() {
+    if (mDinoRoarSound.getBuffer()) {
+        mDinoRoarSound.play();
+    }
+}
+
+void SoundManager::playStampede() {
+    if (mHazardSounds[0].getBuffer()) {
+        mHazardSounds[0].play();
+    }
+}
+
+void SoundManager::playSandstorm() {
+    if (mHazardSounds[1].getBuffer()) {
+        mHazardSounds[1].play();
+    }
+}
+
+void SoundManager::playArrowVolley() {
+    if (mHazardSounds[2].getBuffer()) {
+        mHazardSounds[2].play();
+    }
+}
+
+void SoundManager::playRushHour() {
+    if (mHazardSounds[3].getBuffer()) {
+        mHazardSounds[3].play();
+    }
+}
+
+void SoundManager::playLaserBeam() {
+    if (mHazardSounds[4].getBuffer()) {
+        mHazardSounds[4].play();
+    }
+}
+
 void SoundManager::setSFXVolume(float v) {
     mDeadSound.setVolume(v);
     mVictorySound.setVolume(v);
@@ -113,7 +191,9 @@ void SoundManager::setSFXVolume(float v) {
     mElevatorDoorSound.setVolume(v);
     mElevatorMoveSound.setVolume(v);
     mElevatorDingSound.setVolume(v);
+    mDinoRoarSound.setVolume(v);
     for (int i = 0; i < 5; ++i) {
         mLevelDeathSounds[i].setVolume(v);
+        mHazardSounds[i].setVolume(v);
     }
 }
