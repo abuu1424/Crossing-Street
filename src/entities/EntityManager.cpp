@@ -149,9 +149,9 @@ void EntityManager::spawnFromLevel(const LevelConfig &cfg) {
                        cfg.trafficY);
 }
 
-void EntityManager::update(float dt) {
+void EntityManager::update(float dt, float speedMultiplier) {
   for (auto &obs : mObstacles) {
-    obs->Move(dt);
+    obs->Move(dt * speedMultiplier);
     obs->update(dt);
   }
   for (auto &ani : mAnimals) {

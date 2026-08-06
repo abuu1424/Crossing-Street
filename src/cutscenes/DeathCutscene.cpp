@@ -88,7 +88,7 @@ void DeathCutscene::start(sf::Vector2f playerPos, int level) {
                                         frameTime, false);
     if (originOffset.x < 0.f) {
       originOffset = sf::Vector2f(static_cast<float>(fw) / 2.f,
-                                 static_cast<float>(fh) / 2.f);
+                                  static_cast<float>(fh) / 2.f);
     }
     mSprite.setOrigin(originOffset);
     mSprite.setScale(scale, scale);

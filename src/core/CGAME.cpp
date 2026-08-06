@@ -19,6 +19,7 @@ CGAME::~CGAME() { clearEntities(); }
 void CGAME::setupUI() {
   mFont.loadFromFile(Font_Path);
   mCutscene.init(mFont, &mSound);
+  mHazardManager.init(mFont);
 
   // Sound
   mSound.loadEffects("assets/sounds/victory/vt1.ogg",
@@ -121,12 +122,12 @@ void CGAME::setupUI() {
 
   // Hai nút nằm ngang cùng kích thước, cùng thiết kế chữ nhật crimson red pixel
   // art
-  mBtnVictoryPlayAgain.setup("assets/ui/menu/btn_yes.png", "PLAY AGAIN",
-                             mFont, Win_W / 2.f - 135.f, Win_H / 2.f + 130.f,
+  mBtnVictoryPlayAgain.setup("assets/ui/menu/btn_yes.png", "PLAY AGAIN", mFont,
+                             Win_W / 2.f - 135.f, Win_H / 2.f + 130.f,
                              "assets/ui/menu/btn_yes_hover.png", 18);
 
-  mBtnVictoryMenu.setup("assets/ui/menu/btn_yes.png", "MAIN MENU",
-                        mFont, Win_W / 2.f + 135.f, Win_H / 2.f + 130.f,
+  mBtnVictoryMenu.setup("assets/ui/menu/btn_yes.png", "MAIN MENU", mFont,
+                        Win_W / 2.f + 135.f, Win_H / 2.f + 130.f,
                         "assets/ui/menu/btn_yes_hover.png", 18);
 
   // Bảng nhập tên save
@@ -412,7 +413,7 @@ bool sameLane(sf::FloatRect playerBox, sf::FloatRect objectBox) {
   return std::abs(playerCenterY - objectCenterY) < 40.f;
 }
 
-void CGAME::clearEntities() { 
+void CGAME::clearEntities() {
   mEntities.clear();
   mEffects.clear();
 }
@@ -437,8 +438,10 @@ void CGAME::loadLevel(int level) {
 
   mSound.playLevelMusic(cfg.musicPath, 40.f);
 
-  // Player
+  // Player - Speed tuned per level (reduced base speed for challenge)
+  float levelPlayerSpeed = std::max(120.f, 155.f - (cfg.level - 1) * 7.f);
   mPlayer.reloadSprite(cfg.playerSpritePath);
+  mPlayer.setSpeed(levelPlayerSpeed);
   mPlayer.setDead(false);
   mPlayer.setFinish(false);
   mPlayer.setPosition(SPAWN_X, SPAWN_Y);
@@ -449,6 +452,7 @@ void CGAME::loadLevel(int level) {
 
   // Spawn obstacle/animal/traffic light — xem EntityManager::spawnFromLevel
   mEntities.spawnFromLevel(cfg);
+  mHazardManager.startLevel(cfg.level);
 }
 
 void CGAME::reset() {
@@ -1046,7 +1050,8 @@ void CGAME::handleEvents() {
 }
 
 void CGAME::handleCollision() {
-  if (mPlayer.isDead() || mPlayer.isFinish() || mIsDying || mDeathCutscene.isActive())
+  if (mPlayer.isDead() || mPlayer.isFinish() || mIsDying ||
+      mDeathCutscene.isActive())
     return;
 
   sf::FloatRect pb = mPlayer.getHitbox();
@@ -1133,7 +1138,7 @@ void CGAME::checkFinish() {
 }
 
 void CGAME::update(float dt) {
-  for (auto it = mEffects.begin(); it != mEffects.end(); ) {
+  for (auto it = mEffects.begin(); it != mEffects.end();) {
     (*it)->update(dt);
     if ((*it)->isFinished()) {
       it = mEffects.erase(it);
@@ -1223,10 +1228,12 @@ void CGAME::update(float dt) {
     return;
   }
 
-  if (!mPlayer.isDead() && !mPlayer.isFinish() && !mIsDying && !mDeathCutscene.isActive()) {
+  if (!mPlayer.isDead() && !mPlayer.isFinish() && !mIsDying &&
+      !mDeathCutscene.isActive()) {
     mlevelTime += dt;
     if (mlevelTime >= Level_Time_Limit) {
-      sf::Vector2f hitPos(mPlayer.getPosition().x + Player_W / 2.f, mPlayer.getPosition().y + Player_H / 2.f);
+      sf::Vector2f hitPos(mPlayer.getPosition().x + Player_W / 2.f,
+                          mPlayer.getPosition().y + Player_H / 2.f);
       mSound.stopMusic();
       mSound.playLevelDeathSound(mCurrentLevel);
       mDeathCutscene.start(hitPos, mCurrentLevel);
@@ -1235,7 +1242,28 @@ void CGAME::update(float dt) {
     mPlayer.Move(dt);
     mPlayer.update(dt);
 
-    mEntities.update(dt);
+    std::vector<std::pair<sf::FloatRect, float>> extraHazardBoxes;
+    mHazardManager.update(dt, mPlayer.getPosition(), extraHazardBoxes);
+
+    // Apply wind drift during Sandstorm
+    sf::Vector2f drift = mHazardManager.getPlayerWindDrift();
+    if (drift.x != 0.f || drift.y != 0.f) {
+      mPlayer.setPosition(mPlayer.getPosition().x + drift.x, mPlayer.getPosition().y + drift.y);
+    }
+
+    mEntities.update(dt, mHazardManager.getSpeedMultiplier());
+
+    // Check collision with extra hazards (Stampede, Arrows, Lasers)
+    sf::FloatRect pb = mPlayer.getHitbox();
+    for (const auto &hb : extraHazardBoxes) {
+      if (pb.intersects(hb.first)) {
+        sf::Vector2f hitPos(pb.left + pb.width / 2.f, pb.top + pb.height / 2.f);
+        mSound.stopMusic();
+        mSound.playLevelDeathSound(mCurrentLevel);
+        mDeathCutscene.start(hitPos, mCurrentLevel);
+        break;
+      }
+    }
 
     handleCollision();
     checkFinish();
@@ -1278,15 +1306,26 @@ void CGAME::render() {
     return;
   }
 
+  sf::View origView = mWindow.getView();
+  sf::Vector2f hazardShake = mHazardManager.getShakeOffset();
+  if (hazardShake.x != 0.f || hazardShake.y != 0.f) {
+    sf::View shakeView = origView;
+    shakeView.move(hazardShake);
+    mWindow.setView(shakeView);
+  }
+
   mWindow.draw(mBgSprite);
 
   mEntities.draw(mWindow);
+  mHazardManager.draw(mWindow);
 
   mPlayer.Draw(mWindow);
 
   for (const auto &effect : mEffects) {
     effect->draw(mWindow);
   }
+
+  mWindow.setView(origView);
 
   if (mDebugHitbox) {
     auto drawRect = [&](sf::FloatRect r, sf::Color color) {
@@ -1306,6 +1345,7 @@ void CGAME::render() {
   }
 
   mHUD.draw(mWindow);
+  mHazardManager.drawUI(mWindow);
 
   if (mPlayer.isDead()) {
     mWindow.draw(mDeadBox);

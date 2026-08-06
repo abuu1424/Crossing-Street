@@ -25,6 +25,8 @@ public:
     void Move(float dt);
     void update(float dt);
     void setPosition(float x, float y);
+    void setSpeed(float speed) { mSpeed = speed; }
+    float getSpeed() const { return mSpeed; }
     sf::Vector2f  getPosition() const;
     sf::FloatRect getBounds() const;
     sf::FloatRect getHitbox() const;

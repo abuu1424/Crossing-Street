@@ -54,6 +54,7 @@ target_include_directories(CrossingGame PRIVATE
     src/cutscenes
     src/levels
     src/ui
+    src/hazards
 )
 
 # Link SFML

@@ -10,6 +10,7 @@
 #include "SaveData.h"
 #include "SoundManager.h"
 #include "Utils.h"
+#include "HazardManager.h"
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
@@ -29,6 +30,7 @@ class CGAME {
   CPEOPLE mPlayer;
 
   EntityManager mEntities;
+  HazardManager mHazardManager;
 
   // Collision Effects
   std::string mCollisionSpritePath;

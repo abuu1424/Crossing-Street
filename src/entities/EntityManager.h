@@ -14,7 +14,7 @@ public:
     ~EntityManager();
 
     void spawnFromLevel(const LevelConfig& cfg);
-    void update(float dt);
+    void update(float dt, float speedMultiplier = 1.0f);
     void draw(sf::RenderWindow& window) const;
 
     void clear();
