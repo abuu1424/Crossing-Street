@@ -44,12 +44,12 @@ void DeathCutscene::start(sf::Vector2f playerPos, int level) {
     originOffset = sf::Vector2f(64.f, 98.f);
     break;
   case 3:
-    // Lốc xoáy lá cây (8 frames, 4x2)
+    // Lốc xoáy lá cây (12 frames, 4x3)
     texturePath = "assets/sprites/lv3_sp/collision/collision_3.png";
     cols = 4;
-    rows = 2;
+    rows = 3;
     frameTime = 0.07f;
-    mTotalDuration = 8 * frameTime;
+    mTotalDuration = 12 * frameTime;
     mHidePlayerRatio = 0.40f;
     break;
   case 4:
