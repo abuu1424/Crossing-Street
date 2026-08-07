@@ -1059,6 +1059,8 @@ void CGAME::handleCollision() {
 
   auto triggerDeath = [&](sf::Vector2f hitPos) {
     mSound.stopMusic();
+    mSound.stopHazardSounds();
+    mHazardManager.reset();
     mSound.playLevelDeathSound(mCurrentLevel);
     mDeathCutscene.start(hitPos, mCurrentLevel);
   };
@@ -1124,6 +1126,8 @@ void CGAME::checkFinish() {
     setupLevelClearOptions();
 
     mSound.stopMusic();
+    mSound.stopHazardSounds();
+    mHazardManager.reset();
     mPlayer.setFinish(true);
 
     if (mCurrentLevel < Max_Level) {
@@ -1152,6 +1156,9 @@ void CGAME::update(float dt) {
     if (mEffects.empty()) {
       mIsDying = false;
       mPlayer.setDead(true);
+      mSound.stopMusic();
+      mSound.stopHazardSounds();
+      mHazardManager.reset();
       HighScore::updateIfHigher(mScore);
       printf("DEAD\n");
     }
@@ -1224,6 +1231,9 @@ void CGAME::update(float dt) {
     mDeathCutscene.update(dt);
     if (mDeathCutscene.isFinished()) {
       mIsDying = true;
+      mSound.stopMusic();
+      mSound.stopHazardSounds();
+      mHazardManager.reset();
       mSound.playDead();
     }
     return;
@@ -1236,6 +1246,8 @@ void CGAME::update(float dt) {
       sf::Vector2f hitPos(mPlayer.getPosition().x + Player_W / 2.f,
                           mPlayer.getPosition().y + Player_H / 2.f);
       mSound.stopMusic();
+      mSound.stopHazardSounds();
+      mHazardManager.reset();
       mSound.playLevelDeathSound(mCurrentLevel);
       mDeathCutscene.start(hitPos, mCurrentLevel);
       printf("You ran out of time\n");
@@ -1244,7 +1256,8 @@ void CGAME::update(float dt) {
     mPlayer.update(dt);
 
     std::vector<std::pair<sf::FloatRect, float>> extraHazardBoxes;
-    mHazardManager.update(dt, mPlayer.getPosition(), extraHazardBoxes);
+    mHazardManager.update(dt, mPlayer.getPosition(), extraHazardBoxes, mScore);
+    mSound.update(dt);
 
     // Apply wind drift during Sandstorm
     sf::Vector2f drift = mHazardManager.getPlayerWindDrift();

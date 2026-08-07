@@ -28,8 +28,9 @@ void SoundManager::loadElevatorSounds(const std::string& doorPath,
 }
 
 void SoundManager::playLevelMusic(const std::string& musicPath, float volume) {
+    mBaseMusicVolume = volume;
     if (mCurrentMusicPath == musicPath && mLevelMusic.getStatus() == sf::Music::Playing) {
-        mLevelMusic.setVolume(volume);
+        mLevelMusic.setVolume(mBaseMusicVolume * mCurrentDuckingFactor);
         return;
     }
 
@@ -37,7 +38,9 @@ void SoundManager::playLevelMusic(const std::string& musicPath, float volume) {
     if (mLevelMusic.openFromFile(musicPath)) {
         mCurrentMusicPath = musicPath;
         mLevelMusic.setLoop(true);
-        mLevelMusic.setVolume(volume);
+        mCurrentDuckingFactor = 1.0f;
+        mTargetDuckingFactor = 1.0f;
+        mLevelMusic.setVolume(mBaseMusicVolume * mCurrentDuckingFactor);
         mLevelMusic.play();
     }
 }
@@ -73,10 +76,9 @@ void SoundManager::stopAllEffects() {
     mElevatorDoorSound.stop();
     mElevatorMoveSound.stop();
     mElevatorDingSound.stop();
-    mDinoRoarSound.stop();
+    stopHazardSounds();
     for (int i = 0; i < 5; ++i) {
         mLevelDeathSounds[i].stop();
-        mHazardSounds[i].stop();
     }
 }
 
@@ -105,7 +107,30 @@ void SoundManager::playElevatorDing() {
 }
 
 void SoundManager::setMusicVolume(float v) {
-    mLevelMusic.setVolume(v);
+    mBaseMusicVolume = v;
+    mLevelMusic.setVolume(mBaseMusicVolume * mCurrentDuckingFactor);
+}
+
+void SoundManager::setMusicDuckingFactor(float factor) {
+    if (factor < 0.f) factor = 0.f;
+    if (factor > 1.f) factor = 1.f;
+    mTargetDuckingFactor = factor;
+}
+
+void SoundManager::update(float dt) {
+    if (std::abs(mCurrentDuckingFactor - mTargetDuckingFactor) > 0.001f) {
+        float speed = 2.5f; // Fast and smooth fade transition (~0.4s)
+        if (mCurrentDuckingFactor < mTargetDuckingFactor) {
+            mCurrentDuckingFactor += dt * speed;
+            if (mCurrentDuckingFactor > mTargetDuckingFactor)
+                mCurrentDuckingFactor = mTargetDuckingFactor;
+        } else {
+            mCurrentDuckingFactor -= dt * speed;
+            if (mCurrentDuckingFactor < mTargetDuckingFactor)
+                mCurrentDuckingFactor = mTargetDuckingFactor;
+        }
+        mLevelMusic.setVolume(mBaseMusicVolume * mCurrentDuckingFactor);
+    }
 }
 
 void SoundManager::loadHazardSounds() {
@@ -137,6 +162,14 @@ void SoundManager::loadHazardSounds() {
         mLightningSound.setBuffer(mHazardBuffers[3]);
         mLightningSound.setVolume(100.f);
     }
+
+    if (mBlackHoleBuffer.loadFromFile("assets/sounds/hazards/black_hole.wav")) {
+        mBlackHoleSound.setBuffer(mBlackHoleBuffer);
+        mBlackHoleSound.setVolume(85.f);
+    } else if (mHazardBuffers[4].getSampleCount() > 0) {
+        mBlackHoleSound.setBuffer(mHazardBuffers[4]);
+        mBlackHoleSound.setVolume(75.f);
+    }
 }
 
 void SoundManager::playHazardSound(int level) {
@@ -145,7 +178,7 @@ void SoundManager::playHazardSound(int level) {
     case 2: playSandstorm(); break;
     case 3: playArrowVolley(); break;
     case 4: playRushHour(); break;
-    case 5: playLaserBeam(); break;
+    case 5: playLaserBeam(); playBlackHole(); break;
     default: break;
     }
 }
@@ -153,6 +186,7 @@ void SoundManager::playHazardSound(int level) {
 void SoundManager::stopHazardSounds() {
     mDinoRoarSound.stop();
     mLightningSound.stop();
+    mBlackHoleSound.stop();
     for (int i = 0; i < 5; ++i) {
         mHazardSounds[i].stop();
     }
@@ -170,33 +204,64 @@ void SoundManager::playLightning() {
     }
 }
 
+void SoundManager::playBlackHole() {
+    if (mBlackHoleSound.getBuffer()) {
+        mBlackHoleSound.setLoop(true);
+        if (mBlackHoleSound.getStatus() != sf::Sound::Playing) {
+            mBlackHoleSound.play();
+        }
+    }
+}
+
+void SoundManager::stopBlackHole() {
+    mBlackHoleSound.stop();
+}
+
 void SoundManager::playStampede() {
     if (mHazardSounds[0].getBuffer()) {
+        mHazardSounds[0].setLoop(false);
+        mHazardSounds[0].stop();
         mHazardSounds[0].play();
     }
 }
 
 void SoundManager::playSandstorm() {
     if (mHazardSounds[1].getBuffer()) {
-        mHazardSounds[1].play();
+        mHazardSounds[1].setLoop(true);
+        if (mHazardSounds[1].getStatus() != sf::Sound::Playing) {
+            mHazardSounds[1].play();
+        }
     }
 }
 
 void SoundManager::playArrowVolley() {
     if (mHazardSounds[2].getBuffer()) {
+        mHazardSounds[2].setLoop(false);
+        mHazardSounds[2].stop();
         mHazardSounds[2].play();
     }
 }
 
 void SoundManager::playRushHour() {
     if (mHazardSounds[3].getBuffer()) {
-        mHazardSounds[3].play();
+        mHazardSounds[3].setLoop(true);
+        if (mHazardSounds[3].getStatus() != sf::Sound::Playing) {
+            mHazardSounds[3].play();
+        }
     }
 }
 
 void SoundManager::playLaserBeam() {
     if (mHazardSounds[4].getBuffer()) {
+        mHazardSounds[4].setLoop(false);
+        mHazardSounds[4].stop();
         mHazardSounds[4].play();
+    }
+}
+
+void SoundManager::stopLaserBeam() {
+    if (mHazardSounds[4].getBuffer()) {
+        mHazardSounds[4].stop();
     }
 }
 
@@ -208,6 +273,8 @@ void SoundManager::setSFXVolume(float v) {
     mElevatorMoveSound.setVolume(v);
     mElevatorDingSound.setVolume(v);
     mDinoRoarSound.setVolume(v);
+    mLightningSound.setVolume(v);
+    mBlackHoleSound.setVolume(v);
     for (int i = 0; i < 5; ++i) {
         mLevelDeathSounds[i].setVolume(v);
         mHazardSounds[i].setVolume(v);

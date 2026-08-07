@@ -107,7 +107,8 @@ public:
     void reset();
 
     void update(float dt, const sf::Vector2f& playerPos,
-                std::vector<std::pair<sf::FloatRect, float>>& extraHitboxes);
+                std::vector<std::pair<sf::FloatRect, float>>& extraHitboxes,
+                int currentScore = 0);
     void draw(sf::RenderWindow& window) const;
     void drawUI(sf::RenderWindow& window) const;
 
@@ -121,6 +122,7 @@ private:
     SoundManager* mSound         = nullptr;
     HazardType    mCurrentHazard = HazardType::NONE;
     int           mCurrentLevel  = 1;
+    int           mPlayerScore   = 0;
     sf::Font      mFont;
 
     float mCooldownTimer = 10.f;
@@ -128,6 +130,8 @@ private:
     float mActiveTimer   = 0.f;
     bool  mIsWarning     = false;
     bool  mIsActive      = false;
+
+    float calculateCooldownFromScore(int score) const;
 
     sf::Vector2f mPlayerPos       = {0.f, 0.f};
     sf::Vector2f mShakeOffset     = {0.f, 0.f};

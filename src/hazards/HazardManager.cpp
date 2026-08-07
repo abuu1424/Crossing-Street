@@ -136,9 +136,25 @@ void HazardManager::startLevel(int level) {
     }
 }
 
+float HazardManager::calculateCooldownFromScore(int score) const {
+    if (score < 500) {
+        // Điểm thấp (<500): Hazard xảy ra lâu hơn (10.0s - 13.9s) cho người chơi thư thả
+        return 10.0f + (float)(rand() % 40) * 0.1f;
+    } else if (score < 1500) {
+        // Điểm trung bình (500 - 1499): Mặc định (6.0s - 8.9s)
+        return 6.0f + (float)(rand() % 30) * 0.1f;
+    } else {
+        // Điểm cao (>=1500): Hazard xảy ra dồn dập sớm hơn (3.5s - 5.4s) tăng tính thách thức
+        return 3.5f + (float)(rand() % 20) * 0.1f;
+    }
+}
+
 void HazardManager::reset() {
-    if (mSound) mSound->stopHazardSounds();
-    mCooldownTimer    = 6.f + (float)(rand() % 4);
+    if (mSound) {
+        mSound->stopHazardSounds();
+        mSound->setMusicDuckingFactor(1.0f);
+    }
+    mCooldownTimer    = calculateCooldownFromScore(mPlayerScore);
     mWarningTimer     = 0.f;
     mActiveTimer      = 0.f;
     mIsWarning        = false;
@@ -275,7 +291,7 @@ void HazardManager::triggerHazard() {
             l.soundPlayed = false;
             mLaserLanes.push_back(l);
         }
-        if (mSound) mSound->playLaserBeam();
+        if (mSound) mSound->playBlackHole();
     }
 }
 
@@ -283,9 +299,12 @@ void HazardManager::triggerHazard() {
 // endHazard
 // =========================================================
 void HazardManager::endHazard() {
-    if (mSound) mSound->stopHazardSounds();
+    if (mSound) {
+        mSound->stopHazardSounds();
+        mSound->setMusicDuckingFactor(1.0f);
+    }
     mIsActive = mIsWarning = false;
-    mCooldownTimer   = 6.f + (float)(rand()%5);
+    mCooldownTimer   = calculateCooldownFromScore(mPlayerScore);
     mShakeOffset     = {0.f,0.f};
     mWindDrift       = {0.f,0.f};
     mSpeedMultiplier = 1.f;
@@ -315,9 +334,28 @@ void HazardManager::updateParticles(float dt) {
 // update
 // =========================================================
 void HazardManager::update(float dt, const sf::Vector2f& playerPos,
-                           std::vector<std::pair<sf::FloatRect,float>>& extraHitboxes) {
-    mPlayerPos = playerPos;
+                           std::vector<std::pair<sf::FloatRect,float>>& extraHitboxes,
+                           int currentScore) {
+    mPlayerPos   = playerPos;
+    mPlayerScore = currentScore;
     if (mCurrentHazard == HazardType::NONE) return;
+
+    if (mSound) {
+        if (mIsWarning || mIsActive) {
+            float duckFactor = 1.0f;
+            switch (mCurrentHazard) {
+            case HazardType::DINO_STAMPEDE: duckFactor = 0.10f; break; // Level 1: Nhạc giảm 90% (còn 10%) cho tiếng dậm chân & tiếng gầm khủng long
+            case HazardType::SANDSTORM:     duckFactor = 0.20f; break; // Level 2: Nhạc giảm 80% (còn 20%) cho tiếng bão cát rền hú
+            case HazardType::ARROW_RAIN:    duckFactor = 0.25f; break; // Level 3: Nhạc giảm 75% (còn 25%) cho tiếng mưa tên xé gió
+            case HazardType::RUSH_HOUR:     duckFactor = 0.05f; break; // Level 4: Nhạc giảm 95% (còn 5%) cho dông bão sấm sét cuồng phong
+            case HazardType::BLACK_HOLE:    duckFactor = 0.10f; break; // Level 5: Nhạc giảm 90% (còn 10%) cho hố đen vũ trụ & laser
+            default:                        duckFactor = 1.0f;  break;
+            }
+            mSound->setMusicDuckingFactor(duckFactor);
+        } else {
+            mSound->setMusicDuckingFactor(1.0f);
+        }
+    }
 
     // State machine: Cooldown → Warning → Active → Cooldown
     if (!mIsWarning && !mIsActive) {
@@ -560,6 +598,10 @@ void HazardManager::update(float dt, const sf::Vector2f& playerPos,
                 if (l.warningTimer > 0.f) {
                     l.warningTimer -= dt;
                     continue;
+                }
+                if (!l.soundPlayed) {
+                    l.soundPlayed = true;
+                    if (mSound) mSound->playLaserBeam();
                 }
                 l.activeTimer -= dt;
                 if (l.activeTimer <= 0.f) {

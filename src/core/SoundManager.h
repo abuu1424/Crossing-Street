@@ -41,10 +41,18 @@ public:
     void playArrowVolley();
     void playRushHour();
     void playLaserBeam();
+    void stopLaserBeam();
+    void playBlackHole();
+    void stopBlackHole();
     void playLightning();
 
     void setMusicVolume(float v);
     void setSFXVolume(float v);
+
+    // Music Ducking cho Hazard
+    void update(float dt);
+    void setMusicDuckingFactor(float factor);
+    float getMusicDuckingFactor() const { return mTargetDuckingFactor; }
 
 private:
     sf::SoundBuffer mVictoryBuffer, mDeadBuffer, mLevelClearBuffer;
@@ -65,6 +73,12 @@ private:
     sf::SoundBuffer mLightningBuffer;
     sf::Sound mLightningSound;
 
+    sf::SoundBuffer mBlackHoleBuffer;
+    sf::Sound mBlackHoleSound;
+
     sf::Music mLevelMusic;
     std::string mCurrentMusicPath;
+    float mBaseMusicVolume = 40.f;
+    float mCurrentDuckingFactor = 1.0f;
+    float mTargetDuckingFactor = 1.0f;
 };
