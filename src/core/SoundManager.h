@@ -41,6 +41,7 @@ public:
     void playArrowVolley();
     void playRushHour();
     void playLaserBeam();
+    void playLightning();
 
     void setMusicVolume(float v);
     void setSFXVolume(float v);
@@ -60,6 +61,9 @@ private:
 
     sf::SoundBuffer mDinoRoarBuffer;
     sf::Sound mDinoRoarSound;
+
+    sf::SoundBuffer mLightningBuffer;
+    sf::Sound mLightningSound;
 
     sf::Music mLevelMusic;
     std::string mCurrentMusicPath;

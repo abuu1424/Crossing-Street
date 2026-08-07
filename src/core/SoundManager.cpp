@@ -120,13 +120,22 @@ void SoundManager::loadHazardSounds() {
     for (int i = 0; i < 5; ++i) {
         if (mHazardBuffers[i].loadFromFile(hazardPaths[i])) {
             mHazardSounds[i].setBuffer(mHazardBuffers[i]);
-            mHazardSounds[i].setVolume(70.f);
+            float vol = (i == 3) ? 55.f : 70.f; // Map 4 Heavy Rain ambient at 55.f
+            mHazardSounds[i].setVolume(vol);
         }
     }
 
     if (mDinoRoarBuffer.loadFromFile("assets/sounds/hazards/dino_roar.wav")) {
         mDinoRoarSound.setBuffer(mDinoRoarBuffer);
-        mDinoRoarSound.setVolume(85.f);
+        mDinoRoarSound.setVolume(100.f);
+    }
+
+    if (mLightningBuffer.loadFromFile("assets/sounds/hazards/lightning.wav")) {
+        mLightningSound.setBuffer(mLightningBuffer);
+        mLightningSound.setVolume(100.f);
+    } else if (mHazardBuffers[3].getSampleCount() > 0) {
+        mLightningSound.setBuffer(mHazardBuffers[3]);
+        mLightningSound.setVolume(100.f);
     }
 }
 
@@ -143,6 +152,7 @@ void SoundManager::playHazardSound(int level) {
 
 void SoundManager::stopHazardSounds() {
     mDinoRoarSound.stop();
+    mLightningSound.stop();
     for (int i = 0; i < 5; ++i) {
         mHazardSounds[i].stop();
     }
@@ -151,6 +161,12 @@ void SoundManager::stopHazardSounds() {
 void SoundManager::playDinoRoar() {
     if (mDinoRoarSound.getBuffer()) {
         mDinoRoarSound.play();
+    }
+}
+
+void SoundManager::playLightning() {
+    if (mLightningSound.getBuffer()) {
+        mLightningSound.play();
     }
 }
 

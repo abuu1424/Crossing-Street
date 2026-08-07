@@ -57,6 +57,7 @@ struct HerdLane {
     float laneY, warningTimer, maxWarningTime;
     int direction;
     bool active;
+    bool soundPlayed = false;
     std::vector<HerdAnimal> animals;
     float animTimer = 0.f;
     int currentFrame = 0;

@@ -166,7 +166,6 @@ void HazardManager::triggerHazard() {
     // --- Level 1: Herd Stampede ---
     if (mCurrentHazard == HazardType::DINO_STAMPEDE) {
         mHerdLanes.clear();
-        if (mSound) mSound->playStampede();
 
         struct LI { float laneY; int dir, tex; };
         const LI all[] = {{180.f,1,0},{315.f,-1,1},{270.f,1,2},{405.f,-1,3}};
@@ -329,10 +328,10 @@ void HazardManager::update(float dt, const sf::Vector2f& playerPos,
 
             std::string warnStr;
             switch (mCurrentHazard) {
-            case HazardType::DINO_STAMPEDE: warnStr="! STAMPEDE - HERD CHARGING !"; if(mSound)mSound->playStampede(); break;
+            case HazardType::DINO_STAMPEDE: warnStr="! STAMPEDE - HERD CHARGING !"; if(mSound)mSound->playDinoRoar(); break;
             case HazardType::SANDSTORM:     warnStr="! SANDSTORM INCOMING !";        break;
             case HazardType::ARROW_RAIN:    warnStr="! ARROW VOLLEY - TAKE COVER !"; break;
-            case HazardType::RUSH_HOUR:     warnStr="! THUNDERSTORM & HEAVY RAIN !"; break;
+            case HazardType::RUSH_HOUR:     warnStr="! THUNDERSTORM & HEAVY RAIN !"; if(mSound)mSound->playLightning(); break;
             case HazardType::BLACK_HOLE:    warnStr="! WARNING: BLACK HOLE GRAVITY SURGE !"; break;
             default:                        warnStr="! HAZARD WARNING !";            break;
             }
@@ -380,6 +379,12 @@ void HazardManager::update(float dt, const sf::Vector2f& playerPos,
                 herd.currentFrame = (int)(herd.animTimer * 12.0f) % 12;
 
                 if (herd.warningTimer > 0.f) { herd.warningTimer -= dt; continue; }
+
+                if (!herd.soundPlayed) {
+                    herd.soundPlayed = true;
+                    if (mSound) mSound->playStampede();
+                }
+
                 bool anyOn = false;
                 for (auto& an : herd.animals) {
                     if (an.offScreen) continue;
@@ -503,7 +508,7 @@ void HazardManager::update(float dt, const sf::Vector2f& playerPos,
                 } else {
                     if (!ls.soundPlayed) { 
                         ls.soundPlayed = true; 
-                        if (mSound) mSound->playRushHour(); 
+                        if (mSound) mSound->playLightning(); 
                     }
                     ls.activeTimer -= dt;
                     if (ls.activeTimer <= 0.f) { 
