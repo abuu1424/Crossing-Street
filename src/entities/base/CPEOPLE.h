@@ -27,6 +27,9 @@ public:
     void reloadSprite(const std::string& texturePath);
     void Move(float dt, int score = 0, bool hasActiveHazard = false);
     void activateSpeedSkill();
+    void activateRadarSkill();
+    void activateTimeSkill();
+    void triggerCooldownWarning();
     void update(float dt);
 
     void setPosition(float x, float y);
@@ -50,8 +53,22 @@ public:
     void knockback(float distanceY = 160.f);
     void resetStats();
 
-
     void Draw(sf::RenderWindow& window);
 private:
     float mInvulnerableTimer = 0.f;
+
+    // Skill animation visual assets
+    sf::Texture mFlashAuraTexture;
+    sf::Sprite  mFlashAuraSprite;
+    sf::Texture mRadarWaveTexture;
+    sf::Sprite  mRadarWaveSprite;
+    sf::Texture mTimeFreezeTexture;
+    sf::Sprite  mTimeFreezeSprite;
+    sf::Font    mWarnFont;
+    sf::Text    mWarnText;
+    float       mAuraRotation = 0.f;
+    bool        mAuraLoaded = false;
+    bool        mRadarLoaded = false;
+    bool        mTimeFreezeLoaded = false;
+    bool        mWarnFontLoaded = false;
 };

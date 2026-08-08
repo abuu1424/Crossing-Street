@@ -17,6 +17,23 @@ CPEOPLE::CPEOPLE()
 
     mSprite.setPosition(mPosition);
 
+    if (mFlashAuraTexture.loadFromFile("assets/shop/animation_shop/flash_speed.png")) {
+        mFlashAuraSprite.setTexture(mFlashAuraTexture);
+        mFlashAuraSprite.setOrigin(32.f, 32.f);
+        mAuraLoaded = true;
+    }
+    if (mRadarWaveTexture.loadFromFile("assets/shop/animation_shop/radar_wave.png")) {
+        mRadarWaveSprite.setTexture(mRadarWaveTexture);
+        mRadarWaveSprite.setOrigin(64.f, 64.f);
+        mRadarLoaded = true;
+    }
+    if (mTimeFreezeTexture.loadFromFile("assets/shop/animation_shop/time_freeze.png")) {
+        mTimeFreezeSprite.setTexture(mTimeFreezeTexture);
+        mTimeFreezeSprite.setOrigin(64.f, 64.f);
+        mTimeFreezeLoaded = true;
+    }
+    mWarnFontLoaded = mWarnFont.loadFromFile(Font_Path);
+
     loadSprite("assets/sprites/lv1_sp/player/player.png");
 }
 
@@ -54,6 +71,54 @@ void CPEOPLE::update(float dt) {
         if (mInvulnerableTimer < 0.f) mInvulnerableTimer = 0.f;
     }
 
+    mAuraRotation += dt * 500.f;
+    if (mAuraRotation >= 360.f) mAuraRotation -= 360.f;
+
+    if (mStats.cooldownWarningTimer > 0.f) {
+        mStats.cooldownWarningTimer -= dt;
+        if (mStats.cooldownWarningTimer < 0.f) mStats.cooldownWarningTimer = 0.f;
+    }
+
+    // Update Skill 'E' timer
+    if (mStats.skillActive) {
+        mStats.skillTimer -= dt;
+        if (mStats.skillTimer <= 0.f) {
+            mStats.skillActive = false;
+            mStats.skillTimer = 0.f;
+            mStats.skillCooldownTimer = mStats.skillCooldownDuration; // 10.0s cooldown
+        }
+    } else if (mStats.skillCooldownTimer > 0.f) {
+        mStats.skillCooldownTimer -= dt;
+        if (mStats.skillCooldownTimer < 0.f) mStats.skillCooldownTimer = 0.f;
+    }
+
+    // Update Skill 'Q' (Radar Pulse) timer
+    if (mStats.radarActive) {
+        mStats.radarTimer -= dt;
+        mStats.radarPulseRadius += dt * 250.f;
+        if (mStats.radarTimer <= 0.f) {
+            mStats.radarActive = false;
+            mStats.radarTimer = 0.f;
+            mStats.radarCooldownTimer = mStats.radarCooldownDuration; // 10.0s cooldown
+        }
+    } else if (mStats.radarCooldownTimer > 0.f) {
+        mStats.radarCooldownTimer -= dt;
+        if (mStats.radarCooldownTimer < 0.f) mStats.radarCooldownTimer = 0.f;
+    }
+
+    // Update Skill 'T' (Time Freeze Clock) timer
+    if (mStats.timeFreezeActive) {
+        mStats.timeFreezeTimer -= dt;
+        if (mStats.timeFreezeTimer <= 0.f) {
+            mStats.timeFreezeActive = false;
+            mStats.timeFreezeTimer = 0.f;
+            mStats.timeFreezeCooldownTimer = mStats.timeFreezeCooldownDuration; // 12.0s cooldown
+        }
+    } else if (mStats.timeFreezeCooldownTimer > 0.f) {
+        mStats.timeFreezeCooldownTimer -= dt;
+        if (mStats.timeFreezeCooldownTimer < 0.f) mStats.timeFreezeCooldownTimer = 0.f;
+    }
+
     if (!mAnim || !mSprite.getTexture()) return;
 
     unsigned int texH = mSprite.getTexture()->getSize().y;
@@ -78,8 +143,40 @@ void CPEOPLE::activateSpeedSkill() {
             mStats.skillActive = true;
             mStats.skillTimer = mStats.skillDuration; // 5.0s
             printf("SPEED SURGE SKILL ACTIVATED (+0.5 Initial Speed Boost)!\n");
+        } else if (mStats.skillCooldownTimer > 0.f) {
+            triggerCooldownWarning();
         }
     }
+}
+
+void CPEOPLE::activateRadarSkill() {
+    if (ShopData::isItemPurchased("radar") || mStats.hasRadarSkill) {
+        if (mStats.radarCooldownTimer <= 0.f && !mStats.radarActive) {
+            mStats.radarActive = true;
+            mStats.radarTimer = mStats.radarDuration; // 3.5s
+            mStats.radarPulseRadius = 0.f;
+            printf("RADAR EMP SONAR PULSE ACTIVATED (50%% Obstacle Slow)!\n");
+        } else if (mStats.radarCooldownTimer > 0.f) {
+            triggerCooldownWarning();
+        }
+    }
+}
+
+void CPEOPLE::activateTimeSkill() {
+    if (ShopData::isItemPurchased("time") || mStats.hasTimeSkill) {
+        if (mStats.timeFreezeCooldownTimer <= 0.f && !mStats.timeFreezeActive) {
+            mStats.timeFreezeActive = true;
+            mStats.timeFreezeTimer = mStats.timeFreezeDuration; // 5.0s
+            printf("TIME FREEZE CLOCK ACTIVATED (100%% Freeze)!\n");
+        } else if (mStats.timeFreezeCooldownTimer > 0.f) {
+            triggerCooldownWarning();
+        }
+    }
+}
+
+void CPEOPLE::triggerCooldownWarning() {
+    mStats.cooldownWarningMsg = "SKILL ON COOLDOWN";
+    mStats.cooldownWarningTimer = 1.2f;
 }
 
 // Move
@@ -88,22 +185,28 @@ void CPEOPLE::Move(float dt, int score, bool hasActiveHazard)
     if (mIsDead || mIsFinish) return;
 
     // Check Skill 'E' Key
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
+    static bool ePressedLast = false;
+    bool ePressedNow = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
+    if (ePressedNow && !ePressedLast) {
         activateSpeedSkill();
     }
+    ePressedLast = ePressedNow;
 
-    // Update Skill timers
-    if (mStats.skillActive) {
-        mStats.skillTimer -= dt;
-        if (mStats.skillTimer <= 0.f) {
-            mStats.skillActive = false;
-            mStats.skillTimer = 0.f;
-            mStats.skillCooldownTimer = mStats.skillCooldownDuration; // 10.0s cooldown
-        }
-    } else if (mStats.skillCooldownTimer > 0.f) {
-        mStats.skillCooldownTimer -= dt;
-        if (mStats.skillCooldownTimer < 0.f) mStats.skillCooldownTimer = 0.f;
+    // Check Skill 'Q' Key (Radar EMP Pulse)
+    static bool qPressedLast = false;
+    bool qPressedNow = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
+    if (qPressedNow && !qPressedLast) {
+        activateRadarSkill();
     }
+    qPressedLast = qPressedNow;
+
+    // Check Skill 'T' Key (Time Freeze Clock)
+    static bool tPressedLast = false;
+    bool tPressedNow = sf::Keyboard::isKeyPressed(sf::Keyboard::T);
+    if (tPressedNow && !tPressedLast) {
+        activateTimeSkill();
+    }
+    tPressedLast = tPressedNow;
 
     sf::Vector2f dir(0.f, 0.f);
     mIsMoving = false;
@@ -261,9 +364,72 @@ bool CPEOPLE::isInvulnerable() const {
 
 void CPEOPLE::Draw(sf::RenderWindow& window)
 {
+    float playerCenterX = mPosition.x + Player_W / 2.f;
+    float playerCenterY = mPosition.y + Player_H / 2.f;
+
+    // 1. Radar Sonar Pulse Wave Effect [Q]
+    if (mStats.radarActive) {
+        if (mRadarLoaded) {
+            float waveScale = std::min(mStats.radarPulseRadius / 64.f, 4.5f);
+            float alphaRatio = std::clamp(mStats.radarTimer / mStats.radarDuration, 0.f, 1.f);
+            mRadarWaveSprite.setPosition(playerCenterX, playerCenterY);
+            mRadarWaveSprite.setScale(waveScale, waveScale);
+            mRadarWaveSprite.setColor(sf::Color(0, 240, 255, static_cast<sf::Uint8>(180 * alphaRatio)));
+            window.draw(mRadarWaveSprite);
+        } else {
+            float r = std::max(20.f, mStats.radarPulseRadius);
+            sf::CircleShape radarRing(r);
+            radarRing.setOrigin(r, r);
+            radarRing.setPosition(playerCenterX, playerCenterY);
+            radarRing.setFillColor(sf::Color::Transparent);
+            float alphaRatio = std::clamp(mStats.radarTimer / mStats.radarDuration, 0.f, 1.f);
+            radarRing.setOutlineColor(sf::Color(0, 240, 255, static_cast<sf::Uint8>(160 * alphaRatio)));
+            radarRing.setOutlineThickness(3.f);
+            window.draw(radarRing);
+        }
+    }
+
+    // 2. Flash Speed Lightning Aura Effect [E]
+    if (mStats.skillActive) {
+        if (mAuraLoaded) {
+            mFlashAuraSprite.setPosition(playerCenterX, playerCenterY);
+            mFlashAuraSprite.setScale(1.25f, 1.25f);
+            mFlashAuraSprite.setRotation(mAuraRotation);
+            mFlashAuraSprite.setColor(sf::Color(255, 230, 80, 230));
+            window.draw(mFlashAuraSprite);
+        } else {
+            sf::CircleShape aura(30.f);
+            aura.setOrigin(30.f, 30.f);
+            aura.setPosition(playerCenterX, playerCenterY);
+            aura.setFillColor(sf::Color::Transparent);
+            aura.setOutlineColor(sf::Color(255, 220, 50, 220));
+            aura.setOutlineThickness(3.f);
+            window.draw(aura);
+        }
+    }
+
+    // 3. Time Freeze Clock Aura Effect [T]
+    if (mStats.timeFreezeActive) {
+        if (mTimeFreezeLoaded) {
+            mTimeFreezeSprite.setPosition(playerCenterX, playerCenterY);
+            mTimeFreezeSprite.setScale(0.85f, 0.85f);
+            mTimeFreezeSprite.setRotation(-mAuraRotation * 0.5f);
+            mTimeFreezeSprite.setColor(sf::Color(160, 240, 255, 230));
+            window.draw(mTimeFreezeSprite);
+        } else {
+            sf::CircleShape clockAura(35.f);
+            clockAura.setOrigin(35.f, 35.f);
+            clockAura.setPosition(playerCenterX, playerCenterY);
+            clockAura.setFillColor(sf::Color(100, 220, 255, 40));
+            clockAura.setOutlineColor(sf::Color(120, 240, 255, 230));
+            clockAura.setOutlineThickness(2.5f);
+            window.draw(clockAura);
+        }
+    }
+
     if (ShopData::isItemPurchased("shield") && !mIsDead) {
-        float centerX = mPosition.x + Player_W / 2.f;
-        float centerY = mPosition.y + Player_H / 2.f;
+        float centerX = playerCenterX;
+        float centerY = playerCenterY;
 
         static float auraPulse = 0.f;
         auraPulse += 0.04f;
@@ -271,7 +437,7 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
         float pulseScale = 1.0f + 0.05f * std::sin(auraPulse * 2.f);
         float radius = 32.f * pulseScale;
 
-        // 1. Inner Energy Field (Translucent Glowing Cyan)
+        // Inner Energy Field
         sf::CircleShape shieldAura(radius);
         shieldAura.setOrigin(radius, radius);
         shieldAura.setPosition(centerX, centerY);
@@ -280,7 +446,7 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
         shieldAura.setOutlineThickness(2.5f);
         window.draw(shieldAura);
 
-        // 2. Hexagonal Shield Nodes (6 Vertices)
+        // Hexagonal Shield Nodes
         sf::CircleShape hexShield(radius + 2.f, 6);
         hexShield.setOrigin(radius + 2.f, radius + 2.f);
         hexShield.setPosition(centerX, centerY);
@@ -290,7 +456,7 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
         hexShield.setOutlineThickness(1.8f);
         window.draw(hexShield);
 
-        // 3. Orbiting Energy Particles (3 Motes)
+        // Orbiting Energy Particles
         for (int i = 0; i < 3; ++i) {
             float angle = auraPulse * 3.f + i * (2.f * 3.14159f / 3.f);
             float px = centerX + std::cos(angle) * (radius + 4.f);
@@ -303,7 +469,7 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
             window.draw(mote);
         }
 
-        // 4. Outer Wave Ring
+        // Outer Wave Ring
         sf::CircleShape outerWave(radius + 7.f);
         outerWave.setOrigin(radius + 7.f, radius + 7.f);
         outerWave.setPosition(centerX, centerY);
@@ -325,6 +491,28 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
     }
 
     window.draw(mSprite);
+
+    // Draw Cooldown Warning Floating Text if active ("SKILL ON COOLDOWN")
+    if (mStats.cooldownWarningTimer > 0.f && mWarnFontLoaded) {
+        sf::Text warnText;
+        warnText.setFont(mWarnFont);
+        warnText.setString(mStats.cooldownWarningMsg.empty() ? "SKILL ON COOLDOWN" : mStats.cooldownWarningMsg);
+        warnText.setCharacterSize(14);
+
+        float alphaRatio = std::clamp(mStats.cooldownWarningTimer / 1.2f, 0.f, 1.f);
+        sf::Uint8 alpha = static_cast<sf::Uint8>(255 * alphaRatio);
+
+        warnText.setFillColor(sf::Color(255, 220, 80, alpha));
+        warnText.setOutlineColor(sf::Color(20, 10, 10, alpha));
+        warnText.setOutlineThickness(1.8f);
+
+        sf::FloatRect b = warnText.getLocalBounds();
+        warnText.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
+
+        float textY = mPosition.y - 18.f - (1.2f - mStats.cooldownWarningTimer) * 18.f;
+        warnText.setPosition(playerCenterX, textY);
+        window.draw(warnText);
+    }
 
     // Draw mini stamina bar under player if stamina < maxStamina
     if (mStats.stamina < mStats.maxStamina && !mIsDead) {

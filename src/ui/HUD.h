@@ -29,6 +29,21 @@ private:
 
     bool mLoaded;
     bool mHudBarLoaded = false;
+
+    // Cache state to avoid string allocation every frame
+    int mLastLevel = -1;
+    int mLastScore = -1;
+    int mLastRemainingSec = -1;
+
+    // Heart sprites (Top-Right HP)
+    sf::Texture mHeartTexture;
+    sf::Sprite  mHeartSprite;
+    sf::Texture mHeartHalfTexture;
+    sf::Sprite  mHeartHalfSprite;
+    sf::Texture mHeartEmptyTexture;
+    sf::Sprite  mHeartEmptySprite;
+    bool        mHeartLoaded = false;
+    bool        mHeartHalfLoaded = false;
 private:
     void setupText(sf::Text& text, unsigned int size, float xRatio, float yRatio, sf::Vector2f& centerOut);
     std::string formatTime(float seconds) const;

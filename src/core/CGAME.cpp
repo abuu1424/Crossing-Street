@@ -2,11 +2,10 @@
 #include "HighScore.h"
 #include "LevelConfig.h"
 #include "ShopData.h"
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <sstream>
-#include <algorithm>
-
 
 const float SPAWN_X = Win_W / 2.f - Player_W / 2.f;
 const float SPAWN_Y = Win_H - Player_H;
@@ -21,6 +20,7 @@ CGAME::CGAME(sf::RenderWindow &window)
 CGAME::~CGAME() { clearEntities(); }
 
 void CGAME::setupUI() {
+  mEffects.reserve(16);
   mFont.loadFromFile(Font_Path);
   mCutscene.init(mFont, &mSound);
   mHazardManager.init(mFont, &mSound);
@@ -563,7 +563,6 @@ void CGAME::handleEvents() {
       printf("Debug Hitbox %s\n", mDebugHitbox ? "ON" : "OFF");
     }
 
-
     sf::Vector2f mouse;
     if (event.type == sf::Event::MouseButtonPressed) {
       mouse = mWindow.mapPixelToCoords(
@@ -683,7 +682,6 @@ void CGAME::handleEvents() {
 
       continue;
     }
-
 
     // Bảng VICTORY
     if (mPlayer.isFinish() && mCurrentLevel == Max_Level && !mShowLevelClear) {
@@ -1023,15 +1021,6 @@ void CGAME::handleEvents() {
     if (event.type == sf::Event::KeyPressed) {
       if (event.key.code == sf::Keyboard::Escape) {
         mShowQuitConfirm = true;
-      } else if (event.key.code == sf::Keyboard::R) {
-        if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
-          mResetCooldownClock.restart();
-          if (mPlayer.isFinish() && mCurrentLevel == Max_Level) {
-            reset();
-          } else {
-            restartLevel();
-          }
-        }
       } else if (event.key.code == sf::Keyboard::M) {
         mShowMenuConfirm = true;
       } else if (event.key.code == sf::Keyboard::P) {
@@ -1200,7 +1189,8 @@ void CGAME::checkFinish() {
 void CGAME::update(float dt) {
   if (mDevFeedbackTimer > 0.f) {
     mDevFeedbackTimer -= dt;
-    if (mDevFeedbackTimer < 0.f) mDevFeedbackTimer = 0.f;
+    if (mDevFeedbackTimer < 0.f)
+      mDevFeedbackTimer = 0.f;
   }
 
   if (mGodMode) {
@@ -1300,19 +1290,34 @@ void CGAME::update(float dt) {
   if (mDeathCutscene.isActive()) {
     mDeathCutscene.update(dt);
     if (mDeathCutscene.isFinished()) {
-      mIsDying = true;
       mSound.stopMusic();
       mSound.stopHazardSounds();
       mSound.stopLevelDeathSounds();
       mHazardManager.reset();
-      mSound.playDead();
+      // Khi còn máu thì chơi lại màn hiện tại
+      if (mPlayer.getStats().currentHp > 0) {
+        mlevelTime = 0.f;
+        mIsDying = false;
+        mPlayer.setDead(false);
+        mPlayer.setFinish(false);
+        mPlayer.setPosition(SPAWN_X, SPAWN_Y);
+        loadLevel(mCurrentLevel);
+        mHUD.update(mCurrentLevel, mScore, mlevelTime);
+      } else {
+        // Hết máu thì từ đầu
+        mIsDying = true;
+        mPlayer.setDead(true);
+        mSound.playDead();
+      }
     }
     return;
   }
 
   if (!mPlayer.isDead() && !mPlayer.isFinish() && !mIsDying &&
       !mDeathCutscene.isActive()) {
-    mlevelTime += dt;
+    if (!mPlayer.getStats().timeFreezeActive) {
+      mlevelTime += dt;
+    }
     if (mlevelTime >= Level_Time_Limit) {
       sf::Vector2f hitPos(mPlayer.getPosition().x + Player_W / 2.f,
                           mPlayer.getPosition().y + Player_H / 2.f);
@@ -1320,8 +1325,12 @@ void CGAME::update(float dt) {
       mSound.stopHazardSounds();
       mHazardManager.reset();
       mSound.playLevelDeathSound(mCurrentLevel);
+
+      // Trừ 1 tim khi hết thời gian
+      mPlayer.takeDamage(1);
+
       mDeathCutscene.start(hitPos, mCurrentLevel);
-      printf("You ran out of time\n");
+      printf("You ran out of time! Deducted 1 HP.\n");
     }
     bool hasHazard =
         mHazardManager.isHazardActive() || mHazardManager.isWarningActive();
@@ -1339,7 +1348,13 @@ void CGAME::update(float dt) {
                           mPlayer.getPosition().y + drift.y);
     }
 
-    mEntities.update(dt, mHazardManager.getSpeedMultiplier());
+    float speedMult = mHazardManager.getSpeedMultiplier();
+    if (mPlayer.getStats().timeFreezeActive) {
+      speedMult = 0.0f; // 100% Freeze when Time Clock skill is active!
+    } else if (mPlayer.getStats().radarActive) {
+      speedMult *= 0.5f; // 50% slow-down when EMP Radar Pulse is active
+    }
+    mEntities.update(dt, speedMult);
 
     // Check collision with extra hazards (Stampede, Arrows, Lasers)
     sf::FloatRect pb = mPlayer.getHitbox();
@@ -1436,6 +1451,14 @@ void CGAME::render() {
   }
 
   mWindow.setView(origView);
+
+  // Time Freeze Icy Screen Overlay Tint
+  if (mPlayer.getStats().timeFreezeActive) {
+    sf::RectangleShape freezeOverlay(
+        sf::Vector2f(static_cast<float>(Win_W), static_cast<float>(Win_H)));
+    freezeOverlay.setFillColor(sf::Color(80, 200, 255, 45));
+    mWindow.draw(freezeOverlay);
+  }
 
   if (mDebugHitbox) {
     auto drawRect = [&](sf::FloatRect r, sf::Color color) {
@@ -1835,12 +1858,15 @@ void CGAME::executeDevCommand(const std::string &rawCmd) {
 
   if (action == "coins" || action == "coin") {
     int val = 1000;
-    if (iss >> val) {}
+    if (iss >> val) {
+    }
     ShopData::addCoins(val);
-    mDevFeedbackMsg = "[DEV] Added +" + std::to_string(val) + " Coins to Slot " + std::to_string(mActiveSlot) + "!";
+    mDevFeedbackMsg = "[DEV] Added +" + std::to_string(val) +
+                      " Coins to Slot " + std::to_string(mActiveSlot) + "!";
   } else if (action == "hp") {
     int val = 3;
-    if (iss >> val) {}
+    if (iss >> val) {
+    }
     val = std::clamp(val, 1, 10);
     mPlayer.getStats().maxHp = val;
     mPlayer.getStats().currentHp = val;
@@ -1852,7 +1878,8 @@ void CGAME::executeDevCommand(const std::string &rawCmd) {
     mDevFeedbackMsg = "[DEV] Player HP & Energy fully restored!";
   } else if (action == "level" || action == "lvl") {
     int lvl = 1;
-    if (iss >> lvl) {}
+    if (iss >> lvl) {
+    }
     lvl = std::clamp(lvl, 1, Max_Level);
     mInCutscene = false;
     mShowLevelClear = false;
@@ -1871,7 +1898,8 @@ void CGAME::executeDevCommand(const std::string &rawCmd) {
     }
   } else if (action == "skill" || action == "skills" || action == "buy") {
     std::string item;
-    if (!(iss >> item)) item = "all";
+    if (!(iss >> item))
+      item = "all";
     if (item == "all") {
       ShopData::buyItem("shield", 0);
       ShopData::buyItem("speed", 0);
@@ -1888,13 +1916,16 @@ void CGAME::executeDevCommand(const std::string &rawCmd) {
     mDevFeedbackMsg = "[DEV] Energy refilled to 100%!";
   } else if (action == "score") {
     int val = 500;
-    if (iss >> val) {}
+    if (iss >> val) {
+    }
     mScore += val;
     mDevFeedbackMsg = "[DEV] Score +" + std::to_string(val) + "!";
   } else if (action == "help") {
-    mDevFeedbackMsg = "[DEV] Cmds: coins_N, hp_N, heal, level_N, god, skill_all, nrg_100, score_N";
+    mDevFeedbackMsg = "[DEV] Cmds: coins_N, hp_N, heal, level_N, god, "
+                      "skill_all, nrg_100, score_N";
   } else {
-    mDevFeedbackMsg = "[DEV ERROR] Unknown command '" + rawCmd + "'. Type 'help'";
+    mDevFeedbackMsg =
+        "[DEV ERROR] Unknown command '" + rawCmd + "'. Type 'help'";
   }
 
   mDevFeedbackTimer = 3.5f;
@@ -1926,9 +1957,11 @@ bool CGAME::handleDevConsoleEvent(const sf::Event &event) {
         }
       }
     } else if (event.type == sf::Event::KeyPressed) {
-      if (event.key.code == sf::Keyboard::BackSpace && !mDevInputString.empty()) {
+      if (event.key.code == sf::Keyboard::BackSpace &&
+          !mDevInputString.empty()) {
         mDevInputString.pop_back();
-      } else if (event.key.code == sf::Keyboard::Enter || event.key.code == sf::Keyboard::Return) {
+      } else if (event.key.code == sf::Keyboard::Enter ||
+                 event.key.code == sf::Keyboard::Return) {
         executeDevCommand(mDevInputString);
         mDevInputString.clear();
         mShowDevConsole = false;
@@ -1966,17 +1999,20 @@ void CGAME::renderDevConsole() {
     mWindow.draw(mDevConsoleBox);
 
     static sf::Clock cursorClock;
-    bool showCursor = (static_cast<int>(cursorClock.getElapsedTime().asSeconds() * 2.5f) % 2 == 0);
+    bool showCursor =
+        (static_cast<int>(cursorClock.getElapsedTime().asSeconds() * 2.5f) %
+             2 ==
+         0);
     mDevConsoleText.setFont(mFont);
     mDevConsoleText.setCharacterSize(20);
     mDevConsoleText.setFillColor(sf::Color(100, 240, 255));
     mDevConsoleText.setOutlineColor(sf::Color::Black);
     mDevConsoleText.setOutlineThickness(1.5f);
     mDevConsoleText.setPosition(15.f, Win_H - 42.f);
-    mDevConsoleText.setString("DEV PROMPT [~ or F8 or /] > " + mDevInputString + (showCursor ? "_" : " "));
+    mDevConsoleText.setString("DEV PROMPT [~ or F8 or /] > " + mDevInputString +
+                              (showCursor ? "_" : " "));
     mWindow.draw(mDevConsoleText);
   }
 
   mWindow.setView(origView);
 }
-

@@ -107,6 +107,9 @@ EntityManager::createAnimal(AnimalType type, float speed, float direction) {
 void EntityManager::spawnFromLevel(const LevelConfig &cfg) {
   clear();
 
+  mObstacles.reserve(32);
+  mAnimals.reserve(32);
+
   for (auto &lane : cfg.lanes) {
     float laneOffset = static_cast<float>(rand() % 160 - 80);
     for (int i = 0; i < lane.count; i++) {

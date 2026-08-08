@@ -5,12 +5,28 @@
 #include <sstream>
 #include <iomanip>
 
-HUD::HUD() : mLoaded(false), mHudBarLoaded(false) {
+HUD::HUD() : mLoaded(false), mHudBarLoaded(false), mHeartLoaded(false) {
     mLoaded = mFont.loadFromFile(Font_Path);
     if (!mLoaded) {
         std::cerr << "Cannot load HUD font\n";
-        return;
     }
+
+    // Load heart texture assets
+    if (mHeartTexture.loadFromFile("assets/ui/hud/heart.png")) {
+        mHeartSprite.setTexture(mHeartTexture);
+        mHeartLoaded = true;
+    }
+    if (mHeartHalfTexture.loadFromFile("assets/ui/hud/heart_half.png")) {
+        mHeartHalfSprite.setTexture(mHeartHalfTexture);
+        mHeartHalfLoaded = true;
+    }
+    if (mHeartEmptyTexture.loadFromFile("assets/ui/hud/heart_empty.png")) {
+        mHeartEmptySprite.setTexture(mHeartEmptyTexture);
+    } else if (mHeartLoaded) {
+        mHeartEmptySprite = mHeartSprite;
+        mHeartEmptySprite.setColor(sf::Color(80, 80, 90, 150));
+    }
+
     setupItemPanel();
     update(1, 0, 0.f);
 }
@@ -34,10 +50,9 @@ std::string HUD::formatTime(float seconds) const {
     if (seconds < 0.f) seconds = 0.f;
     int total = static_cast<int>(seconds);
     int m = total / 60, s = total % 60;
-    std::ostringstream oss;
-    oss << std::setw(2) << std::setfill('0') << m << ":"
-        << std::setw(2) << std::setfill('0') << s;
-    return oss.str();
+    char buf[16];
+    snprintf(buf, sizeof(buf), "%02d:%02d", m, s);
+    return std::string(buf);
 }
 
 bool HUD::isLoaded() const { return mLoaded; }
@@ -45,23 +60,32 @@ bool HUD::isLoaded() const { return mLoaded; }
 void HUD::update(int level, int score, float timeSeconds) {
     if (!mLoaded) return;
 
-    mLevelText.setString("Level " + std::to_string(level));
-    mScoreText.setString("Score " + std::to_string(score));
+    if (level != mLastLevel) {
+        mLastLevel = level;
+        mLevelText.setString("Level " + std::to_string(level));
+        sf::FloatRect b = mLevelText.getLocalBounds();
+        mLevelText.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
+        mLevelText.setPosition(mLevelCenter);
+    }
 
-    float remaining = Level_Time_Limit - timeSeconds;
-    if (remaining < 0.f) remaining = 0.f;
-    mTimeText.setString(formatTime(remaining));
-    mTimeText.setFillColor(remaining <= 10.f ? sf::Color::Red : sf::Color(255, 240, 200));
+    if (score != mLastScore) {
+        mLastScore = score;
+        mScoreText.setString("Score " + std::to_string(score));
+        sf::FloatRect b = mScoreText.getLocalBounds();
+        mScoreText.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
+        mScoreText.setPosition(mScoreCenter);
+    }
 
-    auto centerOn = [](sf::Text& t, sf::Vector2f center) {
-        sf::FloatRect b = t.getLocalBounds();
-        t.setOrigin(b.left + b.width/2.f, b.top + b.height/2.f);
-        t.setPosition(center);
-    };
-
-    centerOn(mLevelText, mLevelCenter);
-    centerOn(mScoreText, mScoreCenter);
-    centerOn(mTimeText,  mTimeCenter);
+    float remaining = std::max(0.f, Level_Time_Limit - timeSeconds);
+    int remainingSec = static_cast<int>(remaining);
+    if (remainingSec != mLastRemainingSec) {
+        mLastRemainingSec = remainingSec;
+        mTimeText.setString(formatTime(remaining));
+        mTimeText.setFillColor(remaining <= 10.f ? sf::Color::Red : sf::Color(255, 240, 200));
+        sf::FloatRect b = mTimeText.getLocalBounds();
+        mTimeText.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
+        mTimeText.setPosition(mTimeCenter);
+    }
 }
 
 void HUD::setupItemPanel() {
@@ -74,21 +98,37 @@ void HUD::setupItemPanel() {
 
     float startX = 12.f;  // Sát góc trên bên trái
     float startY = 8.f;
-    float gapX   = 70.f;  // Rộng rãi dễ nhìn
+    float gapX   = 72.f;  // Rộng rãi dễ nhìn
+    float targetSize = 40.f; // Bounding box chuẩn 40x40px cho tất cả icon
 
     for (int i = 0; i < 4; i++) {
         if (mItemTextures[i].loadFromFile(iconPaths[i])) {
             mItemSprites[i].setTexture(mItemTextures[i]);
-            mItemSprites[i].setScale(0.68f, 0.68f); // Icon to rõ ~44x44px
-            mItemSprites[i].setPosition(startX + i * gapX, startY);
+            
+            sf::Vector2u texSize = mItemTextures[i].getSize();
+            if (texSize.x > 0 && texSize.y > 0) {
+                float scaleX = targetSize / static_cast<float>(texSize.x);
+                float scaleY = targetSize / static_cast<float>(texSize.y);
+                float scale = std::min(scaleX, scaleY);
+                mItemSprites[i].setScale(scale, scale);
+
+                // Căn giữa icon trong hộp 40x40px
+                float renderW = texSize.x * scale;
+                float renderH = texSize.y * scale;
+                float offsetX = (targetSize - renderW) / 2.f;
+                float offsetY = (targetSize - renderH) / 2.f;
+                mItemSprites[i].setPosition(startX + i * gapX + offsetX, startY + offsetY);
+            } else {
+                mItemSprites[i].setPosition(startX + i * gapX, startY);
+            }
         }
 
         mItemCountTexts[i].setFont(mFont);
-        mItemCountTexts[i].setCharacterSize(16);
+        mItemCountTexts[i].setCharacterSize(15);
         mItemCountTexts[i].setFillColor(sf::Color::White);
         mItemCountTexts[i].setOutlineColor(sf::Color::Black);
         mItemCountTexts[i].setOutlineThickness(2.0f);
-        mItemCountTexts[i].setPosition(startX + i * gapX + 42.f, startY + 12.f);
+        mItemCountTexts[i].setPosition(startX + i * gapX + 44.f, startY + 11.f);
     }
     mItemPanelLoaded = true;
 }
@@ -142,52 +182,80 @@ void HUD::draw(sf::RenderWindow& window) {
 }
 
 void HUD::drawStats(sf::RenderWindow& window, const PlayerStats& stats) {
-    // 1. HP Hearts (Top-Right)
-    float startX = Win_W - 240.f;
-    float startY = 14.f;
-    float heartSize = 12.f;
-    float gap = 28.f;
+    float topY = 10.f;
+    float hpSectionX = 900.f; // Safely right of central HUD bar (Pause frame ends ~870px)
 
-    for (int i = 0; i < stats.maxHp; ++i) {
-        float cx = startX + i * gap;
-        float cy = startY + 6.f;
-
-        bool hasHp = (i < stats.currentHp);
-
-        sf::Color fillCol = hasHp ? sf::Color(245, 45, 75, 240) : sf::Color(55, 35, 45, 140);
-        sf::Color outlineCol = hasHp ? sf::Color(255, 210, 225, 255) : sf::Color(90, 75, 85, 160);
-
-        sf::CircleShape leftLobe(heartSize * 0.55f);
-        leftLobe.setOrigin(heartSize * 0.55f, heartSize * 0.55f);
-        leftLobe.setPosition(cx - heartSize * 0.4f, cy - heartSize * 0.2f);
-        leftLobe.setFillColor(fillCol);
-        leftLobe.setOutlineColor(outlineCol);
-        leftLobe.setOutlineThickness(1.f);
-        window.draw(leftLobe);
-
-        sf::CircleShape rightLobe(heartSize * 0.55f);
-        rightLobe.setOrigin(heartSize * 0.55f, heartSize * 0.55f);
-        rightLobe.setPosition(cx + heartSize * 0.4f, cy - heartSize * 0.2f);
-        rightLobe.setFillColor(fillCol);
-        rightLobe.setOutlineColor(outlineCol);
-        rightLobe.setOutlineThickness(1.f);
-        window.draw(rightLobe);
-
-        sf::ConvexShape bottomPoint;
-        bottomPoint.setPointCount(3);
-        bottomPoint.setPoint(0, sf::Vector2f(cx - heartSize * 0.9f, cy - heartSize * 0.1f));
-        bottomPoint.setPoint(1, sf::Vector2f(cx + heartSize * 0.9f, cy - heartSize * 0.1f));
-        bottomPoint.setPoint(2, sf::Vector2f(cx, cy + heartSize * 0.9f));
-        bottomPoint.setFillColor(fillCol);
-        bottomPoint.setOutlineColor(outlineCol);
-        bottomPoint.setOutlineThickness(1.f);
-        window.draw(bottomPoint);
+    // 1. HP Hearts (Top-Right, aligned after central HUD bar)
+    if (mLoaded) {
+        sf::Text hpLabel;
+        hpLabel.setFont(mFont);
+        hpLabel.setString("HEALTH");
+        hpLabel.setCharacterSize(11);
+        hpLabel.setFillColor(sf::Color(255, 200, 210));
+        hpLabel.setPosition(hpSectionX, topY);
+        window.draw(hpLabel);
     }
 
-    // 2. Energy Bar (Top-Right under Hearts)
-    float barX = startX - 8.f;
-    float barY = startY + 24.f;
-    float barW = 145.f;
+    float heartStartX = hpSectionX;
+    float heartStartY = topY + 15.f;
+    float heartGap = 26.f;
+
+    for (int i = 0; i < stats.maxHp; ++i) {
+        float cx = heartStartX + i * heartGap;
+        float cy = heartStartY;
+        bool hasHp = (i < stats.currentHp);
+
+        if (mHeartLoaded) {
+            sf::Sprite* sprPtr = &mHeartEmptySprite;
+            if (hasHp) {
+                sprPtr = &mHeartSprite;
+            }
+            sf::Sprite& spr = *sprPtr;
+            sf::Vector2u texSize = spr.getTexture() ? spr.getTexture()->getSize() : sf::Vector2u(52, 40);
+            spr.setScale(24.f / texSize.x, 18.5f / texSize.y);
+            spr.setPosition(cx, cy);
+            window.draw(spr);
+        } else {
+            // Procedural shape fallback
+            float heartSize = 12.f;
+            float centerOffset = cx + 12.f;
+            float cyOffset = cy + 10.f;
+            sf::Color fillCol = hasHp ? sf::Color(245, 45, 75, 240) : sf::Color(55, 35, 45, 140);
+            sf::Color outlineCol = hasHp ? sf::Color(255, 210, 225, 255) : sf::Color(90, 75, 85, 160);
+
+            sf::CircleShape leftLobe(heartSize * 0.55f);
+            leftLobe.setOrigin(heartSize * 0.55f, heartSize * 0.55f);
+            leftLobe.setPosition(centerOffset - heartSize * 0.4f, cyOffset - heartSize * 0.2f);
+            leftLobe.setFillColor(fillCol);
+            leftLobe.setOutlineColor(outlineCol);
+            leftLobe.setOutlineThickness(1.f);
+            window.draw(leftLobe);
+
+            sf::CircleShape rightLobe(heartSize * 0.55f);
+            rightLobe.setOrigin(heartSize * 0.55f, heartSize * 0.55f);
+            rightLobe.setPosition(centerOffset + heartSize * 0.4f, cyOffset - heartSize * 0.2f);
+            rightLobe.setFillColor(fillCol);
+            rightLobe.setOutlineColor(outlineCol);
+            rightLobe.setOutlineThickness(1.f);
+            window.draw(rightLobe);
+
+            sf::ConvexShape bottomPoint;
+            bottomPoint.setPointCount(3);
+            bottomPoint.setPoint(0, sf::Vector2f(centerOffset - heartSize * 0.9f, cyOffset - heartSize * 0.1f));
+            bottomPoint.setPoint(1, sf::Vector2f(centerOffset + heartSize * 0.9f, cyOffset - heartSize * 0.1f));
+            bottomPoint.setPoint(2, sf::Vector2f(centerOffset, cyOffset + heartSize * 0.9f));
+            bottomPoint.setFillColor(fillCol);
+            bottomPoint.setOutlineColor(outlineCol);
+            bottomPoint.setOutlineThickness(1.f);
+            window.draw(bottomPoint);
+        }
+    }
+
+    // 2. Energy Bar (Side-by-side / ngang hàng với Health Bar)
+    float hpWidth = stats.maxHp * heartGap;
+    float barX = hpSectionX + hpWidth + 16.f;
+    float barY = topY + 17.f;
+    float barW = 135.f;
     float barH = 10.f;
 
     sf::RectangleShape bgEnergy(sf::Vector2f(barW, barH));
@@ -209,7 +277,7 @@ void HUD::drawStats(sf::RenderWindow& window, const PlayerStats& stats) {
         nrgLabel.setString("ENERGY");
         nrgLabel.setCharacterSize(11);
         nrgLabel.setFillColor(sf::Color(200, 245, 255));
-        nrgLabel.setPosition(barX, barY - 12.f);
+        nrgLabel.setPosition(barX, topY);
         window.draw(nrgLabel);
 
         // 3. Realtime Speed Stat Display (px/s)
@@ -217,76 +285,19 @@ void HUD::drawStats(sf::RenderWindow& window, const PlayerStats& stats) {
         spdText.setFont(mFont);
         int spdVal = static_cast<int>(stats.currentCalculatedSpeed);
         spdText.setString("SPEED: " + std::to_string(spdVal) + " px/s");
-        spdText.setCharacterSize(14);
+        spdText.setCharacterSize(13);
         spdText.setPosition(barX, barY + 13.f);
         spdText.setOutlineColor(sf::Color::Black);
         spdText.setOutlineThickness(1.5f);
 
         if (stats.skillActive) {
-            spdText.setFillColor(sf::Color(255, 230, 50)); // Bright Yellow on Skill Surge
+            spdText.setFillColor(sf::Color(255, 230, 50));
         } else if (energyRatio < 0.4f) {
-            spdText.setFillColor(sf::Color(255, 140, 60)); // Amber when Low Energy
+            spdText.setFillColor(sf::Color(255, 140, 60));
         } else {
-            spdText.setFillColor(sf::Color(120, 255, 160)); // Green normal
+            spdText.setFillColor(sf::Color(120, 255, 160));
         }
         window.draw(spdText);
-    }
-
-    // 4. Active Skill 'E' Icon Widget (Far Right)
-    float skillX = Win_W - 80.f;
-    float skillY = 12.f;
-    float skillW = 68.f;
-    float skillH = 50.f;
-
-    bool hasSkill = ShopData::isItemPurchased("speed_skill") || stats.hasSpeedSkill;
-
-    sf::RectangleShape skillBox(sf::Vector2f(skillW, skillH));
-    skillBox.setPosition(skillX, skillY);
-    skillBox.setFillColor(sf::Color(15, 20, 30, 220));
-
-    if (stats.skillActive) {
-        skillBox.setOutlineColor(sf::Color(255, 230, 50, 240)); // Flashing Gold
-        skillBox.setOutlineThickness(2.0f);
-    } else if (hasSkill && stats.skillCooldownTimer <= 0.f) {
-        skillBox.setOutlineColor(sf::Color(50, 240, 140, 240)); // Ready Green
-        skillBox.setOutlineThickness(1.8f);
-    } else {
-        skillBox.setOutlineColor(sf::Color(90, 100, 110, 180)); // Cooldown / Locked
-        skillBox.setOutlineThickness(1.2f);
-    }
-    window.draw(skillBox);
-
-    if (mLoaded) {
-        sf::Text keyText;
-        keyText.setFont(mFont);
-        keyText.setString("[E] SKILL");
-        keyText.setCharacterSize(11);
-        keyText.setFillColor(sf::Color(220, 240, 255));
-        keyText.setPosition(skillX + 6.f, skillY + 4.f);
-        window.draw(keyText);
-
-        sf::Text statusText;
-        statusText.setFont(mFont);
-        statusText.setCharacterSize(12);
-
-        if (stats.skillActive) {
-            int sec = static_cast<int>(stats.skillTimer) + 1;
-            statusText.setString(std::to_string(sec) + "s FAST");
-            statusText.setFillColor(sf::Color(255, 230, 50));
-        } else if (stats.skillCooldownTimer > 0.f) {
-            int cd = static_cast<int>(stats.skillCooldownTimer) + 1;
-            statusText.setString(std::to_string(cd) + "s CD");
-            statusText.setFillColor(sf::Color(180, 180, 190));
-        } else if (hasSkill) {
-            statusText.setString("READY");
-            statusText.setFillColor(sf::Color(50, 240, 140));
-        } else {
-            statusText.setString("SHOP");
-            statusText.setFillColor(sf::Color(140, 140, 150));
-        }
-
-        statusText.setPosition(skillX + 6.f, skillY + 24.f);
-        window.draw(statusText);
     }
 }
 
