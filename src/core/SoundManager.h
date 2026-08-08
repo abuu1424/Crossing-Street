@@ -30,6 +30,7 @@ public:
     // Sound Death Cutscenes Cho 5 Level
     void loadLevelDeathSounds();
     void playLevelDeathSound(int level);
+    void stopLevelDeathSounds();
 
     // Sound Hazard Cho 5 Level
     void loadHazardSounds();

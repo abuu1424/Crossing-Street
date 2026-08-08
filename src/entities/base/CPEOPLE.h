@@ -4,6 +4,7 @@
 #include <string>
 #include "Utils.h"
 #include "Animation.h"
+#include "PlayerStats.h"
 
 class CPEOPLE {
     sf::Sprite                 mSprite;
@@ -17,13 +18,17 @@ class CPEOPLE {
     int          mRow      = 0;
     bool         mIsMoving = false;
 
+    PlayerStats  mStats;
+
 public:
     CPEOPLE();
     ~CPEOPLE();
     bool loadSprite(const std::string& texturePath);
     void reloadSprite(const std::string& texturePath);
-    void Move(float dt);
+    void Move(float dt, int score = 0, bool hasActiveHazard = false);
+    void activateSpeedSkill();
     void update(float dt);
+
     void setPosition(float x, float y);
     void setSpeed(float speed) { mSpeed = speed; }
     float getSpeed() const { return mSpeed; }
@@ -34,5 +39,19 @@ public:
     bool isFinish() const;
     void setDead(bool dead);
     void setFinish(bool finish);
+    void triggerInvulnerability(float duration = 1.2f);
+    bool isInvulnerable() const;
+
+    // Stats & Combat mechanics
+    const PlayerStats& getStats() const { return mStats; }
+    PlayerStats& getStats() { return mStats; }
+    bool takeDamage(int amount = 1);
+    void heal(int amount = 1);
+    void knockback(float distanceY = 160.f);
+    void resetStats();
+
+
     void Draw(sf::RenderWindow& window);
+private:
+    float mInvulnerableTimer = 0.f;
 };

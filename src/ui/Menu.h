@@ -26,7 +26,8 @@ enum class MenuScreen {
     NEW_GAME_SELECT,
     LOAD,
     SETTINGS,
-    INFO
+    INFO,
+    SHOP
 };
 
 class Menu
@@ -116,6 +117,22 @@ class Menu
                          sf::RenderWindow& window,
                          MenuResult& result);
 
+    // Shop Popup
+    MenuButton mBtnShop;
+    sf::Text mShopTitle;
+    sf::Text mShopCoinsText;
+    sf::Text mShopSlotTabs[3];
+    sf::Texture mItemTextures[4];
+    sf::Sprite  mItemSprites[4];
+    sf::Text mItemTitleTexts[4];
+    sf::Text mItemDescTexts[4];
+    sf::Text mItemPriceTexts[4];
+    MenuButton mItemBuyButtons[4];
+    MenuButton mBtnBackShop;
+
+    void setupShopMenu();
+
+
     void setupSettingsMenu();
     void updateSlider(Slider& s, sf::Vector2f mouse, bool mouseDown);
     void drawSlider(sf::RenderWindow& w, Slider& s);
@@ -156,8 +173,15 @@ public:
     void update(float dt, sf::RenderWindow& window);
     void draw(sf::RenderWindow& window);
 
-    //Getter
+    //Getter & Setter
     const std::string& getPendingSaveName() const { return mNewGameName; }
+    MenuScreen getScreen() const { return mScreen; }
+    void setScreen(MenuScreen s) { mScreen = s; }
+
+    void drawShopMenu(sf::RenderWindow& window);
+    void handleShopEvent(const sf::Event& event,
+                         sf::RenderWindow& window,
+                         MenuResult& result);
 
 
     float getMusicVolume() const { return mMuteAll ? 0.f : mMusicSlider.value; }

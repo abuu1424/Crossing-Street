@@ -137,14 +137,18 @@ void HazardManager::startLevel(int level) {
 }
 
 float HazardManager::calculateCooldownFromScore(int score) const {
+    if (mCurrentLevel == 1) {
+        // Map 1: Thời gian mặc định (6.0s - 8.9s) vì người chơi bắt đầu với 0 score
+        return 6.0f + (float)(rand() % 30) * 0.1f;
+    }
     if (score < 500) {
-        // Điểm thấp (<500): Hazard xảy ra lâu hơn (10.0s - 13.9s) cho người chơi thư thả
+        // Điểm thấp (<500 các màn sau): Hazard xảy ra lâu hơn (10.0s - 13.9s)
         return 10.0f + (float)(rand() % 40) * 0.1f;
     } else if (score < 1500) {
         // Điểm trung bình (500 - 1499): Mặc định (6.0s - 8.9s)
         return 6.0f + (float)(rand() % 30) * 0.1f;
     } else {
-        // Điểm cao (>=1500): Hazard xảy ra dồn dập sớm hơn (3.5s - 5.4s) tăng tính thách thức
+        // Điểm cao (>=1500): Hazard xảy ra dồn dập sớm hơn (3.5s - 5.4s)
         return 3.5f + (float)(rand() % 20) * 0.1f;
     }
 }

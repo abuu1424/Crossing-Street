@@ -1,6 +1,7 @@
 #include "Menu.h"
 #include "Utils.h"
 #include "TextureManager.h"
+#include "ShopData.h"
 #include <cmath>
 #include <cstdio>
 
@@ -43,10 +44,15 @@ Menu::Menu() {
   setupButton(mBtnInfo, "assets/ui/menu/btn_info.png", "?",
               Win_W - 65.f, 65.f, "", 36);
 
+  // Icon Shop button ở góc trên bên phải — nằm kế bên nút ? (Info)
+  setupButton(mBtnShop, "assets/shop/btn_shop.png", "",
+              Win_W - 145.f, 65.f, "assets/shop/btn_shop_hover.png", 26);
+
   setupLoadMenu();
   setupSettingsMenu();
   setupNewGameNamePopup();
   setupInfoMenu();
+  setupShopMenu();
 
   // Nhạc nền
   if (!mMusic.openFromFile("assets/sounds/menu/menu_music.ogg"))
@@ -241,6 +247,10 @@ void Menu::handleEvent(const sf::Event &event, sf::RenderWindow &window,
     handleInfoEvent(event, window, result);
     return;
   }
+  if (mScreen == MenuScreen::SHOP) {
+    handleShopEvent(event, window, result);
+    return;
+  }
 
   if (event.type == sf::Event::MouseButtonPressed &&
       event.mouseButton.button == sf::Mouse::Left) {
@@ -264,6 +274,8 @@ void Menu::handleEvent(const sf::Event &event, sf::RenderWindow &window,
       mScreen = MenuScreen::SETTINGS;
     } else if (mBtnInfo.sprite.getGlobalBounds().contains(mouse)) {
       mScreen = MenuScreen::INFO;
+    } else if (mBtnShop.sprite.getGlobalBounds().contains(mouse)) {
+      mScreen = MenuScreen::SHOP;
     }
   }
 }
@@ -362,6 +374,13 @@ void Menu::update(float dt, sf::RenderWindow &window) {
     updateButton(mBtnBackInfo, mouse, dt);
     return;
   }
+  if (mScreen == MenuScreen::SHOP) {
+    updateButton(mBtnBackShop, mouse, dt);
+    for (int i = 0; i < 4; i++) {
+      updateButton(mItemBuyButtons[i], mouse, dt);
+    }
+    return;
+  }
 
   if (mTitleAnim)
     mTitleAnim->update(dt);
@@ -370,6 +389,7 @@ void Menu::update(float dt, sf::RenderWindow &window) {
   updateButton(mBtnSetting, mouse, dt);
   updateButton(mBtnQuit, mouse, dt);
   updateButton(mBtnInfo, mouse, dt);
+  updateButton(mBtnShop, mouse, dt);
 }
 
 void Menu::drawButton(sf::RenderWindow &w, MenuButton &btn) {
@@ -447,6 +467,10 @@ void Menu::draw(sf::RenderWindow &window) {
     drawInfoMenu(window);
     return;
   }
+  if (mScreen == MenuScreen::SHOP) {
+    drawShopMenu(window);
+    return;
+  }
   window.draw(mBgSprite);
   if (mTitleAnim)
     window.draw(mTitleSprite);
@@ -457,6 +481,7 @@ void Menu::draw(sf::RenderWindow &window) {
   drawButton(window, mBtnSetting);
   drawButton(window, mBtnQuit);
   drawButton(window, mBtnInfo);
+  drawButton(window, mBtnShop);
 }
 
 void Menu::setupSettingsMenu() {
@@ -739,6 +764,236 @@ void Menu::handleInfoEvent(const sf::Event &event, sf::RenderWindow &window,
       mScreen = MenuScreen::MAIN;
     }
   }
+  if (event.type == sf::Event::KeyPressed) {
+    if (event.key.code == sf::Keyboard::Escape) {
+      mScreen = MenuScreen::MAIN;
+    }
+  }
+}
+
+void Menu::setupShopMenu() {
+  mShopTitle.setFont(mFont);
+  mShopTitle.setString("ITEM SHOP");
+  mShopTitle.setCharacterSize(44);
+  mShopTitle.setFillColor(sf::Color(255, 215, 0));
+  mShopTitle.setOutlineColor(sf::Color::Black);
+  mShopTitle.setOutlineThickness(3.f);
+  sf::FloatRect tb = mShopTitle.getLocalBounds();
+  mShopTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
+  mShopTitle.setPosition(Win_W / 2.f, 155.f);
+
+  mShopCoinsText.setFont(mFont);
+  mShopCoinsText.setCharacterSize(22);
+  mShopCoinsText.setFillColor(sf::Color(255, 230, 100));
+  mShopCoinsText.setOutlineColor(sf::Color::Black);
+  mShopCoinsText.setOutlineThickness(2.f);
+
+  std::string iconPaths[4] = {
+      "assets/shop/item_shield.png",
+      "assets/shop/item_speed.png",
+      "assets/shop/item_time.png",
+      "assets/shop/item_radar.png"
+  };
+
+  std::string titles[4] = {
+      "Energy Shield", "Speed Boots", "Time Extender", "Hazard Radar"
+  };
+
+  std::string descs[4] = {
+      "Absorbs 1 deadly hit (Single-use)",
+      "+15% Speed movement boost",
+      "+15 Seconds level time limit",
+      "+1s Early hazard warning alert"
+  };
+
+  int prices[4] = { 500, 800, 600, 1000 };
+
+  for (int i = 0; i < 4; i++) {
+    if (mItemTextures[i].loadFromFile(iconPaths[i])) {
+      mItemSprites[i].setTexture(mItemTextures[i]);
+      mItemSprites[i].setScale(0.7f, 0.7f);
+    }
+
+    float itemY = 225.f + i * 65.f;
+
+    mItemSprites[i].setPosition(Win_W / 2.f - 240.f, itemY - 5.f);
+
+    mItemTitleTexts[i].setFont(mFont);
+    mItemTitleTexts[i].setString(titles[i]);
+    mItemTitleTexts[i].setCharacterSize(20);
+    mItemTitleTexts[i].setFillColor(sf::Color(255, 215, 0));
+    mItemTitleTexts[i].setPosition(Win_W / 2.f - 185.f, itemY - 5.f);
+
+    mItemDescTexts[i].setFont(mFont);
+    mItemDescTexts[i].setString(descs[i]);
+    mItemDescTexts[i].setCharacterSize(14);
+    mItemDescTexts[i].setFillColor(sf::Color(220, 220, 220));
+    mItemDescTexts[i].setPosition(Win_W / 2.f - 185.f, itemY + 18.f);
+
+    mItemPriceTexts[i].setFont(mFont);
+    mItemPriceTexts[i].setString(std::to_string(prices[i]) + " Coins");
+    mItemPriceTexts[i].setCharacterSize(16);
+    mItemPriceTexts[i].setFillColor(sf::Color(100, 220, 255));
+    mItemPriceTexts[i].setPosition(Win_W / 2.f + 95.f, itemY + 2.f);
+
+    setupButton(mItemBuyButtons[i], "assets/ui/menu/btn_yes.png", "BUY",
+                Win_W / 2.f + 205.f, itemY + 12.f,
+                "assets/ui/menu/btn_yes_hover.png", 14);
+    mItemBuyButtons[i].baseScale = 0.60f;
+    mItemBuyButtons[i].hoverScale = 0.70f;
+    mItemBuyButtons[i].curScale = 0.60f;
+    mItemBuyButtons[i].sprite.setScale(0.60f, 0.60f);
+    mItemBuyButtons[i].label.setScale(0.60f, 0.60f);
+  }
+
+  setupButton(mBtnBackShop, "assets/ui/menu/btn_back.png", "BACK",
+              Win_W / 2.f, 515.f, "assets/ui/menu/btn_back_hover.png");
+}
+
+void Menu::drawShopMenu(sf::RenderWindow &window) {
+  window.draw(mBgSprite);
+  window.draw(mPanelSprite);
+  window.draw(mShopTitle);
+
+  // Render Slot Selector Tabs (SLOT 1 | SLOT 2 | SLOT 3)
+  int activeSlot = ShopData::getActiveSlot();
+  float tabStartX = Win_W / 2.f - 180.f;
+  float tabGap = 180.f;
+
+  for (int slot = 1; slot <= 3; slot++) {
+    float tx = tabStartX + (slot - 1) * tabGap;
+    float ty = 192.f;
+
+    bool isSelected = (slot == activeSlot);
+
+    sf::RectangleShape tabBox(sf::Vector2f(120.f, 30.f));
+    tabBox.setOrigin(60.f, 15.f);
+    tabBox.setPosition(tx, ty);
+
+    if (isSelected) {
+      tabBox.setFillColor(sf::Color(0, 160, 220, 110));
+      tabBox.setOutlineColor(sf::Color(0, 230, 255, 240));
+      tabBox.setOutlineThickness(2.0f);
+    } else {
+      tabBox.setFillColor(sf::Color(20, 25, 35, 140));
+      tabBox.setOutlineColor(sf::Color(80, 90, 100, 160));
+      tabBox.setOutlineThickness(1.2f);
+    }
+    window.draw(tabBox);
+
+    sf::Text tabText;
+    tabText.setFont(mFont);
+    tabText.setString("SLOT " + std::to_string(slot));
+    tabText.setCharacterSize(18);
+
+    if (isSelected) {
+      tabText.setFillColor(sf::Color(255, 220, 80));
+      tabText.setOutlineColor(sf::Color::Black);
+      tabText.setOutlineThickness(2.f);
+    } else {
+      tabText.setFillColor(sf::Color(170, 180, 190));
+      tabText.setOutlineColor(sf::Color::Black);
+      tabText.setOutlineThickness(1.2f);
+    }
+
+    sf::FloatRect tb = tabText.getLocalBounds();
+    tabText.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
+    tabText.setPosition(tx, ty - 1.f);
+    window.draw(tabText);
+  }
+
+  int coins = ShopData::getCoins();
+  mShopCoinsText.setString("COINS: " + std::to_string(coins) + "  GOLD  (SLOT " + std::to_string(activeSlot) + ")");
+  sf::FloatRect cb = mShopCoinsText.getLocalBounds();
+  mShopCoinsText.setOrigin(cb.left + cb.width / 2.f, cb.top + cb.height / 2.f);
+  mShopCoinsText.setPosition(Win_W / 2.f, 226.f);
+  window.draw(mShopCoinsText);
+
+  std::string itemIds[4] = { "shield", "speed", "time", "radar" };
+  int prices[4] = { 500, 800, 600, 1000 };
+
+  for (int i = 0; i < 4; i++) {
+    float itemY = 255.f + i * 62.f;
+
+    mItemSprites[i].setPosition(Win_W / 2.f - 240.f, itemY - 5.f);
+    mItemTitleTexts[i].setPosition(Win_W / 2.f - 185.f, itemY - 5.f);
+    mItemDescTexts[i].setPosition(Win_W / 2.f - 185.f, itemY + 18.f);
+    mItemBuyButtons[i].sprite.setPosition(Win_W / 2.f + 205.f, itemY + 12.f);
+
+    window.draw(mItemSprites[i]);
+    window.draw(mItemTitleTexts[i]);
+    window.draw(mItemDescTexts[i]);
+
+    bool owned = ShopData::isItemPurchased(itemIds[i]);
+    if (owned) {
+      mItemPriceTexts[i].setString("OWNED");
+      mItemPriceTexts[i].setFillColor(sf::Color(100, 255, 100));
+      mItemBuyButtons[i].label.setString("EQUIPPED");
+    } else {
+      mItemPriceTexts[i].setString(std::to_string(prices[i]) + " Gold");
+      mItemPriceTexts[i].setFillColor(sf::Color(255, 215, 0));
+      if (coins < prices[i]) {
+        mItemBuyButtons[i].label.setString("NO GOLD");
+      } else {
+        mItemBuyButtons[i].label.setString("BUY");
+      }
+    }
+    
+    // Right-align price text so it sits cleanly to the left of the compact BUY button
+    sf::FloatRect pb = mItemPriceTexts[i].getLocalBounds();
+    mItemPriceTexts[i].setOrigin(pb.left + pb.width, pb.top + pb.height / 2.f);
+    mItemPriceTexts[i].setPosition(Win_W / 2.f + 145.f, itemY + 12.f);
+
+    sf::FloatRect b = mItemBuyButtons[i].label.getLocalBounds();
+    mItemBuyButtons[i].label.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
+    mItemBuyButtons[i].label.setPosition(mItemBuyButtons[i].sprite.getPosition());
+
+    window.draw(mItemPriceTexts[i]);
+    drawButton(window, mItemBuyButtons[i]);
+  }
+
+  drawButton(window, mBtnBackShop);
+}
+
+void Menu::handleShopEvent(const sf::Event &event, sf::RenderWindow &window,
+                           MenuResult &result) {
+  if (event.type == sf::Event::MouseButtonPressed &&
+      event.mouseButton.button == sf::Mouse::Left) {
+    sf::Vector2f mouse = window.mapPixelToCoords(
+        sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+
+    if (mBtnBackShop.sprite.getGlobalBounds().contains(mouse)) {
+      mScreen = MenuScreen::MAIN;
+      return;
+    }
+
+    // Check Slot Selector Tabs (SLOT 1 | SLOT 2 | SLOT 3)
+    float tabStartX = Win_W / 2.f - 180.f;
+    float tabGap = 180.f;
+    for (int slot = 1; slot <= 3; slot++) {
+      float tx = tabStartX + (slot - 1) * tabGap;
+      sf::FloatRect tabBounds(tx - 60.f, 177.f, 120.f, 30.f);
+      if (tabBounds.contains(mouse)) {
+        ShopData::setActiveSlot(slot);
+        printf("Switched Active Shop Slot to Slot %d\n", slot);
+        return;
+      }
+    }
+
+    std::string itemIds[4] = { "shield", "speed", "time", "radar" };
+    int prices[4] = { 500, 800, 600, 1000 };
+
+    for (int i = 0; i < 4; i++) {
+      if (mItemBuyButtons[i].sprite.getGlobalBounds().contains(mouse)) {
+        if (!ShopData::isItemPurchased(itemIds[i])) {
+          if (ShopData::buyItem(itemIds[i], prices[i])) {
+            printf("Purchased shop item '%s' for Slot %d\n", itemIds[i].c_str(), ShopData::getActiveSlot());
+          }
+        }
+      }
+    }
+  }
+
   if (event.type == sf::Event::KeyPressed) {
     if (event.key.code == sf::Keyboard::Escape) {
       mScreen = MenuScreen::MAIN;

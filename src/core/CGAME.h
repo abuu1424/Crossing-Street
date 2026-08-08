@@ -111,6 +111,8 @@ class CGAME {
   sf::Text mOpt2Text; // Save
   sf::Text mOpt3Text; // Save & Exit
   sf::Text mOpt4Text; // Exit
+  sf::Text mOptShopText; // Shop
+  bool mShowShopInGame = false;
   bool mPendingSaveAndExit = false;
   bool mSelectingSaveSlot = false;
 
@@ -152,6 +154,21 @@ class CGAME {
 
   sf::Clock mResetCooldownClock;
   bool mDebugHitbox = false;
+
+  // Developer Command Console (']' Key)
+  bool mShowDevConsole = false;
+  bool mGodMode = false;
+  std::string mDevInputString;
+  std::string mDevFeedbackMsg;
+  float mDevFeedbackTimer = 0.f;
+  sf::RectangleShape mDevConsoleBox;
+  sf::Text mDevConsoleText;
+  sf::Text mDevFeedbackText;
+
+  bool handleDevConsoleEvent(const sf::Event& event);
+  void executeDevCommand(const std::string& cmd);
+  void renderDevConsole();
+
 
 public:
   explicit CGAME(sf::RenderWindow &window);

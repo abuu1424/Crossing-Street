@@ -1,10 +1,12 @@
 #include "SaveData.h"
+#include "ShopData.h"
 
 #include <fstream>
 #include <sstream>
 #include <ctime>
 #include <cstdio>
 #include <filesystem>
+
 
 const std::string SaveData::SAVE_DIR = "saves/";
 
@@ -131,8 +133,10 @@ bool SaveData::load(int slot, int& level, int& score, float& playerX, float& pla
 
 bool SaveData::deleteSlot(int slot) {
     if (!isValidSlot(slot)) return false;
+    ShopData::resetSlot(slot);
     return std::remove(getFilePath(slot).c_str()) == 0;
 }
+
 
 bool SaveData::hasData(int slot) {
     if (!isValidSlot(slot)) return false;

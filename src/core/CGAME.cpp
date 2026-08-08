@@ -1,8 +1,12 @@
 #include "CGAME.h"
 #include "HighScore.h"
 #include "LevelConfig.h"
+#include "ShopData.h"
 #include <cmath>
 #include <cstdio>
+#include <sstream>
+#include <algorithm>
+
 
 const float SPAWN_X = Win_W / 2.f - Player_W / 2.f;
 const float SPAWN_Y = Win_H - Player_H;
@@ -314,10 +318,11 @@ void CGAME::setupUI() {
     t.setPosition(Win_W / 2.f, y);
   };
 
-  setupOpt(mOpt1Text, "[1]  Next Level", Win_H / 2.f - 10.f);
-  setupOpt(mOpt2Text, "[2]  Save", Win_H / 2.f + 40.f);
-  setupOpt(mOpt3Text, "[3]  Save & Exit", Win_H / 2.f + 90.f);
-  setupOpt(mOpt4Text, "[4]  Exit", Win_H / 2.f + 140.f);
+  setupOpt(mOpt1Text, "[1]  Next Level", Win_H / 2.f - 25.f);
+  setupOpt(mOpt2Text, "[2]  Save", Win_H / 2.f + 20.f);
+  setupOpt(mOpt3Text, "[3]  Save & Exit", Win_H / 2.f + 65.f);
+  setupOpt(mOpt4Text, "[4]  Exit", Win_H / 2.f + 110.f);
+  setupOpt(mOptShopText, "[S]  ITEM SHOP", Win_H / 2.f + 155.f);
 
   // Tải các bảng Popup từ assets/ui/hud/
   if (mTexturePopupLevelClear.loadFromFile(
@@ -370,11 +375,13 @@ void CGAME::setupLevelClearOptions() {
   mOpt2Text.setString("[2]  Save");
   mOpt3Text.setString("[3]  Save & Exit");
   mOpt4Text.setString("[4]  Exit");
+  mOptShopText.setString("[S]  ITEM SHOP");
 
   centerText(mOpt1Text);
   centerText(mOpt2Text);
   centerText(mOpt3Text);
   centerText(mOpt4Text);
+  centerText(mOptShopText);
 }
 
 void CGAME::setupSaveSlotOptions() {
@@ -439,8 +446,12 @@ void CGAME::loadLevel(int level) {
 
   mSound.playLevelMusic(cfg.musicPath, 40.f);
 
-  // Player - Speed tuned per level (reduced base speed for challenge)
+  // Player - Speed tuned per level + Speed Boots upgrade (+15% speed if
+  // purchased)
   float levelPlayerSpeed = std::max(120.f, 155.f - (cfg.level - 1) * 7.f);
+  if (ShopData::isItemPurchased("speed")) {
+    levelPlayerSpeed *= 1.15f;
+  }
   mPlayer.reloadSprite(cfg.playerSpritePath);
   mPlayer.setSpeed(levelPlayerSpeed);
   mPlayer.setDead(false);
@@ -471,6 +482,7 @@ void CGAME::reset() {
   mSelectingSaveSlot = false;
   mEnteringSaveName = false;
 
+  mPlayer.resetStats();
   mPlayer.setDead(false);
   mPlayer.setFinish(false);
   mPlayer.setPosition(SPAWN_X, SPAWN_Y);
@@ -489,9 +501,11 @@ void CGAME::restartLevel() {
   mSelectingSaveSlot = false;
   mEnteringSaveName = false;
 
+  mPlayer.resetStats();
   mPlayer.setDead(false);
   mPlayer.setFinish(false);
   mPlayer.setPosition(SPAWN_X, SPAWN_Y);
+
   mScore = mLevelStartScore;
   loadLevel(mCurrentLevel);
   mHUD.update(mCurrentLevel, mScore, mlevelTime);
@@ -503,6 +517,17 @@ void CGAME::handleEvents() {
   while (mWindow.pollEvent(event)) {
     if (event.type == sf::Event::Closed) {
       mWindow.close();
+      continue;
+    }
+
+    if (mShowShopInGame) {
+      mMenu.setScreen(MenuScreen::SHOP);
+      MenuResult res = MenuResult::NONE;
+      mMenu.handleShopEvent(event, mWindow, res);
+      if (mMenu.getScreen() != MenuScreen::SHOP) {
+        mShowShopInGame = false;
+        mMenu.setScreen(MenuScreen::MAIN);
+      }
       continue;
     }
 
@@ -528,11 +553,16 @@ void CGAME::handleEvents() {
       continue;
     }
 
+    if (handleDevConsoleEvent(event)) {
+      continue;
+    }
+
     if (event.type == sf::Event::KeyPressed &&
         event.key.code == sf::Keyboard::V) {
       mDebugHitbox = !mDebugHitbox;
       printf("Debug Hitbox %s\n", mDebugHitbox ? "ON" : "OFF");
     }
+
 
     sf::Vector2f mouse;
     if (event.type == sf::Event::MouseButtonPressed) {
@@ -540,7 +570,7 @@ void CGAME::handleEvents() {
           sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
     }
 
-    // Cutscene Thang Máy (Cho phép Skip bằng nút hoặc phím Enter)
+    // Cutscene Thang Máy
     if (mInCutscene) {
       if (event.type == sf::Event::KeyPressed) {
         if (event.key.code == sf::Keyboard::Enter ||
@@ -624,7 +654,7 @@ void CGAME::handleEvents() {
             event.key.code == sf::Keyboard::Space) {
           if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
             mResetCooldownClock.restart();
-            restartLevel();
+            reset();
           }
         } else if (event.key.code == sf::Keyboard::M) {
           mSound.stopAllEffects();
@@ -641,7 +671,7 @@ void CGAME::handleEvents() {
         if (mBtnDeadRestart.contains(mouse)) {
           if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
             mResetCooldownClock.restart();
-            restartLevel();
+            reset();
           }
         } else if (mBtnDeadMenu.contains(mouse)) {
           mSound.stopAllEffects();
@@ -654,7 +684,8 @@ void CGAME::handleEvents() {
       continue;
     }
 
-    // Bảng VICTORY Cao cấp
+
+    // Bảng VICTORY
     if (mPlayer.isFinish() && mCurrentLevel == Max_Level && !mShowLevelClear) {
       if (event.type == sf::Event::KeyPressed) {
         if (event.key.code == sf::Keyboard::R ||
@@ -876,6 +907,8 @@ void CGAME::handleEvents() {
           mCurrentSaveName.clear();
         } else if (event.key.code == sf::Keyboard::Num4) {
           mWindow.close();
+        } else if (event.key.code == sf::Keyboard::S) {
+          mShowShopInGame = true;
         } else if (event.key.code == sf::Keyboard::R) {
           if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
             mResetCooldownClock.restart();
@@ -923,6 +956,8 @@ void CGAME::handleEvents() {
           mCurrentSaveName.clear();
         } else if (mOpt4Text.getGlobalBounds().contains(mouse)) {
           mWindow.close();
+        } else if (mOptShopText.getGlobalBounds().contains(mouse)) {
+          mShowShopInGame = true;
         }
       }
 
@@ -1057,12 +1092,32 @@ void CGAME::handleCollision() {
 
   sf::FloatRect pb = mPlayer.getHitbox();
 
-  auto triggerDeath = [&](sf::Vector2f hitPos) {
-    mSound.stopMusic();
-    mSound.stopHazardSounds();
-    mHazardManager.reset();
-    mSound.playLevelDeathSound(mCurrentLevel);
-    mDeathCutscene.start(hitPos, mCurrentLevel);
+  auto triggerHit = [&](sf::Vector2f hitPos) {
+    if (mPlayer.isInvulnerable()) {
+      return;
+    }
+    if (ShopData::isItemPurchased("shield")) {
+      ShopData::consumeShield();
+      mPlayer.triggerInvulnerability(1.5f);
+      mPlayer.knockback(160.f);
+      printf("Energy Shield absorbed hit at (%.1f, %.1f)!\n", hitPos.x,
+             hitPos.y);
+      mEffects.push_back(std::make_unique<CollisionEffect>(hitPos));
+      return;
+    }
+
+    bool fatalHit = mPlayer.takeDamage(1);
+
+    if (fatalHit) {
+      mSound.stopMusic();
+      mSound.stopHazardSounds();
+      mHazardManager.reset();
+      mSound.playLevelDeathSound(mCurrentLevel);
+      mDeathCutscene.start(hitPos, mCurrentLevel);
+    } else {
+      mEffects.push_back(std::make_unique<CollisionEffect>(hitPos));
+      mSound.playLevelDeathSound(mCurrentLevel);
+    }
   };
 
   for (const auto &obs : mEntities.obstacles()) {
@@ -1070,7 +1125,7 @@ void CGAME::handleCollision() {
 
     if (pb.intersects(ob)) {
       sf::Vector2f hitPos(pb.left + pb.width / 2.f, pb.top + pb.height / 2.f);
-      triggerDeath(hitPos);
+      triggerHit(hitPos);
       return;
     }
   }
@@ -1080,7 +1135,7 @@ void CGAME::handleCollision() {
 
     if (pb.intersects(ab)) {
       sf::Vector2f hitPos(pb.left + pb.width / 2.f, pb.top + pb.height / 2.f);
-      triggerDeath(hitPos);
+      triggerHit(hitPos);
       return;
     }
   }
@@ -1143,7 +1198,17 @@ void CGAME::checkFinish() {
 }
 
 void CGAME::update(float dt) {
+  if (mDevFeedbackTimer > 0.f) {
+    mDevFeedbackTimer -= dt;
+    if (mDevFeedbackTimer < 0.f) mDevFeedbackTimer = 0.f;
+  }
+
+  if (mGodMode) {
+    mPlayer.triggerInvulnerability(999999.f);
+  }
+
   for (auto it = mEffects.begin(); it != mEffects.end();) {
+
     (*it)->update(dt);
     if ((*it)->isFinished()) {
       it = mEffects.erase(it);
@@ -1216,11 +1281,16 @@ void CGAME::update(float dt) {
     return;
   }
 
+  if (mShowShopInGame) {
+    return;
+  }
+
   if (mShowLevelClear) {
     updateHover(mOpt1Text, mousePos, sf::Color::White);
     updateHover(mOpt2Text, mousePos, sf::Color::White);
     updateHover(mOpt3Text, mousePos, sf::Color::White);
     updateHover(mOpt4Text, mousePos, sf::Color::White);
+    updateHover(mOptShopText, mousePos, sf::Color(255, 215, 0));
     return;
   }
 
@@ -1233,6 +1303,7 @@ void CGAME::update(float dt) {
       mIsDying = true;
       mSound.stopMusic();
       mSound.stopHazardSounds();
+      mSound.stopLevelDeathSounds();
       mHazardManager.reset();
       mSound.playDead();
     }
@@ -1252,7 +1323,9 @@ void CGAME::update(float dt) {
       mDeathCutscene.start(hitPos, mCurrentLevel);
       printf("You ran out of time\n");
     }
-    mPlayer.Move(dt);
+    bool hasHazard =
+        mHazardManager.isHazardActive() || mHazardManager.isWarningActive();
+    mPlayer.Move(dt, mScore, hasHazard);
     mPlayer.update(dt);
 
     std::vector<std::pair<sf::FloatRect, float>> extraHazardBoxes;
@@ -1262,7 +1335,8 @@ void CGAME::update(float dt) {
     // Apply wind drift during Sandstorm
     sf::Vector2f drift = mHazardManager.getPlayerWindDrift();
     if (drift.x != 0.f || drift.y != 0.f) {
-      mPlayer.setPosition(mPlayer.getPosition().x + drift.x, mPlayer.getPosition().y + drift.y);
+      mPlayer.setPosition(mPlayer.getPosition().x + drift.x,
+                          mPlayer.getPosition().y + drift.y);
     }
 
     mEntities.update(dt, mHazardManager.getSpeedMultiplier());
@@ -1271,10 +1345,32 @@ void CGAME::update(float dt) {
     sf::FloatRect pb = mPlayer.getHitbox();
     for (const auto &hb : extraHazardBoxes) {
       if (pb.intersects(hb.first)) {
+        if (mPlayer.isInvulnerable()) {
+          break;
+        }
         sf::Vector2f hitPos(pb.left + pb.width / 2.f, pb.top + pb.height / 2.f);
-        mSound.stopMusic();
-        mSound.playLevelDeathSound(mCurrentLevel);
-        mDeathCutscene.start(hitPos, mCurrentLevel);
+        if (ShopData::isItemPurchased("shield")) {
+          ShopData::consumeShield();
+          mPlayer.triggerInvulnerability(1.5f);
+          mPlayer.knockback(160.f);
+          printf("Energy Shield absorbed hazard hit at (%.1f, %.1f)!\n",
+                 hitPos.x, hitPos.y);
+          mEffects.push_back(std::make_unique<CollisionEffect>(hitPos));
+          break;
+        }
+
+        bool fatalHit = mPlayer.takeDamage(1);
+
+        if (fatalHit) {
+          mSound.stopMusic();
+          mSound.stopHazardSounds();
+          mHazardManager.reset();
+          mSound.playLevelDeathSound(mCurrentLevel);
+          mDeathCutscene.start(hitPos, mCurrentLevel);
+        } else {
+          mEffects.push_back(std::make_unique<CollisionEffect>(hitPos));
+          mSound.playLevelDeathSound(mCurrentLevel);
+        }
         break;
       }
     }
@@ -1359,6 +1455,8 @@ void CGAME::render() {
   }
 
   mHUD.draw(mWindow);
+  mHUD.drawStats(mWindow, mPlayer.getStats());
+
   mHazardManager.drawUI(mWindow);
 
   if (mPlayer.isDead()) {
@@ -1557,8 +1655,14 @@ void CGAME::render() {
     mWindow.draw(mOpt2Text);
     mWindow.draw(mOpt3Text);
     mWindow.draw(mOpt4Text);
+    mWindow.draw(mOptShopText);
   }
 
+  if (mShowShopInGame) {
+    mMenu.drawShopMenu(mWindow);
+  }
+
+  renderDevConsole();
   mWindow.display();
 }
 
@@ -1576,6 +1680,10 @@ void CGAME::run() {
           mWindow.close();
         }
 
+        if (handleDevConsoleEvent(event)) {
+          continue;
+        }
+
         mMenu.handleEvent(event, mWindow, menuResult);
       }
       // NEW_GAME
@@ -1585,12 +1693,15 @@ void CGAME::run() {
         mActiveSlot = (menuResult == MenuResult::NEW_GAME_SLOT_1)   ? 1
                       : (menuResult == MenuResult::NEW_GAME_SLOT_2) ? 2
                                                                     : 3;
+        ShopData::setActiveSlot(mActiveSlot);
+        ShopData::resetSlot(mActiveSlot);
         mInMenu = false;
         reset();
         mCurrentSaveName = mMenu.getPendingSaveName();
         saveGame(mActiveSlot);
 
         menuResult = MenuResult::NONE;
+
       } else if (menuResult == MenuResult::QUIT) {
         mWindow.close();
       } else if (menuResult == MenuResult::SETTING) {
@@ -1619,10 +1730,12 @@ void CGAME::run() {
       mMenu.update(dt, mWindow);
       mWindow.clear();
       mMenu.draw(mWindow);
+      renderDevConsole();
       mWindow.display();
 
       continue;
     }
+
     // Game
     handleEvents();
     update(dt);
@@ -1691,6 +1804,8 @@ bool CGAME::loadGame(int slot) {
   mScore = score;
   mLevelStartScore = score;
   mActiveSlot = slot;
+  ShopData::setActiveSlot(slot);
+
   mCurrentSaveName =
       saveName.empty() ? ("Save Slot " + std::to_string(slot)) : saveName;
   loadLevel(level);
@@ -1700,3 +1815,168 @@ bool CGAME::loadGame(int slot) {
   mHUD.update(mCurrentLevel, mScore, mlevelTime);
   return true;
 }
+
+void CGAME::executeDevCommand(const std::string &rawCmd) {
+  std::string cmd = rawCmd;
+  std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
+
+  if (cmd.empty())
+    return;
+
+  // Convert underscores to spaces
+  for (char &c : cmd) {
+    if (c == '_')
+      c = ' ';
+  }
+
+  std::istringstream iss(cmd);
+  std::string action;
+  iss >> action;
+
+  if (action == "coins" || action == "coin") {
+    int val = 1000;
+    if (iss >> val) {}
+    ShopData::addCoins(val);
+    mDevFeedbackMsg = "[DEV] Added +" + std::to_string(val) + " Coins to Slot " + std::to_string(mActiveSlot) + "!";
+  } else if (action == "hp") {
+    int val = 3;
+    if (iss >> val) {}
+    val = std::clamp(val, 1, 10);
+    mPlayer.getStats().maxHp = val;
+    mPlayer.getStats().currentHp = val;
+    mDevFeedbackMsg = "[DEV] Max HP set to " + std::to_string(val) + " Hearts!";
+  } else if (action == "heal") {
+    mPlayer.getStats().currentHp = mPlayer.getStats().maxHp;
+    mPlayer.getStats().energy = mPlayer.getStats().maxEnergy;
+    mPlayer.setDead(false);
+    mDevFeedbackMsg = "[DEV] Player HP & Energy fully restored!";
+  } else if (action == "level" || action == "lvl") {
+    int lvl = 1;
+    if (iss >> lvl) {}
+    lvl = std::clamp(lvl, 1, Max_Level);
+    mInCutscene = false;
+    mShowLevelClear = false;
+    mPlayer.setDead(false);
+    mPlayer.setFinish(false);
+    loadLevel(lvl);
+    mDevFeedbackMsg = "[DEV] Teleported to Level " + std::to_string(lvl) + "!";
+  } else if (action == "god" || action == "invuln") {
+    mGodMode = !mGodMode;
+    if (mGodMode) {
+      mPlayer.triggerInvulnerability(999999.f);
+      mDevFeedbackMsg = "[DEV] GOD MODE: ACTIVATED (Infinite Invulnerability)";
+    } else {
+      mPlayer.triggerInvulnerability(0.f);
+      mDevFeedbackMsg = "[DEV] GOD MODE: DEACTIVATED";
+    }
+  } else if (action == "skill" || action == "skills" || action == "buy") {
+    std::string item;
+    if (!(iss >> item)) item = "all";
+    if (item == "all") {
+      ShopData::buyItem("shield", 0);
+      ShopData::buyItem("speed", 0);
+      ShopData::buyItem("time", 0);
+      ShopData::buyItem("radar", 0);
+      ShopData::buyItem("speed_skill", 0);
+      mDevFeedbackMsg = "[DEV] UNLOCKED ALL SHOP ITEMS & SPEED SKILL!";
+    } else {
+      ShopData::buyItem(item, 0);
+      mDevFeedbackMsg = "[DEV] Unlocked item: " + item;
+    }
+  } else if (action == "nrg" || action == "energy") {
+    mPlayer.getStats().energy = mPlayer.getStats().maxEnergy;
+    mDevFeedbackMsg = "[DEV] Energy refilled to 100%!";
+  } else if (action == "score") {
+    int val = 500;
+    if (iss >> val) {}
+    mScore += val;
+    mDevFeedbackMsg = "[DEV] Score +" + std::to_string(val) + "!";
+  } else if (action == "help") {
+    mDevFeedbackMsg = "[DEV] Cmds: coins_N, hp_N, heal, level_N, god, skill_all, nrg_100, score_N";
+  } else {
+    mDevFeedbackMsg = "[DEV ERROR] Unknown command '" + rawCmd + "'. Type 'help'";
+  }
+
+  mDevFeedbackTimer = 3.5f;
+}
+
+bool CGAME::handleDevConsoleEvent(const sf::Event &event) {
+  if (event.type == sf::Event::KeyPressed) {
+    if (event.key.code == sf::Keyboard::Tilde ||
+        event.key.code == sf::Keyboard::F8 ||
+        event.key.code == sf::Keyboard::F9 ||
+        event.key.code == sf::Keyboard::F12 ||
+        event.key.code == sf::Keyboard::RBracket ||
+        event.key.code == sf::Keyboard::Slash ||
+        event.key.code == sf::Keyboard::Tab) {
+      mShowDevConsole = !mShowDevConsole;
+      mDevInputString.clear();
+      return true;
+    }
+  }
+
+  if (mShowDevConsole) {
+    if (event.type == sf::Event::TextEntered) {
+      uint32_t c = event.text.unicode;
+      if (c == '`' || c == '~' || c == ']' || c == '[' || c == '/') {
+        // Ignore trigger hotkeys
+      } else if (c >= 32 && c < 127) {
+        if (mDevInputString.size() < 40) {
+          mDevInputString += static_cast<char>(c);
+        }
+      }
+    } else if (event.type == sf::Event::KeyPressed) {
+      if (event.key.code == sf::Keyboard::BackSpace && !mDevInputString.empty()) {
+        mDevInputString.pop_back();
+      } else if (event.key.code == sf::Keyboard::Enter || event.key.code == sf::Keyboard::Return) {
+        executeDevCommand(mDevInputString);
+        mDevInputString.clear();
+        mShowDevConsole = false;
+      } else if (event.key.code == sf::Keyboard::Escape) {
+        mShowDevConsole = false;
+      }
+    }
+    return true;
+  }
+
+  return false;
+}
+
+void CGAME::renderDevConsole() {
+  sf::View origView = mWindow.getView();
+  mWindow.setView(mWindow.getDefaultView());
+
+  if (mDevFeedbackTimer > 0.f && !mDevFeedbackMsg.empty()) {
+    mDevFeedbackText.setFont(mFont);
+    mDevFeedbackText.setCharacterSize(18);
+    mDevFeedbackText.setFillColor(sf::Color(255, 220, 100));
+    mDevFeedbackText.setOutlineColor(sf::Color::Black);
+    mDevFeedbackText.setOutlineThickness(1.5f);
+    mDevFeedbackText.setPosition(15.f, Win_H - 85.f);
+    mDevFeedbackText.setString(mDevFeedbackMsg);
+    mWindow.draw(mDevFeedbackText);
+  }
+
+  if (mShowDevConsole) {
+    mDevConsoleBox.setSize(sf::Vector2f(Win_W, 55.f));
+    mDevConsoleBox.setPosition(0.f, Win_H - 55.f);
+    mDevConsoleBox.setFillColor(sf::Color(10, 18, 30, 245));
+    mDevConsoleBox.setOutlineColor(sf::Color(0, 230, 255, 255));
+    mDevConsoleBox.setOutlineThickness(3.f);
+    mWindow.draw(mDevConsoleBox);
+
+    static sf::Clock cursorClock;
+    bool showCursor = (static_cast<int>(cursorClock.getElapsedTime().asSeconds() * 2.5f) % 2 == 0);
+    mDevConsoleText.setFont(mFont);
+    mDevConsoleText.setCharacterSize(20);
+    mDevConsoleText.setFillColor(sf::Color(100, 240, 255));
+    mDevConsoleText.setOutlineColor(sf::Color::Black);
+    mDevConsoleText.setOutlineThickness(1.5f);
+    mDevConsoleText.setPosition(15.f, Win_H - 42.f);
+    mDevConsoleText.setString("DEV PROMPT [~ or F8 or /] > " + mDevInputString + (showCursor ? "_" : " "));
+    mWindow.draw(mDevConsoleText);
+  }
+
+  mWindow.setView(origView);
+}
+
