@@ -20,7 +20,6 @@ CGAME::CGAME(sf::RenderWindow &window)
 CGAME::~CGAME() { clearEntities(); }
 
 void CGAME::setupUI() {
-  mEffects.reserve(16);
   mFont.loadFromFile(Font_Path);
   mCutscene.init(mFont, &mSound);
   mHazardManager.init(mFont, &mSound);
@@ -1498,10 +1497,8 @@ void CGAME::render() {
   }
 
   if (mPlayer.isFinish() && mCurrentLevel == Max_Level && !mShowLevelClear) {
-    // 1. Nền Panel Sci-Fi HUD Xanh đen tối, mờ nhẹ
     mWindow.draw(mVictoryBox);
 
-    // 2. Viền kim loại phụ bên trong & Chi tiết cơ khí góc (Sci-Fi HUD Accents)
     float vboxW = 620.f, vboxH = 400.f;
     sf::RectangleShape innerFrame(sf::Vector2f(vboxW - 16.f, vboxH - 16.f));
     innerFrame.setOrigin((vboxW - 16.f) / 2.f, (vboxH - 16.f) / 2.f);
@@ -1511,7 +1508,6 @@ void CGAME::render() {
     innerFrame.setOutlineThickness(1.5f);
     mWindow.draw(innerFrame);
 
-    // Dải Highlight kim loại trên & dưới HUD
     sf::RectangleShape topBar(sf::Vector2f(vboxW - 24.f, 3.f));
     topBar.setPosition(Win_W / 2.f - (vboxW - 24.f) / 2.f,
                        Win_H / 2.f - vboxH / 2.f + 4.f);
@@ -1524,7 +1520,6 @@ void CGAME::render() {
     botBar.setFillColor(sf::Color(0, 80, 130, 180));
     mWindow.draw(botBar);
 
-    // Chi tiết góc cơ khí L-bracket cyan/glow ở 4 góc HUD
     float cornerSize = 14.f;
     auto drawCorner = [&](float cx, float cy) {
       sf::RectangleShape c1(sf::Vector2f(cornerSize, 3.f));
@@ -1591,7 +1586,6 @@ void CGAME::render() {
     mWindow.draw(mVictoryScore);
     mWindow.draw(mVictoryHighScore);
 
-    // 6. Hai Nút nằm ngang ở phía dưới (CHƠI LẠI | MENU CHÍNH)
     mBtnVictoryPlayAgain.draw(mWindow);
     mBtnVictoryMenu.draw(mWindow);
   }
