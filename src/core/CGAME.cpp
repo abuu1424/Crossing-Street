@@ -413,13 +413,6 @@ sf::FloatRect shrinkBoxPercent(sf::FloatRect r, float percent) {
   return shrinkBoxPercent(r, percent, percent);
 }
 
-bool sameLane(sf::FloatRect playerBox, sf::FloatRect objectBox) {
-  float playerCenterY = playerBox.top + playerBox.height / 2.f;
-  float objectCenterY = objectBox.top + objectBox.height / 2.f;
-
-  return std::abs(playerCenterY - objectCenterY) < 40.f;
-}
-
 void CGAME::clearEntities() {
   mEntities.clear();
   mEffects.clear();
