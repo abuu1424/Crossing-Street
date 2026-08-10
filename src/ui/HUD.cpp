@@ -43,6 +43,8 @@ void HUD::setupText(sf::Text& text, unsigned int size, float xRatio, float yRati
     float y = spriteBounds.top  + spriteBounds.height * yRatio;
 
     centerOut = sf::Vector2f(x, y);   // lưu tâm cố định
+    sf::FloatRect b = text.getLocalBounds();
+    text.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
     text.setPosition(x, y);
 }
 
@@ -318,16 +320,50 @@ void HUD::reloadHudBar(const std::string& hudPath) {
     float scaledWidth = mHudTexture.getSize().x * scale;
     mHudSprite.setPosition(Win_W / 2.f - scaledWidth / 2.f, -110.f);
 
-    setupText(mLevelText, 22, 275.f/1536.f, 495.f/1024.f, mLevelCenter);
-    setupText(mScoreText, 22, 800.f/1536.f, 495.f/1024.f, mScoreCenter);
-    setupText(mTimeText,  24, 1200.f/1536.f, 495.f/1024.f, mTimeCenter);
+    float xLevel = 275.f;
+    float xScore = 778.f;
+    float xTime  = 1200.f;
+    float yCenter = 495.f;
+
+    if (hudPath.find("tiensu") != std::string::npos) {
+        xLevel = 263.f; xScore = 780.f; xTime = 1218.f; yCenter = 460.f;
+    } else if (hudPath.find("codai") != std::string::npos) {
+        xLevel = 277.f; xScore = 780.f; xTime = 1198.f; yCenter = 490.f;
+    } else if (hudPath.find("trungco") != std::string::npos) {
+        xLevel = 275.f; xScore = 778.f; xTime = 1200.f; yCenter = 495.f;
+    } else if (hudPath.find("hiendai") != std::string::npos) {
+        xLevel = 272.f; xScore = 778.f; xTime = 1205.f; yCenter = 521.f;
+    } else if (hudPath.find("tuonglai") != std::string::npos) {
+        xLevel = 263.f; xScore = 774.f; xTime = 1213.f; yCenter = 511.f;
+    }
+
+    setupText(mLevelText, 22, xLevel / 1536.f, yCenter / 1024.f, mLevelCenter);
+    setupText(mScoreText, 22, xScore / 1536.f, yCenter / 1024.f, mScoreCenter);
+    setupText(mTimeText,  24, xTime  / 1536.f, yCenter / 1024.f, mTimeCenter);
+
+    // Re-center text immediately using current text strings
+    sf::FloatRect lb = mLevelText.getLocalBounds();
+    mLevelText.setOrigin(lb.left + lb.width / 2.f, lb.top + lb.height / 2.f);
+    mLevelText.setPosition(mLevelCenter);
+
+    sf::FloatRect sb = mScoreText.getLocalBounds();
+    mScoreText.setOrigin(sb.left + sb.width / 2.f, sb.top + sb.height / 2.f);
+    mScoreText.setPosition(mScoreCenter);
+
+    sf::FloatRect tb = mTimeText.getLocalBounds();
+    mTimeText.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
+    mTimeText.setPosition(mTimeCenter);
+
+    mLastLevel = -1;
+    mLastScore = -1;
+    mLastRemainingSec = -1;
 }
 
 sf::FloatRect HUD::getPauseIconBounds() const {
-    return sf::FloatRect(
-        780.f,  // x
-        20.f,   // y
-        90.f,   // width
-        80.f    // height
-    );
+    sf::FloatRect hudBounds = mHudSprite.getGlobalBounds();
+    float x = hudBounds.left + hudBounds.width * (1390.f / 1536.f);
+    float y = hudBounds.top + hudBounds.height * (420.f / 1024.f);
+    float w = hudBounds.width * (90.f / 1536.f);
+    float h = hudBounds.height * (90.f / 1024.f);
+    return sf::FloatRect(x, y, w, h);
 }

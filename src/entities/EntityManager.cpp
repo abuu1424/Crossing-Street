@@ -153,16 +153,17 @@ void EntityManager::spawnFromLevel(const LevelConfig &cfg) {
 }
 
 void EntityManager::update(float dt, float speedMultiplier) {
+  float effectiveDt = dt * speedMultiplier;
   for (auto &obs : mObstacles) {
-    obs->Move(dt * speedMultiplier);
-    obs->update(dt);
+    obs->Move(effectiveDt);
+    obs->update(effectiveDt);
   }
   for (auto &ani : mAnimals) {
-    ani->Move(dt);
-    ani->update(dt);
+    ani->Move(effectiveDt);
+    ani->update(effectiveDt);
   }
   if (mTraffic) {
-    mTraffic->update(dt);
+    mTraffic->update(effectiveDt);
   }
 }
 

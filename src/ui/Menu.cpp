@@ -811,7 +811,12 @@ void Menu::setupShopMenu() {
   for (int i = 0; i < 4; i++) {
     if (mItemTextures[i].loadFromFile(iconPaths[i])) {
       mItemSprites[i].setTexture(mItemTextures[i]);
-      mItemSprites[i].setScale(0.7f, 0.7f);
+      sf::Vector2u texSize = mItemTextures[i].getSize();
+      if (texSize.x > 0 && texSize.y > 0) {
+        float targetSize = 36.f;
+        float scale = targetSize / std::max(texSize.x, texSize.y);
+        mItemSprites[i].setScale(scale, scale);
+      }
     }
 
     float itemY = 225.f + i * 65.f;
@@ -822,13 +827,13 @@ void Menu::setupShopMenu() {
     mItemTitleTexts[i].setString(titles[i]);
     mItemTitleTexts[i].setCharacterSize(20);
     mItemTitleTexts[i].setFillColor(sf::Color(255, 215, 0));
-    mItemTitleTexts[i].setPosition(Win_W / 2.f - 185.f, itemY - 5.f);
+    mItemTitleTexts[i].setPosition(Win_W / 2.f - 195.f, itemY - 5.f);
 
     mItemDescTexts[i].setFont(mFont);
     mItemDescTexts[i].setString(descs[i]);
     mItemDescTexts[i].setCharacterSize(14);
     mItemDescTexts[i].setFillColor(sf::Color(220, 220, 220));
-    mItemDescTexts[i].setPosition(Win_W / 2.f - 185.f, itemY + 18.f);
+    mItemDescTexts[i].setPosition(Win_W / 2.f - 195.f, itemY + 18.f);
 
     mItemPriceTexts[i].setFont(mFont);
     mItemPriceTexts[i].setString(std::to_string(prices[i]) + " Coins");
@@ -915,9 +920,18 @@ void Menu::drawShopMenu(sf::RenderWindow &window) {
   for (int i = 0; i < 4; i++) {
     float itemY = 255.f + i * 62.f;
 
-    mItemSprites[i].setPosition(Win_W / 2.f - 240.f, itemY - 5.f);
-    mItemTitleTexts[i].setPosition(Win_W / 2.f - 185.f, itemY - 5.f);
-    mItemDescTexts[i].setPosition(Win_W / 2.f - 185.f, itemY + 18.f);
+    sf::Vector2u texSize = mItemTextures[i].getSize();
+    float scale = mItemSprites[i].getScale().x;
+    float renderW = (texSize.x > 0) ? (texSize.x * scale) : 36.f;
+    float renderH = (texSize.y > 0) ? (texSize.y * scale) : 36.f;
+
+    float iconBoxLeft = Win_W / 2.f - 245.f;
+    float iconX = iconBoxLeft + (40.f - renderW) / 2.f;
+    float iconY = itemY + (40.f - renderH) / 2.f - 2.f;
+
+    mItemSprites[i].setPosition(iconX, iconY);
+    mItemTitleTexts[i].setPosition(Win_W / 2.f - 195.f, itemY - 2.f);
+    mItemDescTexts[i].setPosition(Win_W / 2.f - 195.f, itemY + 20.f);
     mItemBuyButtons[i].sprite.setPosition(Win_W / 2.f + 205.f, itemY + 12.f);
 
     window.draw(mItemSprites[i]);

@@ -1324,24 +1324,29 @@ void CGAME::update(float dt) {
       mDeathCutscene.start(hitPos, mCurrentLevel);
       printf("You ran out of time! Deducted 1 HP.\n");
     }
+    bool isTimeFrozen = mPlayer.getStats().timeFreezeActive;
     bool hasHazard =
         mHazardManager.isHazardActive() || mHazardManager.isWarningActive();
     mPlayer.Move(dt, mScore, hasHazard);
     mPlayer.update(dt);
 
+    float hazardDt = isTimeFrozen ? 0.0f : dt;
+
     std::vector<std::pair<sf::FloatRect, float>> extraHazardBoxes;
-    mHazardManager.update(dt, mPlayer.getPosition(), extraHazardBoxes, mScore);
+    mHazardManager.update(hazardDt, mPlayer.getPosition(), extraHazardBoxes, mScore);
     mSound.update(dt);
 
-    // Apply wind drift during Sandstorm
-    sf::Vector2f drift = mHazardManager.getPlayerWindDrift();
-    if (drift.x != 0.f || drift.y != 0.f) {
-      mPlayer.setPosition(mPlayer.getPosition().x + drift.x,
-                          mPlayer.getPosition().y + drift.y);
+    // Apply wind drift during Sandstorm (only if time is not frozen)
+    if (!isTimeFrozen) {
+      sf::Vector2f drift = mHazardManager.getPlayerWindDrift();
+      if (drift.x != 0.f || drift.y != 0.f) {
+        mPlayer.setPosition(mPlayer.getPosition().x + drift.x,
+                            mPlayer.getPosition().y + drift.y);
+      }
     }
 
     float speedMult = mHazardManager.getSpeedMultiplier();
-    if (mPlayer.getStats().timeFreezeActive) {
+    if (isTimeFrozen) {
       speedMult = 0.0f; // 100% Freeze when Time Clock skill is active!
     } else if (mPlayer.getStats().radarActive) {
       speedMult *= 0.5f; // 50% slow-down when EMP Radar Pulse is active
