@@ -138,7 +138,7 @@ void CPEOPLE::update(float dt) {
 }
 
 void CPEOPLE::activateSpeedSkill() {
-    if (ShopData::isItemPurchased("speed_skill") || mStats.hasSpeedSkill) {
+    if (mStats.hasSpeedSkill || ShopData::getItemCount("speed") > 0 || ShopData::isItemPurchased("speed")) {
         if (mStats.skillCooldownTimer <= 0.f && !mStats.skillActive) {
             mStats.skillActive = true;
             mStats.skillTimer = mStats.skillDuration; // 5.0s
@@ -150,7 +150,7 @@ void CPEOPLE::activateSpeedSkill() {
 }
 
 void CPEOPLE::activateRadarSkill() {
-    if (ShopData::isItemPurchased("radar") || mStats.hasRadarSkill) {
+    if (mStats.hasRadarSkill || ShopData::getItemCount("radar") > 0 || ShopData::isItemPurchased("radar")) {
         if (mStats.radarCooldownTimer <= 0.f && !mStats.radarActive) {
             mStats.radarActive = true;
             mStats.radarTimer = mStats.radarDuration; // 3.5s
@@ -163,7 +163,7 @@ void CPEOPLE::activateRadarSkill() {
 }
 
 void CPEOPLE::activateTimeSkill() {
-    if (ShopData::isItemPurchased("time") || mStats.hasTimeSkill) {
+    if (mStats.hasTimeSkill || ShopData::getItemCount("time") > 0 || ShopData::isItemPurchased("time")) {
         if (mStats.timeFreezeCooldownTimer <= 0.f && !mStats.timeFreezeActive) {
             mStats.timeFreezeActive = true;
             mStats.timeFreezeTimer = mStats.timeFreezeDuration; // 5.0s
@@ -185,28 +185,25 @@ void CPEOPLE::Move(float dt, int score, bool hasActiveHazard)
     if (mIsDead || mIsFinish) return;
 
     // Check Skill 'E' Key
-    static bool ePressedLast = false;
     bool ePressedNow = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
-    if (ePressedNow && !ePressedLast) {
+    if (ePressedNow && !mEPressedLast) {
         activateSpeedSkill();
     }
-    ePressedLast = ePressedNow;
+    mEPressedLast = ePressedNow;
 
     // Check Skill 'Q' Key (Radar EMP Pulse)
-    static bool qPressedLast = false;
     bool qPressedNow = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
-    if (qPressedNow && !qPressedLast) {
+    if (qPressedNow && !mQPressedLast) {
         activateRadarSkill();
     }
-    qPressedLast = qPressedNow;
+    mQPressedLast = qPressedNow;
 
     // Check Skill 'T' Key (Time Freeze Clock)
-    static bool tPressedLast = false;
     bool tPressedNow = sf::Keyboard::isKeyPressed(sf::Keyboard::T);
-    if (tPressedNow && !tPressedLast) {
+    if (tPressedNow && !mTPressedLast) {
         activateTimeSkill();
     }
-    tPressedLast = tPressedNow;
+    mTPressedLast = tPressedNow;
 
     sf::Vector2f dir(0.f, 0.f);
     mIsMoving = false;

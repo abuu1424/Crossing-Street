@@ -1139,7 +1139,8 @@ void CGAME::checkFinish() {
     int timeBonus = static_cast<int>(timeRemaining) * 10;
     mScore = mLevelStartScore + baseScore + timeBonus;
     HighScore::updateIfHigher(mScore);
-    printf("Level %d clear! +%d (base=%d, bonus=%d)\n", mCurrentLevel,
+    ShopData::addCoins(100); // Level completion +100 Gold bonus!
+    printf("Level %d clear! +%d (base=%d, bonus=%d) [+100 Gold Bonus]\n", mCurrentLevel,
            baseScore + timeBonus, baseScore, timeBonus);
 
     // Cập nhật text bảng Level Clear
@@ -1350,10 +1351,17 @@ void CGAME::update(float dt) {
     }
 
     float speedMult = mHazardManager.getSpeedMultiplier();
+    int radarCount = ShopData::getItemCount("radar");
+    if (radarCount > 0 && !isTimeFrozen) {
+      // Passive Hazard Radar obstacle slow (-15% per radar count, max 45% slow)
+      float passiveRadarSlow = std::max(0.55f, 1.0f - 0.15f * radarCount);
+      speedMult *= passiveRadarSlow;
+    }
+
     if (isTimeFrozen) {
       speedMult = 0.0f; // 100% Freeze when Time Clock skill is active!
     } else if (mPlayer.getStats().radarActive) {
-      speedMult *= 0.5f; // 50% slow-down when EMP Radar Pulse is active
+      speedMult *= 0.30f; // 70% slow-down when EMP Radar Pulse skill 'Q' is activated!
     }
     mEntities.update(dt, speedMult);
 

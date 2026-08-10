@@ -56,6 +56,9 @@ public:
     void Draw(sf::RenderWindow& window);
 private:
     float mInvulnerableTimer = 0.f;
+    bool  mEPressedLast = false;
+    bool  mQPressedLast = false;
+    bool  mTPressedLast = false;
 
     // Skill animation visual assets
     sf::Texture mFlashAuraTexture;

@@ -21,7 +21,7 @@ struct PlayerStats {
   bool isSprinting = false;
 
   // Skill Speed Burst 'E'
-  bool hasSpeedSkill = false;
+  bool hasSpeedSkill = true;
   bool skillActive = false;
   float skillTimer = 0.f; // 5.0s duration
   float skillDuration = 5.0f;

@@ -800,13 +800,13 @@ void Menu::setupShopMenu() {
   };
 
   std::string descs[4] = {
-      "Absorbs 1 deadly hit (Single-use)",
-      "+15% Speed movement boost",
+      "Absorbs 1 deadly hit (Consumable)",
+      "+20% Speed movement boost",
       "+15 Seconds level time limit",
-      "+1s Early hazard warning alert"
+      "-15% Obstacle slow & early alert"
   };
 
-  int prices[4] = { 500, 800, 600, 1000 };
+  int prices[4] = { 250, 400, 350, 500 };
 
   for (int i = 0; i < 4; i++) {
     if (mItemTextures[i].loadFromFile(iconPaths[i])) {
@@ -916,7 +916,7 @@ void Menu::drawShopMenu(sf::RenderWindow &window) {
 
   std::string itemIds[4] = { "shield", "speed", "time", "radar" };
   std::string titles[4] = { "Energy Shield", "Speed Boots", "Time Extender", "Hazard Radar" };
-  int prices[4] = { 500, 800, 600, 1000 };
+  int prices[4] = { 250, 400, 350, 500 };
 
   for (int i = 0; i < 4; i++) {
     float itemY = 255.f + i * 62.f;
@@ -993,7 +993,7 @@ void Menu::handleShopEvent(const sf::Event &event, sf::RenderWindow &window,
     }
 
     std::string itemIds[4] = { "shield", "speed", "time", "radar" };
-    int prices[4] = { 500, 800, 600, 1000 };
+    int prices[4] = { 250, 400, 350, 500 };
 
     for (int i = 0; i < 4; i++) {
       if (mItemBuyButtons[i].sprite.getGlobalBounds().contains(mouse)) {

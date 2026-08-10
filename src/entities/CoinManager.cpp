@@ -80,12 +80,12 @@ void CoinManager::update(float dt, const sf::FloatRect& playerHitbox, SoundManag
         if (playerHitbox.intersects(coinHitbox)) {
             coin.collected = true;
 
-            // Award +15 Gold to player slot balance
-            ShopData::addCoins(15);
+            // Award +25 Gold to player slot balance
+            ShopData::addCoins(25);
 
-            // Add floating feedback text "+15 Gold"
+            // Add floating feedback text "+25 Gold"
             FloatingCoinText ft;
-            ft.text = "+15 Gold";
+            ft.text = "+25 Gold";
             ft.position = sf::Vector2f(coin.position.x, coin.position.y - 10.f);
             ft.alpha = 255.f;
             ft.lifetime = 0.85f;
