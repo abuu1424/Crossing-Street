@@ -51,6 +51,14 @@ ShopState ShopData::load(int slot) {
     try {
       if (key == "coins")
         state.coins = std::stoi(value);
+      else if (key == "shieldCount")
+        state.shieldCount = std::stoi(value);
+      else if (key == "speedCount")
+        state.speedCount = std::stoi(value);
+      else if (key == "timeCount")
+        state.timeCount = std::stoi(value);
+      else if (key == "radarCount")
+        state.radarCount = std::stoi(value);
       else if (key == "hasShield")
         state.hasShield = (std::stoi(value) != 0);
       else if (key == "hasSpeedBoots")
@@ -64,6 +72,18 @@ ShopState ShopData::load(int slot) {
     } catch (...) {
     }
   }
+
+  // Backwards compatibility migration
+  if (state.shieldCount == 0 && state.hasShield) state.shieldCount = 1;
+  if (state.speedCount == 0 && state.hasSpeedBoots) state.speedCount = 1;
+  if (state.timeCount == 0 && state.hasTimeExtender) state.timeCount = 1;
+  if (state.radarCount == 0 && state.hasRadar) state.radarCount = 1;
+
+  state.hasShield = (state.shieldCount > 0);
+  state.hasSpeedBoots = (state.speedCount > 0);
+  state.hasTimeExtender = (state.timeCount > 0);
+  state.hasRadar = (state.radarCount > 0);
+
   return state;
 }
 
@@ -74,10 +94,14 @@ void ShopData::save(const ShopState &state, int slot) {
     return;
 
   file << "coins=" << state.coins << "\n";
-  file << "hasShield=" << (state.hasShield ? 1 : 0) << "\n";
-  file << "hasSpeedBoots=" << (state.hasSpeedBoots ? 1 : 0) << "\n";
-  file << "hasTimeExtender=" << (state.hasTimeExtender ? 1 : 0) << "\n";
-  file << "hasRadar=" << (state.hasRadar ? 1 : 0) << "\n";
+  file << "shieldCount=" << state.shieldCount << "\n";
+  file << "speedCount=" << state.speedCount << "\n";
+  file << "timeCount=" << state.timeCount << "\n";
+  file << "radarCount=" << state.radarCount << "\n";
+  file << "hasShield=" << (state.shieldCount > 0 ? 1 : 0) << "\n";
+  file << "hasSpeedBoots=" << (state.speedCount > 0 ? 1 : 0) << "\n";
+  file << "hasTimeExtender=" << (state.timeCount > 0 ? 1 : 0) << "\n";
+  file << "hasRadar=" << (state.radarCount > 0 ? 1 : 0) << "\n";
   file << "hasSpeedSkill=" << (state.hasSpeedSkill ? 1 : 0) << "\n";
 }
 
@@ -107,39 +131,46 @@ bool ShopData::spendCoins(int amount, int slot) {
   return true;
 }
 
-bool ShopData::isItemPurchased(const std::string &itemId, int slot) {
+int ShopData::getItemCount(const std::string &itemId, int slot) {
   ShopState state = load(slot);
   if (itemId == "shield")
-    return state.hasShield;
+    return state.shieldCount;
   if (itemId == "speed")
-    return state.hasSpeedBoots;
+    return state.speedCount;
   if (itemId == "time")
-    return state.hasTimeExtender;
+    return state.timeCount;
   if (itemId == "radar")
-    return state.hasRadar;
+    return state.radarCount;
   if (itemId == "speed_skill")
-    return state.hasSpeedSkill;
-  return false;
+    return state.hasSpeedSkill ? 1 : 0;
+  return 0;
+}
+
+bool ShopData::isItemPurchased(const std::string &itemId, int slot) {
+  return getItemCount(itemId, slot) > 0;
 }
 
 bool ShopData::buyItem(const std::string &itemId, int price, int slot) {
   ShopState state = load(slot);
-  if (isItemPurchased(itemId, slot))
-    return false;
   if (state.coins < price)
     return false;
 
   state.coins -= price;
   if (itemId == "shield")
-    state.hasShield = true;
+    state.shieldCount++;
   else if (itemId == "speed")
-    state.hasSpeedBoots = true;
+    state.speedCount++;
   else if (itemId == "time")
-    state.hasTimeExtender = true;
+    state.timeCount++;
   else if (itemId == "radar")
-    state.hasRadar = true;
+    state.radarCount++;
   else if (itemId == "speed_skill")
     state.hasSpeedSkill = true;
+
+  state.hasShield = (state.shieldCount > 0);
+  state.hasSpeedBoots = (state.speedCount > 0);
+  state.hasTimeExtender = (state.timeCount > 0);
+  state.hasRadar = (state.radarCount > 0);
 
   save(state, slot);
   return true;
@@ -147,7 +178,10 @@ bool ShopData::buyItem(const std::string &itemId, int price, int slot) {
 
 void ShopData::consumeShield(int slot) {
   ShopState state = load(slot);
-  state.hasShield = false;
+  if (state.shieldCount > 0) {
+    state.shieldCount--;
+  }
+  state.hasShield = (state.shieldCount > 0);
   save(state, slot);
 }
 

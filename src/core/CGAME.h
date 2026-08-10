@@ -11,6 +11,7 @@
 #include "SoundManager.h"
 #include "Utils.h"
 #include "HazardManager.h"
+#include "CoinManager.h"
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
@@ -31,6 +32,7 @@ class CGAME {
 
   EntityManager mEntities;
   HazardManager mHazardManager;
+  CoinManager mCoinManager;
 
   // Collision Effects
   std::string mCollisionSpritePath;

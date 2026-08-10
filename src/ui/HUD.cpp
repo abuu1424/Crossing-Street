@@ -143,30 +143,19 @@ void HUD::drawItemPanel(sf::RenderWindow& window) {
     std::string itemIds[4] = { "shield", "speed", "time", "radar" };
 
     for (int i = 0; i < 4; i++) {
-        bool owned = ShopData::isItemPurchased(itemIds[i]);
+        int count = ShopData::getItemCount(itemIds[i]);
 
-        if (i == 0) {
-            // Khiên: Sáng rõ khi có, Tối mờ khi không có / đã dùng
-            if (owned) {
-                mItemSprites[0].setColor(sf::Color(255, 255, 255, 255)); // Sáng rực
-            } else {
-                mItemSprites[0].setColor(sf::Color(80, 80, 90, 90));     // Tối mờ
-            }
-            window.draw(mItemSprites[0]);
+        if (count > 0) {
+            mItemSprites[i].setColor(sf::Color(255, 255, 255, 255));
+            mItemCountTexts[i].setString("x" + std::to_string(count));
+            mItemCountTexts[i].setFillColor(sf::Color(120, 255, 120));
         } else {
-            // Các item khác: Hiện số lượng (x1 khi đã mua, x0 khi chưa mua)
-            if (owned) {
-                mItemSprites[i].setColor(sf::Color(255, 255, 255, 255));
-                mItemCountTexts[i].setString("x1");
-                mItemCountTexts[i].setFillColor(sf::Color(120, 255, 120));
-            } else {
-                mItemSprites[i].setColor(sf::Color(140, 140, 150, 120));
-                mItemCountTexts[i].setString("x0");
-                mItemCountTexts[i].setFillColor(sf::Color(220, 220, 220));
-            }
-            window.draw(mItemSprites[i]);
-            window.draw(mItemCountTexts[i]);
+            mItemSprites[i].setColor(sf::Color(140, 140, 150, 120));
+            mItemCountTexts[i].setString("x0");
+            mItemCountTexts[i].setFillColor(sf::Color(220, 220, 220));
         }
+        window.draw(mItemSprites[i]);
+        window.draw(mItemCountTexts[i]);
     }
 }
 

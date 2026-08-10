@@ -915,6 +915,7 @@ void Menu::drawShopMenu(sf::RenderWindow &window) {
   window.draw(mShopCoinsText);
 
   std::string itemIds[4] = { "shield", "speed", "time", "radar" };
+  std::string titles[4] = { "Energy Shield", "Speed Boots", "Time Extender", "Hazard Radar" };
   int prices[4] = { 500, 800, 600, 1000 };
 
   for (int i = 0; i < 4; i++) {
@@ -934,23 +935,20 @@ void Menu::drawShopMenu(sf::RenderWindow &window) {
     mItemDescTexts[i].setPosition(Win_W / 2.f - 195.f, itemY + 20.f);
     mItemBuyButtons[i].sprite.setPosition(Win_W / 2.f + 205.f, itemY + 12.f);
 
+    int count = ShopData::getItemCount(itemIds[i]);
+    std::string titleStr = titles[i] + (count > 0 ? (" (x" + std::to_string(count) + ")") : " (x0)");
+    mItemTitleTexts[i].setString(titleStr);
+
     window.draw(mItemSprites[i]);
     window.draw(mItemTitleTexts[i]);
     window.draw(mItemDescTexts[i]);
 
-    bool owned = ShopData::isItemPurchased(itemIds[i]);
-    if (owned) {
-      mItemPriceTexts[i].setString("OWNED");
-      mItemPriceTexts[i].setFillColor(sf::Color(100, 255, 100));
-      mItemBuyButtons[i].label.setString("EQUIPPED");
+    mItemPriceTexts[i].setString(std::to_string(prices[i]) + " Gold");
+    mItemPriceTexts[i].setFillColor(sf::Color(255, 215, 0));
+    if (coins < prices[i]) {
+      mItemBuyButtons[i].label.setString("NO GOLD");
     } else {
-      mItemPriceTexts[i].setString(std::to_string(prices[i]) + " Gold");
-      mItemPriceTexts[i].setFillColor(sf::Color(255, 215, 0));
-      if (coins < prices[i]) {
-        mItemBuyButtons[i].label.setString("NO GOLD");
-      } else {
-        mItemBuyButtons[i].label.setString("BUY");
-      }
+      mItemBuyButtons[i].label.setString("BUY");
     }
     
     // Right-align price text so it sits cleanly to the left of the compact BUY button
@@ -999,11 +997,11 @@ void Menu::handleShopEvent(const sf::Event &event, sf::RenderWindow &window,
 
     for (int i = 0; i < 4; i++) {
       if (mItemBuyButtons[i].sprite.getGlobalBounds().contains(mouse)) {
-        if (!ShopData::isItemPurchased(itemIds[i])) {
-          if (ShopData::buyItem(itemIds[i], prices[i])) {
-            printf("Purchased shop item '%s' for Slot %d\n", itemIds[i].c_str(), ShopData::getActiveSlot());
-          }
+        if (ShopData::buyItem(itemIds[i], prices[i])) {
+          printf("Purchased shop item '%s' (Count now: %d) for Slot %d\n",
+                 itemIds[i].c_str(), ShopData::getItemCount(itemIds[i]), ShopData::getActiveSlot());
         }
+        return;
       }
     }
   }

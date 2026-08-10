@@ -263,7 +263,7 @@ void CPEOPLE::Move(float dt, int score, bool hasActiveHazard)
     }
 
     float sprintBoost = mStats.isSprinting ? 0.35f : 0.f;
-    float bootsMultiplier = ShopData::isItemPurchased("speed") ? 1.2f : 1.0f;
+    float bootsMultiplier = 1.0f + 0.15f * ShopData::getItemCount("speed");
 
     float totalMultiplier = bootsMultiplier * energyMultiplier * hazardPenalty * (1.0f + skillBoost + sprintBoost);
     mStats.currentCalculatedSpeed = mSpeed * totalMultiplier;

@@ -457,6 +457,7 @@ void CGAME::loadLevel(int level) {
   // Spawn obstacle/animal/traffic light — xem EntityManager::spawnFromLevel
   mEntities.spawnFromLevel(cfg);
   mHazardManager.startLevel(cfg.level);
+  mCoinManager.spawnForLevel(cfg.level);
 }
 
 void CGAME::reset() {
@@ -1130,7 +1131,8 @@ void CGAME::checkFinish() {
     mLevelCleared = true;
 
     // Tính score
-    float timeRemaining = Level_Time_Limit - mlevelTime;
+    float effectiveTimeLimit = Level_Time_Limit + 15.f * ShopData::getItemCount("time");
+    float timeRemaining = effectiveTimeLimit - mlevelTime;
     if (timeRemaining < 0.f)
       timeRemaining = 0.f;
     int baseScore = 100 * mCurrentLevel;
@@ -1310,7 +1312,8 @@ void CGAME::update(float dt) {
     if (!mPlayer.getStats().timeFreezeActive) {
       mlevelTime += dt;
     }
-    if (mlevelTime >= Level_Time_Limit) {
+    float effectiveTimeLimit = Level_Time_Limit + 15.f * ShopData::getItemCount("time");
+    if (mlevelTime >= effectiveTimeLimit) {
       sf::Vector2f hitPos(mPlayer.getPosition().x + Player_W / 2.f,
                           mPlayer.getPosition().y + Player_H / 2.f);
       mSound.stopMusic();
@@ -1334,6 +1337,7 @@ void CGAME::update(float dt) {
 
     std::vector<std::pair<sf::FloatRect, float>> extraHazardBoxes;
     mHazardManager.update(hazardDt, mPlayer.getPosition(), extraHazardBoxes, mScore);
+    mCoinManager.update(dt, mPlayer.getHitbox(), &mSound);
     mSound.update(dt);
 
     // Apply wind drift during Sandstorm (only if time is not frozen)
@@ -1439,6 +1443,7 @@ void CGAME::render() {
   mWindow.draw(mBgSprite);
 
   mEntities.draw(mWindow);
+  mCoinManager.draw(mWindow);
   mHazardManager.draw(mWindow);
 
   mPlayer.Draw(mWindow);

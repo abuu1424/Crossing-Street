@@ -3,10 +3,14 @@
 
 struct ShopState {
   int coins = 1000;             // Coins balance
-  bool hasShield = false;       // Energy Shield
-  bool hasSpeedBoots = false;   // Permanent
-  bool hasTimeExtender = false; // Permanent
-  bool hasRadar = false;        // Permanent
+  int shieldCount = 0;          // Energy Shield quantity
+  int speedCount = 0;           // Speed Boots quantity
+  int timeCount = 0;            // Time Extender quantity
+  int radarCount = 0;           // Hazard Radar quantity
+  bool hasShield = false;       // Energy Shield (legacy helper)
+  bool hasSpeedBoots = false;   // Permanent (legacy helper)
+  bool hasTimeExtender = false; // Permanent (legacy helper)
+  bool hasRadar = false;        // Permanent (legacy helper)
   bool hasSpeedSkill = false;   // Speed Surge Skill 'E'
 };
 
@@ -26,6 +30,7 @@ public:
   static void addCoins(int amount, int slot = 0);
   static bool spendCoins(int amount, int slot = 0);
 
+  static int getItemCount(const std::string &itemId, int slot = 0);
   static bool isItemPurchased(const std::string &itemId, int slot = 0);
   static bool buyItem(const std::string &itemId, int price, int slot = 0);
   static void consumeShield(int slot = 0);
