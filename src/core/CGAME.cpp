@@ -69,13 +69,17 @@ void CGAME::setupUI() {
   mDeadScore.setCharacterSize(24);
   mDeadScore.setFillColor(sf::Color(255, 215, 0));
 
+  mBtnDeadRevive.setup("assets/ui/menu/btn_yes.png", "REVIVE (2500c)", mFont,
+                        Win_W / 2.f, Win_H / 2.f + 35.f,
+                        "assets/ui/menu/btn_yes_hover.png", 16);
+
   mBtnDeadRestart.setup("assets/ui/menu/btn_yes.png", "RESTART", mFont,
-                        Win_W / 2.f - 130.f, Win_H / 2.f + 85.f,
-                        "assets/ui/menu/btn_yes_hover.png", 18);
+                        Win_W / 2.f - 130.f, Win_H / 2.f + 105.f,
+                        "assets/ui/menu/btn_yes_hover.png", 16);
 
   mBtnDeadMenu.setup("assets/ui/menu/btn_yes.png", "MAIN MENU", mFont,
-                     Win_W / 2.f + 130.f, Win_H / 2.f + 85.f,
-                     "assets/ui/menu/btn_yes_hover.png", 18);
+                     Win_W / 2.f + 130.f, Win_H / 2.f + 105.f,
+                     "assets/ui/menu/btn_yes_hover.png", 16);
 
   float vboxW = 620.f, vboxH = 400.f;
   mVictoryBox.setSize(sf::Vector2f(vboxW, vboxH));
@@ -641,12 +645,24 @@ void CGAME::handleEvents() {
     // Bảng GAME OVER (DEAD)
     if (mPlayer.isDead()) {
       if (event.type == sf::Event::KeyPressed) {
-        if (event.key.code == sf::Keyboard::R ||
-            event.key.code == sf::Keyboard::Enter ||
-            event.key.code == sf::Keyboard::Space) {
+        if (event.key.code == sf::Keyboard::R) {
           if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
             mResetCooldownClock.restart();
             reset();
+          }
+        } else if (event.key.code == sf::Keyboard::E ||
+                   event.key.code == sf::Keyboard::Enter ||
+                   event.key.code == sf::Keyboard::Space) {
+          if (ShopData::spendCoins(2500, mActiveSlot)) {
+            mPlayer.setDead(false);
+            mPlayer.getStats().currentHp = 1;
+            mPlayer.getStats().energy = mPlayer.getStats().maxEnergy;
+            mIsDying = false;
+            mDeathCutscene.reset();
+            mPlayer.setPosition(SPAWN_X, SPAWN_Y);
+            mHUD.update(mCurrentLevel, mScore, mlevelTime);
+            mSound.playLevelMusic(getLevel(mCurrentLevel).musicPath, 40.f);
+            printf("REVIVED PLAYER with 1 Heart for 2500 Coins!\n");
           }
         } else if (event.key.code == sf::Keyboard::M) {
           mSound.stopAllEffects();
@@ -660,7 +676,19 @@ void CGAME::handleEvents() {
 
       if (event.type == sf::Event::MouseButtonPressed &&
           event.mouseButton.button == sf::Mouse::Left) {
-        if (mBtnDeadRestart.contains(mouse)) {
+        if (mBtnDeadRevive.contains(mouse)) {
+          if (ShopData::spendCoins(2500, mActiveSlot)) {
+            mPlayer.setDead(false);
+            mPlayer.getStats().currentHp = 1;
+            mPlayer.getStats().energy = mPlayer.getStats().maxEnergy;
+            mIsDying = false;
+            mDeathCutscene.reset();
+            mPlayer.setPosition(SPAWN_X, SPAWN_Y);
+            mHUD.update(mCurrentLevel, mScore, mlevelTime);
+            mSound.playLevelMusic(getLevel(mCurrentLevel).musicPath, 40.f);
+            printf("REVIVED PLAYER with 1 Heart for 2500 Coins!\n");
+          }
+        } else if (mBtnDeadRestart.contains(mouse)) {
           if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
             mResetCooldownClock.restart();
             reset();
@@ -1313,7 +1341,8 @@ void CGAME::update(float dt) {
     if (!mPlayer.getStats().timeFreezeActive) {
       mlevelTime += dt;
     }
-    float effectiveTimeLimit = Level_Time_Limit + 15.f * ShopData::getItemCount("time");
+    float baseLevelTime = getLevel(mCurrentLevel).timeLimit;
+    float effectiveTimeLimit = baseLevelTime + 8.f * ShopData::getItemCount("time");
     if (mlevelTime >= effectiveTimeLimit) {
       sf::Vector2f hitPos(mPlayer.getPosition().x + Player_W / 2.f,
                           mPlayer.getPosition().y + Player_H / 2.f);
@@ -1401,6 +1430,13 @@ void CGAME::update(float dt) {
 
     handleCollision();
     checkFinish();
+  }
+
+  if (mPlayer.isDead()) {
+    sf::Vector2f mousePos = mWindow.mapPixelToCoords(sf::Mouse::getPosition(mWindow));
+    mBtnDeadRevive.update(mousePos, dt);
+    mBtnDeadRestart.update(mousePos, dt);
+    mBtnDeadMenu.update(mousePos, dt);
   }
 
   mHUD.update(mCurrentLevel, mScore, mlevelTime);
@@ -1500,9 +1536,22 @@ void CGAME::render() {
     mDeadScore.setString("SCORE: " + std::to_string(mScore));
     sf::FloatRect ds = mDeadScore.getLocalBounds();
     mDeadScore.setOrigin(ds.left + ds.width / 2.f, ds.top + ds.height / 2.f);
-    mDeadScore.setPosition(Win_W / 2.f, Win_H / 2.f - 5.f);
+    mDeadScore.setPosition(Win_W / 2.f, Win_H / 2.f - 20.f);
     mWindow.draw(mDeadScore);
 
+    int currentCoins = ShopData::getCoins(mActiveSlot);
+    if (currentCoins < 2500) {
+      mBtnDeadRevive.label.setString("REVIVE (NEED 2500c)");
+      mBtnDeadRevive.label.setFillColor(sf::Color(180, 180, 180));
+    } else {
+      mBtnDeadRevive.label.setString("REVIVE (2500 COINS)");
+      mBtnDeadRevive.label.setFillColor(sf::Color(255, 215, 0));
+    }
+    sf::FloatRect rb = mBtnDeadRevive.label.getLocalBounds();
+    mBtnDeadRevive.label.setOrigin(rb.left + rb.width / 2.f, rb.top + rb.height / 2.f);
+    mBtnDeadRevive.label.setPosition(mBtnDeadRevive.sprite.getPosition());
+
+    mBtnDeadRevive.draw(mWindow);
     mBtnDeadRestart.draw(mWindow);
     mBtnDeadMenu.draw(mWindow);
   }

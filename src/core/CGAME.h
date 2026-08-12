@@ -71,6 +71,7 @@ class CGAME {
   sf::Text mDeadSubText;
   sf::Text mDeadScore;
   sf::RectangleShape mDeadBox;
+  MenuButton mBtnDeadRevive;
   MenuButton mBtnDeadRestart;
   MenuButton mBtnDeadMenu;
   // Bảng VICTORY

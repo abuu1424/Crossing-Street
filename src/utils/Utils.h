@@ -12,7 +12,7 @@ inline constexpr int Lane_H = 80;
 inline constexpr int Safe_Zone_H = 80;
 
 // Player
-inline constexpr float Player_Speed = 200.f;
+inline constexpr float Player_Speed = 220.f;
 inline constexpr float Player_W = 48.f;
 inline constexpr float Player_H = 64.f;
 // Animal
@@ -43,4 +43,4 @@ inline constexpr float Green_Time = 5.f; // giây đèn xanh
 inline constexpr float Red_Time = 3.f;   // giây đèn đỏ
 
 // TIME SET
-inline constexpr float Level_Time_Limit = 45.f;
+inline constexpr float Level_Time_Limit = 65.f;

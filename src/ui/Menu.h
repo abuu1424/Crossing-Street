@@ -104,11 +104,25 @@ class Menu
 
     // Info / Help Popup
     MenuButton mBtnInfo;
+    int mInfoTab = 0; // 0: Controls, 1: Gameplay & Eras, 2: Items & Tips
     sf::Text mInfoTitle;
-    sf::Text mInfoControlsTitle;
-    sf::Text mInfoControlsText[4];
-    sf::Text mInfoGameplayTitle;
-    sf::Text mInfoGameplayText[3];
+    sf::Text mInfoTabButtons[3];
+    sf::Text mInfoCardTitleLeft[3];
+    sf::Text mInfoCardTitleRight[3];
+
+    // Tab 0: Controls & Shortcuts
+    sf::Text mInfoTab0Left[4];
+    sf::Text mInfoTab0Right[4];
+
+    // Tab 1: Gameplay & 5 Eras
+    sf::Text mInfoTab1Left[4];
+    sf::Text mInfoTab1Right[5];
+
+    // Tab 2: Shop & Tips
+    sf::Text mInfoTab2Left[4];
+    sf::Text mInfoTab2Right[3];
+
+    sf::Text mInfoPageHint;
     MenuButton mBtnBackInfo;
 
     void setupInfoMenu();
@@ -122,12 +136,12 @@ class Menu
     sf::Text mShopTitle;
     sf::Text mShopCoinsText;
     sf::Text mShopSlotTabs[3];
-    sf::Texture mItemTextures[4];
-    sf::Sprite  mItemSprites[4];
-    sf::Text mItemTitleTexts[4];
-    sf::Text mItemDescTexts[4];
-    sf::Text mItemPriceTexts[4];
-    MenuButton mItemBuyButtons[4];
+    sf::Texture mItemTextures[5];
+    sf::Sprite  mItemSprites[5];
+    sf::Text mItemTitleTexts[5];
+    sf::Text mItemDescTexts[5];
+    sf::Text mItemPriceTexts[5];
+    MenuButton mItemBuyButtons[5];
     MenuButton mBtnBackShop;
 
     void setupShopMenu();

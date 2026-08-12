@@ -1,6 +1,7 @@
 #include "HUD.h"
 #include "Utils.h"
 #include "ShopData.h"
+#include "LevelConfig.h"
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -78,7 +79,9 @@ void HUD::update(int level, int score, float timeSeconds) {
         mScoreText.setPosition(mScoreCenter);
     }
 
-    float remaining = std::max(0.f, Level_Time_Limit - timeSeconds);
+    float baseLevelTime = getLevel(level).timeLimit;
+    float effectiveTimeLimit = baseLevelTime + 8.f * ShopData::getItemCount("time");
+    float remaining = std::max(0.f, effectiveTimeLimit - timeSeconds);
     int remainingSec = static_cast<int>(remaining);
     if (remainingSec != mLastRemainingSec) {
         mLastRemainingSec = remainingSec;

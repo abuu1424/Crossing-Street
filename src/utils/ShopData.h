@@ -7,6 +7,7 @@ struct ShopState {
   int speedCount = 0;           // Speed Boots quantity
   int timeCount = 0;            // Time Extender quantity
   int radarCount = 0;           // Hazard Radar quantity
+  int heartCount = 0;           // Extra Heart quantity
   bool hasShield = false;       // Energy Shield (legacy helper)
   bool hasSpeedBoots = false;   // Permanent (legacy helper)
   bool hasTimeExtender = false; // Permanent (legacy helper)

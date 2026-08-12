@@ -61,6 +61,7 @@ struct LevelConfig {
   std::string collisionSpritePath;
   float trafficX;
   float trafficY;
+  float timeLimit;
   std::vector<LaneConfig> lanes;
   std::vector<AnimalConfig> animals;
 };

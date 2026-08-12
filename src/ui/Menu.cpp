@@ -1,7 +1,7 @@
 #include "Menu.h"
-#include "Utils.h"
-#include "TextureManager.h"
 #include "ShopData.h"
+#include "TextureManager.h"
+#include "Utils.h"
 #include <cmath>
 #include <cstdio>
 
@@ -11,22 +11,25 @@ Menu::Menu() {
     printf("FAILED font\n");
 
   // Background
-  const auto& bgTex = TextureManager::getInstance().getTexture("assets/ui/menu/menu_bg.png");
+  const auto &bgTex =
+      TextureManager::getInstance().getTexture("assets/ui/menu/menu_bg.png");
   mBgSprite.setTexture(bgTex);
   mBgSprite.setScale((float)Win_W / bgTex.getSize().x,
                      (float)Win_H / bgTex.getSize().y);
 
   // Title
-  const auto& titleTex = TextureManager::getInstance().getTexture("assets/ui/menu/title.png");
+  const auto &titleTex =
+      TextureManager::getInstance().getTexture("assets/ui/menu/title.png");
   mTitleSprite.setTexture(titleTex);
   mTitleSprite.setTextureRect(sf::IntRect(0, 0, 350, 40));
   mTitleSprite.setScale(3.f, 3.f);
   mTitleSprite.setOrigin(350 / 2.f, 40 / 2.f);
   mTitleSprite.setPosition(Win_W / 2.f, 120.f);
-  mTitleAnim = std::make_unique<Animation>(mTitleSprite, titleTex, 350, 40, 4, 4,
-                             0.12f, // frame
-                             true   // Loop
-  );
+  mTitleAnim =
+      std::make_unique<Animation>(mTitleSprite, titleTex, 350, 40, 4, 4,
+                                  0.12f, // frame
+                                  true   // Loop
+      );
 
   // Buttons
   float btnY = 280.f;
@@ -41,12 +44,12 @@ Menu::Menu() {
               Win_W / 2.f, btnY + gap * 3);
 
   // Icon ? button (Info/Help) ở góc trên bên phải — dùng texture gỗ chuẩn
-  setupButton(mBtnInfo, "assets/ui/menu/btn_info.png", "?",
-              Win_W - 65.f, 65.f, "", 36);
+  setupButton(mBtnInfo, "assets/ui/menu/btn_info.png", "?", Win_W - 65.f, 65.f,
+              "", 36);
 
   // Icon Shop button ở góc trên bên phải — nằm kế bên nút ? (Info)
-  setupButton(mBtnShop, "assets/shop/btn_shop.png", "",
-              Win_W - 145.f, 65.f, "assets/shop/btn_shop_hover.png", 26);
+  setupButton(mBtnShop, "assets/shop/btn_shop.png", "", Win_W - 145.f, 65.f,
+              "assets/shop/btn_shop_hover.png", 26);
 
   setupLoadMenu();
   setupSettingsMenu();
@@ -66,8 +69,7 @@ Menu::~Menu() = default;
 
 void Menu::setupButton(MenuButton &btn, const std::string &texPath,
                        const std::string &label, float x, float y,
-                       const std::string &hoverTexPath,
-                       unsigned int charSize) {
+                       const std::string &hoverTexPath, unsigned int charSize) {
   btn.setup(texPath, label, mFont, x, y, hoverTexPath, charSize);
 }
 
@@ -116,8 +118,8 @@ void Menu::setupLoadMenu() {
   mLoadTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
   mLoadTitle.setPosition(Win_W / 2.f, 135.f);
 
-  setupButton(mBtnBack, "assets/ui/menu/btn_back.png", "BACK", Win_W / 2.f, 520.f,
-              "assets/ui/menu/btn_back_hover.png");
+  setupButton(mBtnBack, "assets/ui/menu/btn_back.png", "BACK", Win_W / 2.f,
+              520.f, "assets/ui/menu/btn_back_hover.png");
 
   mOverwriteHint.setFont(mFont);
   mOverwriteHint.setCharacterSize(20);
@@ -376,7 +378,7 @@ void Menu::update(float dt, sf::RenderWindow &window) {
   }
   if (mScreen == MenuScreen::SHOP) {
     updateButton(mBtnBackShop, mouse, dt);
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
       updateButton(mItemBuyButtons[i], mouse, dt);
     }
     return;
@@ -392,9 +394,7 @@ void Menu::update(float dt, sf::RenderWindow &window) {
   updateButton(mBtnShop, mouse, dt);
 }
 
-void Menu::drawButton(sf::RenderWindow &w, MenuButton &btn) {
-  btn.draw(w);
-}
+void Menu::drawButton(sf::RenderWindow &w, MenuButton &btn) { btn.draw(w); }
 
 void Menu::drawLoadMenu(sf::RenderWindow &window) {
   mLoadTitle.setString("LOAD GAME");
@@ -414,13 +414,9 @@ void Menu::drawNewGameMenu(sf::RenderWindow &window) {
   window.draw(mBgSprite);
 
   if (mEnteringNewGameName) {
-    // Popup nhap ten dang mo -> AN het bang chon slot,
-    // chi ve popup nhap ten len tren nen game.
     drawNewGameNamePopup(window);
     return;
   }
-
-  // Khong co popup -> ve binh thuong bang chon slot (nhu cu)
   mLoadTitle.setString("NEW GAME - CHOOSE FILE SAVE");
   sf::FloatRect tb = mLoadTitle.getLocalBounds();
   mLoadTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
@@ -552,8 +548,8 @@ void Menu::setupSettingsMenu() {
   mMuteText.setPosition(Win_W / 2.f - 200.f, 450.f);
 
   // Back
-  setupButton(mBtnBackSettings, "assets/ui/menu/btn_back.png", "BACK", Win_W / 2.f, 540.f,
-              "assets/ui/menu/btn_back_hover.png");
+  setupButton(mBtnBackSettings, "assets/ui/menu/btn_back.png", "BACK",
+              Win_W / 2.f, 540.f, "assets/ui/menu/btn_back_hover.png");
 
   // Cập nhật thumb lần đầu
   updateSlider(mMusicSlider, {}, false);
@@ -670,70 +666,131 @@ void Menu::handleSettingsEvent(const sf::Event &event, sf::RenderWindow &window,
 }
 
 void Menu::setupInfoMenu() {
+  mInfoTab = 0;
+
+  // Title
   mInfoTitle.setFont(mFont);
-  mInfoTitle.setString("GAME INFORMATION & CONTROLS");
-  mInfoTitle.setCharacterSize(32);
+  mInfoTitle.setString("GAME GUIDE & INFORMATION");
+  mInfoTitle.setCharacterSize(28);
   mInfoTitle.setFillColor(sf::Color(255, 215, 0));
   mInfoTitle.setOutlineColor(sf::Color::Black);
   mInfoTitle.setOutlineThickness(3.f);
   sf::FloatRect tb = mInfoTitle.getLocalBounds();
   mInfoTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
-  mInfoTitle.setPosition(Win_W / 2.f, 220.f);
+  mInfoTitle.setPosition(Win_W / 2.f, 212.f);
 
-  // Section 1: Controls
-  mInfoControlsTitle.setFont(mFont);
-  mInfoControlsTitle.setString("CONTROLS");
-  mInfoControlsTitle.setCharacterSize(24);
-  mInfoControlsTitle.setFillColor(sf::Color(100, 200, 255));
-  mInfoControlsTitle.setOutlineColor(sf::Color::Black);
-  mInfoControlsTitle.setOutlineThickness(2.f);
-  mInfoControlsTitle.setPosition(Win_W / 2.f - 260.f, 255.f);
+  // Tab Buttons (Headers)
+  std::string tabNames[3] = {"[ 1. CONTROLS ]", "[ 2. GAMEPLAY & ERAS ]",
+                             "[ 3. ITEMS & TIPS ]"};
 
-  std::string controls[] = {
-      "W / A / S / D  or  Arrow Keys : Move Player",
-      "P : Pause / Resume Game",
-      "R : Restart Level (In-game / Game Over)",
-      "ESC : Quit Dialog / Back"
-  };
-
-  for (int i = 0; i < 4; i++) {
-    mInfoControlsText[i].setFont(mFont);
-    mInfoControlsText[i].setString(controls[i]);
-    mInfoControlsText[i].setCharacterSize(18);
-    mInfoControlsText[i].setFillColor(sf::Color::White);
-    mInfoControlsText[i].setOutlineColor(sf::Color::Black);
-    mInfoControlsText[i].setOutlineThickness(1.5f);
-    mInfoControlsText[i].setPosition(Win_W / 2.f - 240.f, 282.f + i * 22.f);
-  }
-
-  // Section 2: Gameplay & Rules
-  mInfoGameplayTitle.setFont(mFont);
-  mInfoGameplayTitle.setString("GAMEPLAY & FEATURES");
-  mInfoGameplayTitle.setCharacterSize(24);
-  mInfoGameplayTitle.setFillColor(sf::Color(100, 200, 255));
-  mInfoGameplayTitle.setOutlineColor(sf::Color::Black);
-  mInfoGameplayTitle.setOutlineThickness(2.f);
-  mInfoGameplayTitle.setPosition(Win_W / 2.f - 260.f, 380.f);
-
-  std::string gameplay[] = {
-      "Cross 5 Eras : Prehistoric -> Ancient -> Medieval -> Modern -> Future",
-      "Red Traffic Lights temporarily stop obstacles for safe passage",
-      "F1 - F3 : Quick Save Slot 1-3   |   F4 - F6 : Quick Load Slot 1-3"
-  };
+  float tabPosX[3] = {Win_W / 2.f - 200.f, Win_W / 2.f, Win_W / 2.f + 200.f};
 
   for (int i = 0; i < 3; i++) {
-    mInfoGameplayText[i].setFont(mFont);
-    mInfoGameplayText[i].setString(gameplay[i]);
-    mInfoGameplayText[i].setCharacterSize(18);
-    mInfoGameplayText[i].setFillColor(sf::Color::White);
-    mInfoGameplayText[i].setOutlineColor(sf::Color::Black);
-    mInfoGameplayText[i].setOutlineThickness(1.5f);
-    mInfoGameplayText[i].setPosition(Win_W / 2.f - 240.f, 407.f + i * 22.f);
+    mInfoTabButtons[i].setFont(mFont);
+    mInfoTabButtons[i].setString(tabNames[i]);
+    mInfoTabButtons[i].setCharacterSize(16);
+    mInfoTabButtons[i].setOutlineColor(sf::Color::Black);
+    mInfoTabButtons[i].setOutlineThickness(2.f);
+
+    sf::FloatRect bounds = mInfoTabButtons[i].getLocalBounds();
+    mInfoTabButtons[i].setOrigin(bounds.left + bounds.width / 2.f,
+                                 bounds.top + bounds.height / 2.f);
+    mInfoTabButtons[i].setPosition(tabPosX[i], 245.f);
   }
 
+  // Card Titles for each tab
+  std::string leftTitles[3] = {"GAME CONTROLS", "OBJECTIVE & RULES",
+                               "SHOP ITEMS GUIDE"};
+  std::string rightTitles[3] = {"SHORTCUTS & SYSTEM", "5 HISTORICAL ERAS",
+                                "PRO TIPS & ADVICE"};
+
+  for (int i = 0; i < 3; i++) {
+    mInfoCardTitleLeft[i].setFont(mFont);
+    mInfoCardTitleLeft[i].setString(leftTitles[i]);
+    mInfoCardTitleLeft[i].setCharacterSize(18);
+    mInfoCardTitleLeft[i].setFillColor(sf::Color(100, 220, 255));
+    mInfoCardTitleLeft[i].setOutlineColor(sf::Color::Black);
+    mInfoCardTitleLeft[i].setOutlineThickness(2.f);
+    sf::FloatRect lb = mInfoCardTitleLeft[i].getLocalBounds();
+    mInfoCardTitleLeft[i].setOrigin(lb.left + lb.width / 2.f,
+                                    lb.top + lb.height / 2.f);
+    mInfoCardTitleLeft[i].setPosition(Win_W / 2.f - 158.f, 280.f);
+
+    mInfoCardTitleRight[i].setFont(mFont);
+    mInfoCardTitleRight[i].setString(rightTitles[i]);
+    mInfoCardTitleRight[i].setCharacterSize(18);
+    mInfoCardTitleRight[i].setFillColor(sf::Color(100, 220, 255));
+    mInfoCardTitleRight[i].setOutlineColor(sf::Color::Black);
+    mInfoCardTitleRight[i].setOutlineThickness(2.f);
+    sf::FloatRect rb = mInfoCardTitleRight[i].getLocalBounds();
+    mInfoCardTitleRight[i].setOrigin(rb.left + rb.width / 2.f,
+                                     rb.top + rb.height / 2.f);
+    mInfoCardTitleRight[i].setPosition(Win_W / 2.f + 165.f, 280.f);
+  }
+
+  // Helper lambda for setup left-aligned rows
+  auto setupRows = [this](sf::Text texts[], const std::string lines[],
+                          int count, float startX, float startY,
+                          float lineGap = 26.f) {
+    for (int i = 0; i < count; i++) {
+      texts[i].setFont(mFont);
+      texts[i].setString(lines[i]);
+      texts[i].setCharacterSize(14);
+      texts[i].setFillColor(sf::Color(240, 240, 240));
+      texts[i].setOutlineColor(sf::Color::Black);
+      texts[i].setOutlineThickness(1.0f);
+      texts[i].setOrigin(0.f, 0.f);
+      texts[i].setPosition(startX, startY + i * lineGap);
+    }
+  };
+
+  // Tab 0: Controls & Shortcuts
+  std::string tab0LeftLines[] = {
+      "W / A / S / D : Move Player", "Arrow Keys : Move Player",
+      "P : Pause / Resume Game", "R : Quick Restart Level"};
+  std::string tab0RightLines[] = {
+      "F1 - F3 : Quick Save (Slot 1-3)", "F4 - F6 : Quick Load (Slot 1-3)",
+      "M : Toggle Sound Mute", "< / > Keys : Switch Guide Pages"};
+  setupRows(mInfoTab0Left, tab0LeftLines, 4, Win_W / 2.f - 308.f, 308.f);
+  setupRows(mInfoTab0Right, tab0RightLines, 4, Win_W / 2.f + 18.f, 308.f);
+
+  // Tab 1: Gameplay & Eras
+  std::string tab1LeftLines[] = {
+      "Goal: Reach Elevator to finish", "Time Limit: 45s per level",
+      "Red Light: Stop lane temporarily", "Coins: Collect gold on road"};
+  std::string tab1RightLines[] = {
+      "1. Prehistoric: Dinosaurs & Mammoths", "2. Ancient: Chariots & Horses",
+      "3. Medieval: Knights & Dragons", "4. Modern: Cars & Buses",
+      "5. Future: UFOs & Sci-Fi Vehicles"};
+  setupRows(mInfoTab1Left, tab1LeftLines, 4, Win_W / 2.f - 308.f, 308.f);
+  setupRows(mInfoTab1Right, tab1RightLines, 5, Win_W / 2.f + 18.f, 304.f, 24.f);
+
+  // Tab 2: Items & Shop
+  std::string tab2LeftLines[] = {"Shield (250c): Block 1 fatal hit",
+                                 "Speed (400c): +20% Speed (Key E)",
+                                 "Timer (350c): +8s Time (Key T)",
+                                 "Radar (500c): -15% Hazard (Key Q)"};
+  std::string tab2RightLines[] = {"Wait for Red Lights to cross safely",
+                                  "Items automatically save with slot",
+                                  "Collect coins in early eras for Shop!"};
+  setupRows(mInfoTab2Left, tab2LeftLines, 4, Win_W / 2.f - 308.f, 308.f);
+  setupRows(mInfoTab2Right, tab2RightLines, 3, Win_W / 2.f + 18.f, 312.f, 30.f);
+
+  // Page Indicator Hint
+  mInfoPageHint.setFont(mFont);
+  mInfoPageHint.setCharacterSize(14);
+  mInfoPageHint.setFillColor(sf::Color(255, 235, 150));
+  mInfoPageHint.setOutlineColor(sf::Color::Black);
+  mInfoPageHint.setOutlineThickness(1.f);
+  mInfoPageHint.setPosition(Win_W / 2.f, 503.f);
+
   // Back Button
-  setupButton(mBtnBackInfo, "assets/ui/menu/btn_back.png", "BACK", Win_W / 2.f, 515.f,
-              "assets/ui/menu/btn_back_hover.png");
+  setupButton(mBtnBackInfo, "assets/ui/menu/btn_back.png", "BACK", Win_W / 2.f,
+              538.f, "assets/ui/menu/btn_back_hover.png");
+  mBtnBackInfo.baseScale = 0.85f;
+  mBtnBackInfo.hoverScale = 0.95f;
+  mBtnBackInfo.curScale = 0.85f;
+  mBtnBackInfo.sprite.setScale(0.85f, 0.85f);
 }
 
 void Menu::drawInfoMenu(sf::RenderWindow &window) {
@@ -741,16 +798,78 @@ void Menu::drawInfoMenu(sf::RenderWindow &window) {
   window.draw(mPanelSprite);
   window.draw(mInfoTitle);
 
-  window.draw(mInfoControlsTitle);
-  for (int i = 0; i < 4; i++) {
-    window.draw(mInfoControlsText[i]);
-  }
-
-  window.draw(mInfoGameplayTitle);
+  // Draw 3 Tab Buttons with highlight box on active tab
   for (int i = 0; i < 3; i++) {
-    window.draw(mInfoGameplayText[i]);
+    if (i == mInfoTab) {
+      mInfoTabButtons[i].setFillColor(sf::Color(255, 220, 50));
+
+      // Active tab highlight indicator frame
+      sf::FloatRect bounds = mInfoTabButtons[i].getGlobalBounds();
+      sf::RectangleShape tabBox(
+          sf::Vector2f(bounds.width + 16.f, bounds.height + 8.f));
+      tabBox.setOrigin((bounds.width + 16.f) / 2.f,
+                       (bounds.height + 8.f) / 2.f);
+      tabBox.setPosition(mInfoTabButtons[i].getPosition().x,
+                         mInfoTabButtons[i].getPosition().y + 2.f);
+      tabBox.setFillColor(sf::Color(255, 215, 0, 50));
+      tabBox.setOutlineColor(sf::Color(255, 215, 0, 200));
+      tabBox.setOutlineThickness(1.2f);
+      window.draw(tabBox);
+    } else {
+      mInfoTabButtons[i].setFillColor(sf::Color(170, 170, 170));
+    }
+    window.draw(mInfoTabButtons[i]);
   }
 
+  // Card Left container
+  sf::RectangleShape cardLeft(sf::Vector2f(316.f, 225.f));
+  cardLeft.setFillColor(sf::Color(15, 12, 10, 210));
+  cardLeft.setOutlineColor(sf::Color(218, 165, 32, 220));
+  cardLeft.setOutlineThickness(1.5f);
+  cardLeft.setPosition(Win_W / 2.f - 323.f, 268.f);
+  window.draw(cardLeft);
+
+  // Card Right container
+  sf::RectangleShape cardRight(sf::Vector2f(316.f, 225.f));
+  cardRight.setFillColor(sf::Color(15, 12, 10, 210));
+  cardRight.setOutlineColor(sf::Color(218, 165, 32, 220));
+  cardRight.setOutlineThickness(1.5f);
+  cardRight.setPosition(Win_W / 2.f + 7.f, 268.f);
+  window.draw(cardRight);
+
+  // Draw Card Titles for active tab
+  window.draw(mInfoCardTitleLeft[mInfoTab]);
+  window.draw(mInfoCardTitleRight[mInfoTab]);
+
+  // Draw Tab specific content
+  if (mInfoTab == 0) {
+    for (int i = 0; i < 4; i++) {
+      window.draw(mInfoTab0Left[i]);
+      window.draw(mInfoTab0Right[i]);
+    }
+  } else if (mInfoTab == 1) {
+    for (int i = 0; i < 4; i++)
+      window.draw(mInfoTab1Left[i]);
+    for (int i = 0; i < 5; i++)
+      window.draw(mInfoTab1Right[i]);
+  } else if (mInfoTab == 2) {
+    for (int i = 0; i < 4; i++)
+      window.draw(mInfoTab2Left[i]);
+    for (int i = 0; i < 3; i++)
+      window.draw(mInfoTab2Right[i]);
+  }
+
+  // Draw Page Hint
+  std::string hintStr =
+      "< Tab " + std::to_string(mInfoTab + 1) +
+      " / 3 - Click tab or press Left/Right Arrow to switch >";
+  mInfoPageHint.setString(hintStr);
+  sf::FloatRect hb = mInfoPageHint.getLocalBounds();
+  mInfoPageHint.setOrigin(hb.left + hb.width / 2.f, hb.top + hb.height / 2.f);
+  mInfoPageHint.setPosition(Win_W / 2.f, 504.f);
+  window.draw(mInfoPageHint);
+
+  // Draw Back Button
   drawButton(window, mBtnBackInfo);
 }
 
@@ -760,13 +879,34 @@ void Menu::handleInfoEvent(const sf::Event &event, sf::RenderWindow &window,
       event.mouseButton.button == sf::Mouse::Left) {
     sf::Vector2f mouse = window.mapPixelToCoords(
         sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+
+    // Check tab click
+    for (int i = 0; i < 3; i++) {
+      sf::FloatRect tabBounds = mInfoTabButtons[i].getGlobalBounds();
+      tabBounds.left -= 10.f;
+      tabBounds.width += 20.f;
+      tabBounds.top -= 5.f;
+      tabBounds.height += 10.f;
+      if (tabBounds.contains(mouse)) {
+        mInfoTab = i;
+        return;
+      }
+    }
+
     if (mBtnBackInfo.sprite.getGlobalBounds().contains(mouse)) {
       mScreen = MenuScreen::MAIN;
     }
   }
+
   if (event.type == sf::Event::KeyPressed) {
     if (event.key.code == sf::Keyboard::Escape) {
       mScreen = MenuScreen::MAIN;
+    } else if (event.key.code == sf::Keyboard::Left ||
+               event.key.code == sf::Keyboard::A) {
+      mInfoTab = (mInfoTab + 2) % 3;
+    } else if (event.key.code == sf::Keyboard::Right ||
+               event.key.code == sf::Keyboard::D) {
+      mInfoTab = (mInfoTab + 1) % 3;
     }
   }
 }
@@ -788,71 +928,66 @@ void Menu::setupShopMenu() {
   mShopCoinsText.setOutlineColor(sf::Color::Black);
   mShopCoinsText.setOutlineThickness(2.f);
 
-  std::string iconPaths[4] = {
-      "assets/shop/item_shield.png",
-      "assets/shop/item_speed.png",
-      "assets/shop/item_time.png",
-      "assets/shop/item_radar.png"
-  };
+  std::string iconPaths[5] = {
+      "assets/shop/item_shield.png", "assets/shop/item_speed.png",
+      "assets/shop/item_time.png", "assets/shop/item_radar.png",
+      "assets/ui/hud/heart.png"};
 
-  std::string titles[4] = {
-      "Energy Shield", "Speed Boots", "Time Extender", "Hazard Radar"
-  };
+  std::string titles[5] = {"Energy Shield", "Speed Boots", "Time Extender",
+                           "Hazard Radar", "Extra Heart"};
 
-  std::string descs[4] = {
-      "Absorbs 1 deadly hit (Consumable)",
-      "+20% Speed movement boost",
-      "+15 Seconds level time limit",
-      "-15% Obstacle slow & early alert"
-  };
+  std::string descs[5] = {
+      "Absorbs 1 deadly hit (Consumable)", "+20% Speed movement boost",
+      "+8 Seconds level time limit", "-15% Obstacle slow & early alert",
+      "+1 Extra Life / Restore Health"};
 
-  int prices[4] = { 250, 400, 350, 500 };
+  int prices[5] = {250, 400, 350, 500, 1500};
 
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 5; i++) {
     if (mItemTextures[i].loadFromFile(iconPaths[i])) {
       mItemSprites[i].setTexture(mItemTextures[i]);
       sf::Vector2u texSize = mItemTextures[i].getSize();
       if (texSize.x > 0 && texSize.y > 0) {
-        float targetSize = 36.f;
+        float targetSize = 34.f;
         float scale = targetSize / std::max(texSize.x, texSize.y);
         mItemSprites[i].setScale(scale, scale);
       }
     }
 
-    float itemY = 225.f + i * 65.f;
+    float itemY = 230.f + i * 54.f;
 
     mItemSprites[i].setPosition(Win_W / 2.f - 240.f, itemY - 5.f);
 
     mItemTitleTexts[i].setFont(mFont);
     mItemTitleTexts[i].setString(titles[i]);
-    mItemTitleTexts[i].setCharacterSize(20);
+    mItemTitleTexts[i].setCharacterSize(18);
     mItemTitleTexts[i].setFillColor(sf::Color(255, 215, 0));
     mItemTitleTexts[i].setPosition(Win_W / 2.f - 195.f, itemY - 5.f);
 
     mItemDescTexts[i].setFont(mFont);
     mItemDescTexts[i].setString(descs[i]);
-    mItemDescTexts[i].setCharacterSize(14);
+    mItemDescTexts[i].setCharacterSize(13);
     mItemDescTexts[i].setFillColor(sf::Color(220, 220, 220));
     mItemDescTexts[i].setPosition(Win_W / 2.f - 195.f, itemY + 18.f);
 
     mItemPriceTexts[i].setFont(mFont);
     mItemPriceTexts[i].setString(std::to_string(prices[i]) + " Coins");
-    mItemPriceTexts[i].setCharacterSize(16);
+    mItemPriceTexts[i].setCharacterSize(15);
     mItemPriceTexts[i].setFillColor(sf::Color(100, 220, 255));
     mItemPriceTexts[i].setPosition(Win_W / 2.f + 95.f, itemY + 2.f);
 
     setupButton(mItemBuyButtons[i], "assets/ui/menu/btn_yes.png", "BUY",
-                Win_W / 2.f + 205.f, itemY + 12.f,
-                "assets/ui/menu/btn_yes_hover.png", 14);
-    mItemBuyButtons[i].baseScale = 0.60f;
-    mItemBuyButtons[i].hoverScale = 0.70f;
-    mItemBuyButtons[i].curScale = 0.60f;
-    mItemBuyButtons[i].sprite.setScale(0.60f, 0.60f);
-    mItemBuyButtons[i].label.setScale(0.60f, 0.60f);
+                Win_W / 2.f + 205.f, itemY + 10.f,
+                "assets/ui/menu/btn_yes_hover.png", 13);
+    mItemBuyButtons[i].baseScale = 0.55f;
+    mItemBuyButtons[i].hoverScale = 0.65f;
+    mItemBuyButtons[i].curScale = 0.55f;
+    mItemBuyButtons[i].sprite.setScale(0.55f, 0.55f);
+    mItemBuyButtons[i].label.setScale(0.55f, 0.55f);
   }
 
-  setupButton(mBtnBackShop, "assets/ui/menu/btn_back.png", "BACK",
-              Win_W / 2.f, 515.f, "assets/ui/menu/btn_back_hover.png");
+  setupButton(mBtnBackShop, "assets/ui/menu/btn_back.png", "BACK", Win_W / 2.f,
+              530.f, "assets/ui/menu/btn_back_hover.png");
 }
 
 void Menu::drawShopMenu(sf::RenderWindow &window) {
@@ -867,12 +1002,12 @@ void Menu::drawShopMenu(sf::RenderWindow &window) {
 
   for (int slot = 1; slot <= 3; slot++) {
     float tx = tabStartX + (slot - 1) * tabGap;
-    float ty = 192.f;
+    float ty = 188.f;
 
     bool isSelected = (slot == activeSlot);
 
-    sf::RectangleShape tabBox(sf::Vector2f(120.f, 30.f));
-    tabBox.setOrigin(60.f, 15.f);
+    sf::RectangleShape tabBox(sf::Vector2f(120.f, 28.f));
+    tabBox.setOrigin(60.f, 14.f);
     tabBox.setPosition(tx, ty);
 
     if (isSelected) {
@@ -889,7 +1024,7 @@ void Menu::drawShopMenu(sf::RenderWindow &window) {
     sf::Text tabText;
     tabText.setFont(mFont);
     tabText.setString("SLOT " + std::to_string(slot));
-    tabText.setCharacterSize(18);
+    tabText.setCharacterSize(16);
 
     if (isSelected) {
       tabText.setFillColor(sf::Color(255, 220, 80));
@@ -908,35 +1043,39 @@ void Menu::drawShopMenu(sf::RenderWindow &window) {
   }
 
   int coins = ShopData::getCoins();
-  mShopCoinsText.setString("COINS: " + std::to_string(coins) + "  GOLD  (SLOT " + std::to_string(activeSlot) + ")");
+  mShopCoinsText.setString("COINS: " + std::to_string(coins) +
+                           "  GOLD  (SLOT " + std::to_string(activeSlot) + ")");
   sf::FloatRect cb = mShopCoinsText.getLocalBounds();
   mShopCoinsText.setOrigin(cb.left + cb.width / 2.f, cb.top + cb.height / 2.f);
-  mShopCoinsText.setPosition(Win_W / 2.f, 226.f);
+  mShopCoinsText.setPosition(Win_W / 2.f, 218.f);
   window.draw(mShopCoinsText);
 
-  std::string itemIds[4] = { "shield", "speed", "time", "radar" };
-  std::string titles[4] = { "Energy Shield", "Speed Boots", "Time Extender", "Hazard Radar" };
-  int prices[4] = { 250, 400, 350, 500 };
+  std::string itemIds[5] = {"shield", "speed", "time", "radar", "heart"};
+  std::string titles[5] = {"Energy Shield", "Speed Boots", "Time Extender",
+                           "Hazard Radar", "Extra Heart"};
+  int prices[5] = {250, 400, 350, 500, 1500};
 
-  for (int i = 0; i < 4; i++) {
-    float itemY = 255.f + i * 62.f;
+  for (int i = 0; i < 5; i++) {
+    float itemY = 245.f + i * 52.f;
 
     sf::Vector2u texSize = mItemTextures[i].getSize();
     float scale = mItemSprites[i].getScale().x;
-    float renderW = (texSize.x > 0) ? (texSize.x * scale) : 36.f;
-    float renderH = (texSize.y > 0) ? (texSize.y * scale) : 36.f;
+    float renderW = (texSize.x > 0) ? (texSize.x * scale) : 34.f;
+    float renderH = (texSize.y > 0) ? (texSize.y * scale) : 34.f;
 
     float iconBoxLeft = Win_W / 2.f - 245.f;
-    float iconX = iconBoxLeft + (40.f - renderW) / 2.f;
-    float iconY = itemY + (40.f - renderH) / 2.f - 2.f;
+    float iconX = iconBoxLeft + (38.f - renderW) / 2.f;
+    float iconY = itemY + (38.f - renderH) / 2.f - 2.f;
 
     mItemSprites[i].setPosition(iconX, iconY);
     mItemTitleTexts[i].setPosition(Win_W / 2.f - 195.f, itemY - 2.f);
-    mItemDescTexts[i].setPosition(Win_W / 2.f - 195.f, itemY + 20.f);
-    mItemBuyButtons[i].sprite.setPosition(Win_W / 2.f + 205.f, itemY + 12.f);
+    mItemDescTexts[i].setPosition(Win_W / 2.f - 195.f, itemY + 18.f);
+    mItemBuyButtons[i].sprite.setPosition(Win_W / 2.f + 205.f, itemY + 10.f);
 
     int count = ShopData::getItemCount(itemIds[i]);
-    std::string titleStr = titles[i] + (count > 0 ? (" (x" + std::to_string(count) + ")") : " (x0)");
+    std::string titleStr =
+        titles[i] +
+        (count > 0 ? (" (x" + std::to_string(count) + ")") : " (x0)");
     mItemTitleTexts[i].setString(titleStr);
 
     window.draw(mItemSprites[i]);
@@ -950,15 +1089,17 @@ void Menu::drawShopMenu(sf::RenderWindow &window) {
     } else {
       mItemBuyButtons[i].label.setString("BUY");
     }
-    
+
     // Right-align price text so it sits cleanly to the left of the compact BUY button
     sf::FloatRect pb = mItemPriceTexts[i].getLocalBounds();
     mItemPriceTexts[i].setOrigin(pb.left + pb.width, pb.top + pb.height / 2.f);
-    mItemPriceTexts[i].setPosition(Win_W / 2.f + 145.f, itemY + 12.f);
+    mItemPriceTexts[i].setPosition(Win_W / 2.f + 145.f, itemY + 10.f);
 
     sf::FloatRect b = mItemBuyButtons[i].label.getLocalBounds();
-    mItemBuyButtons[i].label.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
-    mItemBuyButtons[i].label.setPosition(mItemBuyButtons[i].sprite.getPosition());
+    mItemBuyButtons[i].label.setOrigin(b.left + b.width / 2.f,
+                                       b.top + b.height / 2.f);
+    mItemBuyButtons[i].label.setPosition(
+        mItemBuyButtons[i].sprite.getPosition());
 
     window.draw(mItemPriceTexts[i]);
     drawButton(window, mItemBuyButtons[i]);
@@ -984,7 +1125,7 @@ void Menu::handleShopEvent(const sf::Event &event, sf::RenderWindow &window,
     float tabGap = 180.f;
     for (int slot = 1; slot <= 3; slot++) {
       float tx = tabStartX + (slot - 1) * tabGap;
-      sf::FloatRect tabBounds(tx - 60.f, 177.f, 120.f, 30.f);
+      sf::FloatRect tabBounds(tx - 60.f, 172.f, 120.f, 30.f);
       if (tabBounds.contains(mouse)) {
         ShopData::setActiveSlot(slot);
         printf("Switched Active Shop Slot to Slot %d\n", slot);
@@ -992,14 +1133,15 @@ void Menu::handleShopEvent(const sf::Event &event, sf::RenderWindow &window,
       }
     }
 
-    std::string itemIds[4] = { "shield", "speed", "time", "radar" };
-    int prices[4] = { 250, 400, 350, 500 };
+    std::string itemIds[5] = {"shield", "speed", "time", "radar", "heart"};
+    int prices[5] = {250, 400, 350, 500, 1500};
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
       if (mItemBuyButtons[i].sprite.getGlobalBounds().contains(mouse)) {
         if (ShopData::buyItem(itemIds[i], prices[i])) {
           printf("Purchased shop item '%s' (Count now: %d) for Slot %d\n",
-                 itemIds[i].c_str(), ShopData::getItemCount(itemIds[i]), ShopData::getActiveSlot());
+                 itemIds[i].c_str(), ShopData::getItemCount(itemIds[i]),
+                 ShopData::getActiveSlot());
         }
         return;
       }

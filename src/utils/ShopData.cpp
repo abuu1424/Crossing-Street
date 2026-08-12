@@ -59,6 +59,8 @@ ShopState ShopData::load(int slot) {
         state.timeCount = std::stoi(value);
       else if (key == "radarCount")
         state.radarCount = std::stoi(value);
+      else if (key == "heartCount")
+        state.heartCount = std::stoi(value);
       else if (key == "hasShield")
         state.hasShield = (std::stoi(value) != 0);
       else if (key == "hasSpeedBoots")
@@ -98,6 +100,7 @@ void ShopData::save(const ShopState &state, int slot) {
   file << "speedCount=" << state.speedCount << "\n";
   file << "timeCount=" << state.timeCount << "\n";
   file << "radarCount=" << state.radarCount << "\n";
+  file << "heartCount=" << state.heartCount << "\n";
   file << "hasShield=" << (state.shieldCount > 0 ? 1 : 0) << "\n";
   file << "hasSpeedBoots=" << (state.speedCount > 0 ? 1 : 0) << "\n";
   file << "hasTimeExtender=" << (state.timeCount > 0 ? 1 : 0) << "\n";
@@ -141,6 +144,8 @@ int ShopData::getItemCount(const std::string &itemId, int slot) {
     return state.timeCount;
   if (itemId == "radar")
     return state.radarCount;
+  if (itemId == "heart")
+    return state.heartCount;
   if (itemId == "speed_skill")
     return state.hasSpeedSkill ? 1 : 0;
   return 0;
@@ -164,6 +169,8 @@ bool ShopData::buyItem(const std::string &itemId, int price, int slot) {
     state.timeCount++;
   else if (itemId == "radar")
     state.radarCount++;
+  else if (itemId == "heart")
+    state.heartCount++;
   else if (itemId == "speed_skill")
     state.hasSpeedSkill = true;
 
