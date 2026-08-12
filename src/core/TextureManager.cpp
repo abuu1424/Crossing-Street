@@ -17,9 +17,9 @@ const sf::Texture& TextureManager::getTexture(const std::string& filename) {
         printf("TextureManager ERROR: Failed to load %s\n", filename.c_str());
     }
 
-    const sf::Texture& ref = *texture;
-    mTextures[filename] = std::move(texture);
-    return ref;
+    auto& entry = mTextures[filename];
+    entry = std::move(texture);
+    return *entry;
 }
 
 void TextureManager::clearCache() {

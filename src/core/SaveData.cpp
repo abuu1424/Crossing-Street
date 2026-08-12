@@ -69,6 +69,15 @@ bool SaveData::load(int slot, int& level, int& score, float& playerX, float& pla
     return load(slot, level, score, playerX, playerY, dummyName);
 }
 
+namespace {
+std::string trimStr(const std::string& str) {
+    size_t first = str.find_first_not_of(" \t\r\n");
+    if (first == std::string::npos) return "";
+    size_t last = str.find_last_not_of(" \t\r\n");
+    return str.substr(first, (last - first + 1));
+}
+}
+
 bool SaveData::load(int slot, int& level, int& score, float& playerX, float& playerY, std::string& saveName) {
     if (!isValidSlot(slot)) {
         printf("Invalid load slot %d\n", slot);
@@ -90,8 +99,11 @@ bool SaveData::load(int slot, int& level, int& score, float& playerX, float& pla
         std::istringstream ss(line);
         std::string key, value;
 
-        std::getline(ss, key, '=');
+        if (!std::getline(ss, key, '=')) continue;
         std::getline(ss, value);
+
+        key = trimStr(key);
+        value = trimStr(value);
 
         if (value.empty()) continue;
 
@@ -137,7 +149,6 @@ bool SaveData::deleteSlot(int slot) {
     return std::remove(getFilePath(slot).c_str()) == 0;
 }
 
-
 bool SaveData::hasData(int slot) {
     if (!isValidSlot(slot)) return false;
 
@@ -165,8 +176,11 @@ std::vector<SaveSlot> SaveData::getAllSlots() {
             std::istringstream ss(line);
             std::string key, value;
 
-            std::getline(ss, key, '=');
+            if (!std::getline(ss, key, '=')) continue;
             std::getline(ss, value);
+
+            key = trimStr(key);
+            value = trimStr(value);
 
             if (value.empty()) continue;
 

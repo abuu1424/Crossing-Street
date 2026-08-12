@@ -657,6 +657,7 @@ void CGAME::handleEvents() {
             mPlayer.setDead(false);
             mPlayer.getStats().currentHp = 1;
             mPlayer.getStats().energy = mPlayer.getStats().maxEnergy;
+            mPlayer.triggerInvulnerability(2.0f);
             mIsDying = false;
             mDeathCutscene.reset();
             mPlayer.setPosition(SPAWN_X, SPAWN_Y);
@@ -681,6 +682,7 @@ void CGAME::handleEvents() {
             mPlayer.setDead(false);
             mPlayer.getStats().currentHp = 1;
             mPlayer.getStats().energy = mPlayer.getStats().maxEnergy;
+            mPlayer.triggerInvulnerability(2.0f);
             mIsDying = false;
             mDeathCutscene.reset();
             mPlayer.setPosition(SPAWN_X, SPAWN_Y);
@@ -1125,7 +1127,7 @@ void CGAME::handleCollision() {
       mSound.playLevelDeathSound(mCurrentLevel);
       mDeathCutscene.start(hitPos, mCurrentLevel);
     } else {
-      mEffects.push_back(std::make_unique<CollisionEffect>(hitPos));
+      mEffects.push_back(std::make_unique<CollisionEffect>(mCollisionSpritePath, hitPos));
       mSound.playLevelDeathSound(mCurrentLevel);
     }
   };
@@ -1159,7 +1161,7 @@ void CGAME::checkFinish() {
     mLevelCleared = true;
 
     // Tính score
-    float effectiveTimeLimit = Level_Time_Limit + 15.f * ShopData::getItemCount("time");
+    float effectiveTimeLimit = getLevel(mCurrentLevel).timeLimit + 8.f * ShopData::getItemCount("time");
     float timeRemaining = effectiveTimeLimit - mlevelTime;
     if (timeRemaining < 0.f)
       timeRemaining = 0.f;
@@ -1421,7 +1423,7 @@ void CGAME::update(float dt) {
           mSound.playLevelDeathSound(mCurrentLevel);
           mDeathCutscene.start(hitPos, mCurrentLevel);
         } else {
-          mEffects.push_back(std::make_unique<CollisionEffect>(hitPos));
+          mEffects.push_back(std::make_unique<CollisionEffect>(mCollisionSpritePath, hitPos));
           mSound.playLevelDeathSound(mCurrentLevel);
         }
         break;

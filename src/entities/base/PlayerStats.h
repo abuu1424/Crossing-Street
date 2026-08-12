@@ -46,9 +46,9 @@ struct PlayerStats {
   float timeFreezeCooldownTimer = 0.f; // 12.0s cooldown
   float timeFreezeCooldownDuration = 12.0f;
 
-  // Cooldown Warning Message ("Chưa đủ thời gian hồi")
+  // Cooldown Warning Message
   std::string cooldownWarningMsg = "";
-  float cooldownWarningTimer = 0.f; // 1.2s display timer
+  float cooldownWarningTimer = 0.f;
 
   // Realtime Speed Stat Output
   float currentCalculatedSpeed = 200.f;
