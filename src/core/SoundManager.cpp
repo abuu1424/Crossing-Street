@@ -138,6 +138,21 @@ void SoundManager::playElevatorDing() {
     mElevatorDingSound.play();
 }
 
+void SoundManager::loadCoinSound(const std::string &path) {
+  if (mCoinBuffer.loadFromFile(path)) {
+    mCoinSound.setBuffer(mCoinBuffer);
+  } else if (mCoinBuffer.loadFromFile("assets/sounds/coin/coin_collection.ogg")) {
+    mCoinSound.setBuffer(mCoinBuffer);
+  } else {
+    printf("Note: Coin sound not found (%s)\n", path.c_str());
+  }
+}
+
+void SoundManager::playCoinSound() {
+  if (mCoinSound.getBuffer())
+    mCoinSound.play();
+}
+
 void SoundManager::setMusicVolume(float v) {
   mBaseMusicVolume = v;
   mLevelMusic.setVolume(mBaseMusicVolume * mCurrentDuckingFactor);
@@ -314,6 +329,7 @@ void SoundManager::setSFXVolume(float v) {
   mElevatorDoorSound.setVolume(v);
   mElevatorMoveSound.setVolume(v);
   mElevatorDingSound.setVolume(v);
+  mCoinSound.setVolume(v);
   mDinoRoarSound.setVolume(v);
   mLightningSound.setVolume(v);
   mBlackHoleSound.setVolume(v);

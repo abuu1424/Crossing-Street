@@ -55,6 +55,9 @@ class CGAME {
   int mLevelStartScore = 0;
   float mlevelTime = 0.f;
   // Helpers
+  void handleResize(unsigned int width, unsigned int height);
+  void toggleFullscreen();
+  bool mIsFullscreen = false;
   void loadLevel(int level);
   void clearEntities();
   void handleCollision();

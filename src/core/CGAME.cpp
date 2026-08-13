@@ -12,9 +12,42 @@ const float SPAWN_Y = Win_H - Player_H;
 
 CGAME::CGAME(sf::RenderWindow &window)
     : mWindow(window), mScore(0), mLevelStartScore(0), mlevelTime(0.f) {
-  sf::View view(sf::FloatRect(0.f, 0.f, (float)Win_W, (float)Win_H));
-  mWindow.setView(view);
+  handleResize(mWindow.getSize().x, mWindow.getSize().y);
   setupUI();
+}
+
+void CGAME::handleResize(unsigned int width, unsigned int height) {
+  if (width == 0 || height == 0) return;
+  float windowRatio = (float)width / (float)height;
+  float viewRatio = (float)Win_W / (float)Win_H;
+  sf::View view(sf::FloatRect(0.f, 0.f, (float)Win_W, (float)Win_H));
+  float sizeX = 1.f;
+  float sizeY = 1.f;
+  float posX = 0.f;
+  float posY = 0.f;
+
+  if (windowRatio >= viewRatio) {
+    sizeX = viewRatio / windowRatio;
+    posX = (1.f - sizeX) / 2.f;
+  } else {
+    sizeY = windowRatio / viewRatio;
+    posY = (1.f - sizeY) / 2.f;
+  }
+
+  view.setViewport(sf::FloatRect(posX, posY, sizeX, sizeY));
+  mWindow.setView(view);
+}
+
+void CGAME::toggleFullscreen() {
+  mIsFullscreen = !mIsFullscreen;
+  if (mIsFullscreen) {
+    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+    mWindow.create(desktop, "Crossing Street", sf::Style::Fullscreen);
+  } else {
+    mWindow.create(sf::VideoMode(Win_W, Win_H), "Crossing Street", sf::Style::Default);
+  }
+  mWindow.setFramerateLimit(FPS);
+  handleResize(mWindow.getSize().x, mWindow.getSize().y);
 }
 
 CGAME::~CGAME() { clearEntities(); }
@@ -32,6 +65,8 @@ void CGAME::setupUI() {
   mSound.loadElevatorSounds("assets/sounds/elevator/elevator_door.ogg",
                             "assets/sounds/elevator/elevator_move.ogg",
                             "assets/sounds/elevator/elevator_ding.ogg");
+
+  mSound.loadCoinSound("assets/sounds/coin/coin_collection.wav");
 
   mSound.loadLevelDeathSounds();
   mSound.loadHazardSounds();
@@ -517,6 +552,19 @@ void CGAME::handleEvents() {
       continue;
     }
 
+    if (event.type == sf::Event::Resized) {
+      handleResize(event.size.width, event.size.height);
+      continue;
+    }
+
+    if (event.type == sf::Event::KeyPressed) {
+      if (event.key.code == sf::Keyboard::F11 ||
+          (event.key.code == sf::Keyboard::Enter && event.key.alt)) {
+        toggleFullscreen();
+        continue;
+      }
+    }
+
     if (mShowShopInGame) {
       mMenu.setScreen(MenuScreen::SHOP);
       MenuResult res = MenuResult::NONE;
@@ -525,28 +573,6 @@ void CGAME::handleEvents() {
         mShowShopInGame = false;
         mMenu.setScreen(MenuScreen::MAIN);
       }
-      continue;
-    }
-
-    if (event.type == sf::Event::Resized) {
-      float windowRatio = (float)event.size.width / (float)event.size.height;
-      float viewRatio = (float)Win_W / (float)Win_H;
-      sf::View view(sf::FloatRect(0.f, 0.f, (float)Win_W, (float)Win_H));
-      float sizeX = 1.f;
-      float sizeY = 1.f;
-      float posX = 0.f;
-      float posY = 0.f;
-
-      if (windowRatio >= viewRatio) {
-        sizeX = viewRatio / windowRatio;
-        posX = (1.f - sizeX) / 2.f;
-      } else {
-        sizeY = windowRatio / viewRatio;
-        posY = (1.f - sizeY) / 2.f;
-      }
-
-      view.setViewport(sf::FloatRect(posX, posY, sizeX, sizeY));
-      mWindow.setView(view);
       continue;
     }
 
@@ -1757,6 +1783,19 @@ void CGAME::run() {
       while (mWindow.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
           mWindow.close();
+        }
+
+        if (event.type == sf::Event::Resized) {
+          handleResize(event.size.width, event.size.height);
+          continue;
+        }
+
+        if (event.type == sf::Event::KeyPressed) {
+          if (event.key.code == sf::Keyboard::F11 ||
+              (event.key.code == sf::Keyboard::Enter && event.key.alt)) {
+            toggleFullscreen();
+            continue;
+          }
         }
 
         if (handleDevConsoleEvent(event)) {

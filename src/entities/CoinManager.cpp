@@ -96,7 +96,7 @@ void CoinManager::update(float dt, const sf::FloatRect &playerHitbox,
 
       // Play pickup sound chime if available
       if (sound) {
-        sound->playElevatorDing();
+        sound->playCoinSound();
       }
     }
   }

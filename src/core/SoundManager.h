@@ -27,6 +27,10 @@ public:
     void stopElevatorMove();
     void playElevatorDing();
 
+    // Sound Nhặt Coin
+    void loadCoinSound(const std::string& path = "assets/sounds/coin/coin_collection.wav");
+    void playCoinSound();
+
     // Sound Death Cutscenes Cho 5 Level
     void loadLevelDeathSounds();
     void playLevelDeathSound(int level);
@@ -61,6 +65,9 @@ private:
 
     sf::SoundBuffer mElevatorDoorBuffer, mElevatorMoveBuffer, mElevatorDingBuffer;
     sf::Sound mElevatorDoorSound, mElevatorMoveSound, mElevatorDingSound;
+
+    sf::SoundBuffer mCoinBuffer;
+    sf::Sound mCoinSound;
 
     sf::SoundBuffer mLevelDeathBuffers[5];
     sf::Sound mLevelDeathSounds[5];
