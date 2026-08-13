@@ -138,8 +138,8 @@ void HazardManager::startLevel(int level) {
 
 float HazardManager::calculateCooldownFromScore(int score) const {
     if (mCurrentLevel == 1) {
-        // Map 1: Thời gian mặc định (6.0s - 8.9s) vì người chơi bắt đầu với 0 score
-        return 6.0f + (float)(rand() % 30) * 0.1f;
+        // Map 1: Tăng thời gian giãn cách giữa các đợt Hazard (14.0s - 17.9s)
+        return 14.0f + (float)(rand() % 40) * 0.1f;
     }
     if (score < 500) {
         // Điểm thấp (<500 các màn sau): Hazard xảy ra lâu hơn (10.0s - 13.9s)
@@ -193,22 +193,23 @@ void HazardManager::triggerHazard() {
         int idx[4] = {0,1,2,3};
         for (int i=3;i>0;--i) std::swap(idx[i], idx[rand()%(i+1)]);
 
-        for (int pick=0; pick<2; ++pick) {
+        // Màn 1: Giảm xuống 1 làn khủng long chạy tràn qua mỗi đợt
+        for (int pick=0; pick<1; ++pick) {
             const LI& li = all[idx[pick]];
             HerdLane herd;
             herd.laneY       = li.laneY;
             herd.direction   = li.dir;
-            herd.warningTimer= 1.5f + (float)(rand()%5)*0.1f;
+            herd.warningTimer= 2.0f + (float)(rand()%5)*0.1f;
             herd.maxWarningTime = herd.warningTimer;
             herd.active      = true;
 
-            int count   = 10 + rand()%4;
-            float gap   = 200.f;
+            int count   = 5 + rand()%3; // 5-7 con khủng long
+            float gap   = 240.f;        // Tăng khoảng cách giữa các con khủng long
             for (int a=0; a<count; ++a) {
                 HerdAnimal an;
                 an.laneY     = li.laneY;
                 an.direction = li.dir;
-                an.speed     = 400.f + (float)(rand()%80);
+                an.speed     = 320.f + (float)(rand()%50); // Tốc độ vừa phải hơn
                 an.textureIdx= li.tex;
                 an.scale     = (li.tex==2) ? 2.5f : 3.0f;
                 if (li.tex < (int)mDinoFrameData.size()) {
