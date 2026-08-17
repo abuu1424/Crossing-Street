@@ -3,7 +3,6 @@
 #include "CollisionEffect.h"
 #include "DeathCutscene.h"
 #include "ElevatorCutscene.h"
-#include "StoryCutsceneManager.h"
 #include "EntityManager.h"
 #include "HUD.h"
 #include "LevelConfig.h"
@@ -42,9 +41,6 @@ class CGAME {
   // Cutscenes
   ElevatorCutscene mCutscene;
   bool mInCutscene = false;
-
-  StoryCutsceneManager mStoryCutscene;
-  bool mInStoryCutscene = false;
 
   DeathCutscene mDeathCutscene;
 

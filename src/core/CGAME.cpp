@@ -55,7 +55,6 @@ CGAME::~CGAME() { clearEntities(); }
 void CGAME::setupUI() {
   mFont.loadFromFile(Font_Path);
   mCutscene.init(mFont, &mSound);
-  mStoryCutscene.init(mFont, &mSound);
   mHazardManager.init(mFont, &mSound);
 
   // Sound
@@ -520,8 +519,7 @@ void CGAME::reset() {
   mPlayer.setFinish(false);
   mPlayer.setPosition(SPAWN_X, SPAWN_Y);
 
-  mInStoryCutscene = true;
-  mStoryCutscene.startChapter(1);
+  loadLevel(1);
 }
 
 void CGAME::restartLevel() {
@@ -613,25 +611,7 @@ void CGAME::handleEvents() {
       continue;
     }
 
-    // Cutscene Visual Novel Story
-    if (mInStoryCutscene) {
-      if (event.type == sf::Event::KeyPressed) {
-        if (event.key.code == sf::Keyboard::Enter ||
-            event.key.code == sf::Keyboard::Return ||
-            event.key.code == sf::Keyboard::Space) {
-          mStoryCutscene.skip();
-        }
-      }
 
-      if (event.type == sf::Event::MouseButtonPressed &&
-          event.mouseButton.button == sf::Mouse::Left) {
-        if (mStoryCutscene.isSkipButtonClicked(mouse)) {
-          mStoryCutscene.skip();
-        }
-      }
-
-      continue;
-    }
 
     // Bảng QUIT confirm
     if (mShowQuitConfirm) {
@@ -1254,8 +1234,6 @@ void CGAME::checkFinish() {
       bool isNewHighScore = HighScore::updateIfHigher(mScore);
       if (isNewHighScore)
         printf("NEW HIGH SCORE: %d\n", mScore);
-      mInStoryCutscene = true;
-      mStoryCutscene.startChapter(6);
     }
   }
 }
@@ -1302,26 +1280,15 @@ void CGAME::update(float dt) {
     if (mCutscene.isFinished()) {
       mInCutscene = false;
       int nextLvl = mCutscene.getTargetLevel();
-      mInStoryCutscene = true;
-      mStoryCutscene.startChapter(nextLvl);
+      loadLevel(nextLvl);
+      mHUD.update(mCurrentLevel, mScore, mlevelTime);
+      if (mActiveSlot > 0)
+        saveGame(mActiveSlot);
     }
     return;
   }
 
-  if (mInStoryCutscene) {
-    mStoryCutscene.update(dt, mousePos);
-    if (mStoryCutscene.isFinished()) {
-      mInStoryCutscene = false;
-      int currentCh = mStoryCutscene.getCurrentChapter();
-      if (currentCh <= 5) {
-        loadLevel(currentCh);
-        mHUD.update(mCurrentLevel, mScore, mlevelTime);
-        if (mActiveSlot > 0)
-          saveGame(mActiveSlot);
-      }
-    }
-    return;
-  }
+
 
   if (mShowQuitConfirm || mShowMenuConfirm) {
     mBtnYes.update(mousePos, dt);
@@ -1519,11 +1486,7 @@ void CGAME::render() {
     return;
   }
 
-  if (mInStoryCutscene) {
-    mStoryCutscene.render(mWindow);
-    mWindow.display();
-    return;
-  }
+
 
   if (mDeathCutscene.isActive()) {
     sf::View currentView = mWindow.getView();
