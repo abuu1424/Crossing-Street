@@ -3,6 +3,8 @@
 #include "SoundManager.h"
 #include <cmath>
 #include <iostream>
+#include <algorithm>
+
 
 CoinManager::CoinManager() {
   if (mCoinTexture.loadFromFile("assets/shop/coin.png")) {

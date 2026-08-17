@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
+
 
 HUD::HUD() : mLoaded(false), mHudBarLoaded(false), mHeartLoaded(false) {
     mLoaded = mFont.loadFromFile(Font_Path);

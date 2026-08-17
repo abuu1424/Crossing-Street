@@ -4,6 +4,8 @@
 #include "Utils.h"
 #include <cmath>
 #include <cstdio>
+#include <algorithm>
+
 
 Menu::Menu() {
   // Font

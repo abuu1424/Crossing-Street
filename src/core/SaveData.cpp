@@ -1,5 +1,7 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "SaveData.h"
 #include "ShopData.h"
+
 
 #include <fstream>
 #include <sstream>

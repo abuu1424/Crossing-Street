@@ -3,6 +3,7 @@
 #include <SFML/Audio.hpp>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include "SaveData.h"
 #include "Animation.h"
 #include "TextureManager.h"

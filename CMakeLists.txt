@@ -7,11 +7,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Tìm SFML
 if(APPLE)
-    set(CMAKE_PREFIX_PATH "/opt/homebrew/opt/sfml@2")
+    list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew/opt/sfml@2")
 endif()
 
 if(WIN32)
-    set(CMAKE_PREFIX_PATH "C:/SFML-2.6.2")
+    if(DEFINED ENV{SFML_DIR})
+        list(APPEND CMAKE_PREFIX_PATH "$ENV{SFML_DIR}")
+    endif()
+    if(DEFINED ENV{SFML_ROOT})
+        list(APPEND CMAKE_PREFIX_PATH "$ENV{SFML_ROOT}")
+    endif()
+    list(APPEND CMAKE_PREFIX_PATH "C:/SFML-2.6.2" "C:/SFML-2.5.1" "C:/SFML")
 endif()
 
 find_package(SFML 2.5 COMPONENTS graphics window system audio REQUIRED)
@@ -65,12 +71,22 @@ target_link_libraries(CrossingGame PRIVATE
     sfml-audio
 )
 
-# Cấu hình compiler warnings
+# Compiler definitions
+if(WIN32)
+    target_compile_definitions(CrossingGame PRIVATE _CRT_SECURE_NO_WARNINGS NOMINMAX)
+endif()
+
+# Cấu hình compiler warnings & UTF-8
 if(MSVC)
-    target_compile_options(CrossingGame PRIVATE /W4)
+    target_compile_options(CrossingGame PRIVATE /W4 /utf-8)
 else()
     target_compile_options(CrossingGame PRIVATE -Wall -Wextra -Wno-unused-parameter)
 endif()
+
+# Visual Studio debugger: đặt Working Directory về thư mục gốc dự án để F5 debug load được assets/
+set_target_properties(CrossingGame PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+)
 
 # Copy assets vào build
 add_custom_command(TARGET CrossingGame POST_BUILD
@@ -87,12 +103,25 @@ add_custom_command(TARGET CrossingGame POST_BUILD
     COMMENT "Creating saves directory..."
 )
 
-# Windows: copy SFML DLL vào cùng thư mục exe
+# Windows: copy SFML & OpenAL DLLs vào cùng thư mục exe
 if(WIN32)
-    add_custom_command(TARGET CrossingGame POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_RUNTIME_DLLS:CrossingGame>
-        $<TARGET_FILE_DIR:CrossingGame>
-        COMMAND_EXPAND_LISTS
-    )
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.21")
+        add_custom_command(TARGET CrossingGame POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_RUNTIME_DLLS:CrossingGame>
+            $<TARGET_FILE_DIR:CrossingGame>
+            COMMAND_EXPAND_LISTS
+        )
+    endif()
+
+    # Đảm bảo copy toàn bộ DLL từ thư mục bin của SFML (bao gồm openal32.dll)
+    get_filename_component(SFML_BIN_DIR "${SFML_DIR}/../../../bin" ABSOLUTE)
+    if(EXISTS "${SFML_BIN_DIR}")
+        add_custom_command(TARGET CrossingGame POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${SFML_BIN_DIR}"
+            "$<TARGET_FILE_DIR:CrossingGame>"
+            COMMENT "Copying SFML and OpenAL runtime DLLs..."
+        )
+    endif()
 endif()

@@ -3,6 +3,7 @@
 #include "ShopData.h"
 #include <cmath>
 #include <memory>
+#include <algorithm>
 
 CPEOPLE::CPEOPLE()
 {

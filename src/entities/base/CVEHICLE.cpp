@@ -2,6 +2,8 @@
 #include "TextureManager.h"
 #include <cstdio>
 #include <memory>
+#include <algorithm>
+
 
 CVEHICLE::CVEHICLE(float speed, float direction)
     : mSpeed(speed), mDirection(direction), mIsStopped(false) {}

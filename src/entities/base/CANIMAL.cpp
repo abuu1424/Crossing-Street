@@ -1,5 +1,7 @@
 #include "CANIMAL.h"
 #include "TextureManager.h"
+#include <algorithm>
+
 
 CANIMAL::CANIMAL(float speed, float direction)
     : mSpeed(speed), mDirection(direction) {
