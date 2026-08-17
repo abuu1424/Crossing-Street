@@ -3,6 +3,9 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
+#include <string>
+
 
 int ShopData::sActiveSlot = 1;
 
