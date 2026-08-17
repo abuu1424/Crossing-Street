@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstdio>
 #include <sstream>
+#include <fstream>
 
 const float SPAWN_X = Win_W / 2.f - Player_W / 2.f;
 const float SPAWN_Y = Win_H - Player_H;
@@ -56,6 +57,8 @@ void CGAME::setupUI() {
   mFont.loadFromFile(Font_Path);
   mCutscene.init(mFont, &mSound);
   mHazardManager.init(mFont, &mSound);
+  mPowerUpManager.init(mFont);
+  loadEndlessHighScore();
 
   // Sound
   mSound.loadEffects("assets/sounds/victory/vt1.ogg",
@@ -497,6 +500,7 @@ void CGAME::loadLevel(int level) {
   mEntities.spawnFromLevel(cfg);
   mHazardManager.startLevel(cfg.level);
   mCoinManager.spawnForLevel(cfg.level);
+  mPowerUpManager.spawnForLevel(cfg.level, mIsEndlessMode);
 }
 
 void CGAME::reset() {
@@ -504,6 +508,8 @@ void CGAME::reset() {
   mSound.stopMusic();
 
   mDeathCutscene.reset();
+  mPowerUpManager.reset();
+  mEffects.clear();
   mScore = 0;
   mLevelStartScore = 0;
   mlevelTime = 0.f;
@@ -513,6 +519,8 @@ void CGAME::reset() {
   mShowMenuConfirm = false;
   mSelectingSaveSlot = false;
   mEnteringSaveName = false;
+  mIsEndlessMode = false;
+  mHUD.setEndlessMode(false);
 
   mPlayer.resetStats();
   mPlayer.setDead(false);
@@ -531,15 +539,73 @@ void CGAME::restartLevel() {
   mShowMenuConfirm = false;
   mSelectingSaveSlot = false;
   mEnteringSaveName = false;
+  mPowerUpManager.reset();
+  mEffects.clear();
 
   mPlayer.resetStats();
   mPlayer.setDead(false);
   mPlayer.setFinish(false);
   mPlayer.setPosition(SPAWN_X, SPAWN_Y);
 
-  mScore = mLevelStartScore;
+  if (mIsEndlessMode) {
+    mHUD.setEndlessMode(true, mEndlessWave);
+  } else {
+    mScore = mLevelStartScore;
+    mHUD.setEndlessMode(false);
+  }
+
   loadLevel(mCurrentLevel);
   mHUD.update(mCurrentLevel, mScore, mlevelTime);
+}
+
+void CGAME::startEndlessGame() {
+  mIsEndlessMode = true;
+  mEndlessWave = 1;
+  mScore = 0;
+  mLevelStartScore = 0;
+  mCurrentLevel = 1;
+  mInMenu = false;
+  mPaused = false;
+  mShowMenuConfirm = false;
+  mShowQuitConfirm = false;
+  mShowLevelClear = false;
+  mSelectingSaveSlot = false;
+  mEnteringSaveName = false;
+
+  mHUD.setEndlessMode(true, 1);
+  mSound.stopAllEffects();
+  mSound.stopMusic();
+
+  mPlayer.resetStats();
+  mPlayer.setDead(false);
+  mPlayer.setFinish(false);
+  mPlayer.setPosition(SPAWN_X, SPAWN_Y);
+
+  mPowerUpManager.reset();
+  loadLevel(1);
+  printf(">>> STARTING ENDLESS CHRONO MODE! Wave 1 (Prehistoric Era) <<<\n");
+}
+
+void CGAME::loadEndlessHighScore() {
+  std::ifstream f("saves/endless_highscore.txt");
+  if (f.is_open()) {
+    f >> mEndlessHighScore;
+    f.close();
+  }
+}
+
+void CGAME::saveEndlessHighScore() {
+  if (mScore > mEndlessHighScore) {
+    mEndlessHighScore = mScore;
+    try {
+      std::filesystem::create_directories("saves");
+      std::ofstream f("saves/endless_highscore.txt");
+      if (f.is_open()) {
+        f << mEndlessHighScore;
+        f.close();
+      }
+    } catch (...) {}
+  }
 }
 
 void CGAME::handleEvents() {
@@ -567,7 +633,7 @@ void CGAME::handleEvents() {
     if (mShowShopInGame) {
       mMenu.setScreen(MenuScreen::SHOP);
       MenuResult res = MenuResult::NONE;
-      mMenu.handleShopEvent(event, mWindow, res);
+      mMenu.handleShopEvent(event, mWindow, res, &mPlayer.getStats().currentHp, mPlayer.getStats().maxHp);
       if (mMenu.getScreen() != MenuScreen::SHOP) {
         mShowShopInGame = false;
         mMenu.setScreen(MenuScreen::MAIN);
@@ -1135,12 +1201,11 @@ void CGAME::handleCollision() {
     if (mPlayer.isInvulnerable()) {
       return;
     }
-    if (ShopData::isItemPurchased("shield")) {
-      ShopData::consumeShield();
+    if (ShopData::consumeItem("shield")) {
       mPlayer.triggerInvulnerability(1.5f);
       mPlayer.knockback(160.f);
-      printf("Energy Shield absorbed hit at (%.1f, %.1f)!\n", hitPos.x,
-             hitPos.y);
+      printf("Energy Shield absorbed hit at (%.1f, %.1f) (Shields left: %d)!\n",
+             hitPos.x, hitPos.y, ShopData::getItemCount("shield"));
       mEffects.push_back(std::make_unique<CollisionEffect>(hitPos));
       return;
     }
@@ -1183,6 +1248,27 @@ void CGAME::handleCollision() {
 void CGAME::checkFinish() {
   if (mPlayer.isDead() || mPlayer.isFinish() || mLevelCleared)
     return;
+
+  if (mIsEndlessMode) {
+    if (mPlayer.getPosition().y < 80.f) {
+      int scoreMultiplier = mPowerUpManager.isScoreX2Active() ? 2 : 1;
+      int waveBonus = (300 + mEndlessWave * 60) * scoreMultiplier;
+      mScore += waveBonus;
+      ShopData::addCoins(100 * scoreMultiplier);
+      mEndlessWave++;
+      mCurrentLevel = ((mEndlessWave - 1) % Max_Level) + 1;
+      mHUD.setEndlessMode(true, mEndlessWave);
+      loadLevel(mCurrentLevel);
+      mPlayer.setPosition(SPAWN_X, SPAWN_Y);
+      mPlayer.triggerInvulnerability(1.5f);
+      mSound.playLevelClear();
+      mPowerUpManager.spawnForLevel(mCurrentLevel, true);
+      saveEndlessHighScore();
+      printf(">>> ENDLESS WAVE %d CLEARED! +%d Points. Entering Wave %d (Era %d) <<<\n",
+             mEndlessWave - 1, waveBonus, mEndlessWave, mCurrentLevel);
+    }
+    return;
+  }
 
   if (mPlayer.getPosition().y < 80.f) {
     mLevelCleared = true;
@@ -1388,9 +1474,14 @@ void CGAME::update(float dt) {
       mDeathCutscene.start(hitPos, mCurrentLevel);
       printf("You ran out of time! Deducted 1 HP.\n");
     }
-    bool isTimeFrozen = mPlayer.getStats().timeFreezeActive;
+    bool isTimeFrozen = mPlayer.getStats().timeFreezeActive || mPowerUpManager.isTimeStopActive();
     bool hasHazard =
         mHazardManager.isHazardActive() || mHazardManager.isWarningActive();
+
+    // PowerUp Active Buff effects on Player
+    mPlayer.setPowerUpSpeedMultiplier(mPowerUpManager.isSpeedBoostActive() ? 1.6f : 1.0f);
+    mPlayer.setPowerUpShield(mPowerUpManager.hasBubbleShield());
+
     mPlayer.Move(dt, mScore, hasHazard);
     mPlayer.update(dt);
 
@@ -1398,7 +1489,11 @@ void CGAME::update(float dt) {
 
     std::vector<std::pair<sf::FloatRect, float>> extraHazardBoxes;
     mHazardManager.update(hazardDt, mPlayer.getPosition(), extraHazardBoxes, mScore);
-    mCoinManager.update(dt, mPlayer.getHitbox(), &mSound);
+    mPowerUpManager.update(dt, mPlayer.getHitbox(), &mSound);
+    mCoinManager.update(dt, mPlayer.getHitbox(), &mSound,
+                        mPowerUpManager.isMagnetActive() || mPlayer.getStats().radarActive,
+                        mPlayer.getPosition(),
+                        mPowerUpManager.isScoreX2Active() ? 2 : 1);
     mSound.update(dt);
 
     // Apply wind drift during Sandstorm (only if time is not frozen)
@@ -1418,8 +1513,15 @@ void CGAME::update(float dt) {
       speedMult *= passiveRadarSlow;
     }
 
-    if (isTimeFrozen) {
+    if (mIsEndlessMode) {
+      // Scale obstacle speed in endless mode (+6% per wave)
+      speedMult *= (1.0f + 0.06f * (mEndlessWave - 1));
+    }
+
+    if (mPlayer.getStats().timeFreezeActive) {
       speedMult = 0.0f; // 100% Freeze when Time Clock skill is active!
+    } else if (mPowerUpManager.isTimeStopActive()) {
+      speedMult *= 0.15f; // 85% slowdown when Chrono Hourglass powerup is active!
     } else if (mPlayer.getStats().radarActive) {
       speedMult *= 0.30f; // 70% slow-down when EMP Radar Pulse skill 'Q' is activated!
     }
@@ -1433,12 +1535,11 @@ void CGAME::update(float dt) {
           break;
         }
         sf::Vector2f hitPos(pb.left + pb.width / 2.f, pb.top + pb.height / 2.f);
-        if (ShopData::isItemPurchased("shield")) {
-          ShopData::consumeShield();
+        if (ShopData::consumeItem("shield")) {
           mPlayer.triggerInvulnerability(1.5f);
           mPlayer.knockback(160.f);
-          printf("Energy Shield absorbed hazard hit at (%.1f, %.1f)!\n",
-                 hitPos.x, hitPos.y);
+          printf("Energy Shield absorbed hazard hit at (%.1f, %.1f) (Shields left: %d)!\n",
+                 hitPos.x, hitPos.y, ShopData::getItemCount("shield"));
           mEffects.push_back(std::make_unique<CollisionEffect>(hitPos));
           break;
         }
@@ -1521,6 +1622,7 @@ void CGAME::render() {
 
   mEntities.draw(mWindow);
   mCoinManager.draw(mWindow);
+  mPowerUpManager.draw(mWindow);
   mHazardManager.draw(mWindow);
 
   mPlayer.Draw(mWindow);
@@ -1531,8 +1633,8 @@ void CGAME::render() {
 
   mWindow.setView(origView);
 
-  // Time Freeze Icy Screen Overlay Tint
-  if (mPlayer.getStats().timeFreezeActive) {
+  // Time Freeze / Chrono Hourglass Icy Screen Overlay Tint
+  if (mPlayer.getStats().timeFreezeActive || mPowerUpManager.isTimeStopActive()) {
     sf::RectangleShape freezeOverlay(
         sf::Vector2f(static_cast<float>(Win_W), static_cast<float>(Win_H)));
     freezeOverlay.setFillColor(sf::Color(80, 200, 255, 45));
@@ -1558,6 +1660,12 @@ void CGAME::render() {
 
   mHUD.draw(mWindow);
   mHUD.drawStats(mWindow, mPlayer.getStats());
+  mHUD.drawPowerUpBuffs(mWindow,
+                        mPowerUpManager.getMagnetRemaining(),
+                        mPowerUpManager.getTimeStopRemaining(),
+                        mPowerUpManager.getSpeedBoostRemaining(),
+                        mPowerUpManager.getScoreX2Remaining(),
+                        mPowerUpManager.hasBubbleShield());
 
   mHazardManager.drawUI(mWindow);
 
@@ -1769,7 +1877,7 @@ void CGAME::render() {
   }
 
   if (mShowShopInGame) {
-    mMenu.drawShopMenu(mWindow);
+    mMenu.drawShopMenu(mWindow, mPlayer.getStats().currentHp, mPlayer.getStats().maxHp);
   }
 
   renderDevConsole();
@@ -1813,6 +1921,8 @@ void CGAME::run() {
       if (menuResult == MenuResult::NEW_GAME_SLOT_1 ||
           menuResult == MenuResult::NEW_GAME_SLOT_2 ||
           menuResult == MenuResult::NEW_GAME_SLOT_3) {
+        mIsEndlessMode = false;
+        mHUD.setEndlessMode(false);
         mActiveSlot = (menuResult == MenuResult::NEW_GAME_SLOT_1)   ? 1
                       : (menuResult == MenuResult::NEW_GAME_SLOT_2) ? 2
                                                                     : 3;
@@ -1825,6 +1935,10 @@ void CGAME::run() {
 
         menuResult = MenuResult::NONE;
 
+      } else if (menuResult == MenuResult::ENDLESS_GAME) {
+        mInMenu = false;
+        startEndlessGame();
+        menuResult = MenuResult::NONE;
       } else if (menuResult == MenuResult::QUIT) {
         mWindow.close();
       } else if (menuResult == MenuResult::SETTING) {
@@ -1832,18 +1946,24 @@ void CGAME::run() {
       }
       // LOAD_GAME
       else if (menuResult == MenuResult::LOAD_SLOT_1) {
+        mIsEndlessMode = false;
+        mHUD.setEndlessMode(false);
         if (loadGame(1)) {
           mInMenu = false;
           mActiveSlot = 1;
         }
         menuResult = MenuResult::NONE;
       } else if (menuResult == MenuResult::LOAD_SLOT_2) {
+        mIsEndlessMode = false;
+        mHUD.setEndlessMode(false);
         if (loadGame(2)) {
           mInMenu = false;
           mActiveSlot = 2;
         }
         menuResult = MenuResult::NONE;
       } else if (menuResult == MenuResult::LOAD_SLOT_3) {
+        mIsEndlessMode = false;
+        mHUD.setEndlessMode(false);
         if (loadGame(3)) {
           mInMenu = false;
           mActiveSlot = 3;

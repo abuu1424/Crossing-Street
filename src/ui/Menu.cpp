@@ -32,16 +32,18 @@ Menu::Menu() {
       );
 
   // Buttons
-  float btnY = 280.f;
-  float gap = 80.f;
-  setupButton(mBtnNew, "assets/ui/menu/btn_newgame.png", "NEW GAME",
+  float btnY = 245.f;
+  float gap = 65.f;
+  setupButton(mBtnNew, "assets/ui/menu/btn_newgame.png", "CAMPAIGN",
               Win_W / 2.f, btnY);
-  setupButton(mBtnLoad, "assets/ui/menu/btn_loadgame.png", "LOAD GAME",
+  setupButton(mBtnEndless, "assets/ui/menu/btn_newgame.png", "ENDLESS MODE",
               Win_W / 2.f, btnY + gap);
-  setupButton(mBtnQuit, "assets/ui/menu/btn_quit.png", "QUIT", Win_W / 2.f,
-              btnY + gap * 2);
+  setupButton(mBtnLoad, "assets/ui/menu/btn_loadgame.png", "LOAD GAME",
+              Win_W / 2.f, btnY + gap * 2);
   setupButton(mBtnSetting, "assets/ui/menu/btn_setting.png", "SETTINGS",
               Win_W / 2.f, btnY + gap * 3);
+  setupButton(mBtnQuit, "assets/ui/menu/btn_quit.png", "QUIT", Win_W / 2.f,
+              btnY + gap * 4);
 
   // Icon ? button (Info/Help) ở góc trên bên phải — dùng texture gỗ chuẩn
   setupButton(mBtnInfo, "assets/ui/menu/btn_info.png", "?", Win_W - 65.f, 65.f,
@@ -267,6 +269,9 @@ void Menu::handleEvent(const sf::Event &event, sf::RenderWindow &window,
       mPendingNewGameSlot = -1;
       mNewGameName.clear();
       mScreen = MenuScreen::NEW_GAME_SELECT;
+    } else if (mBtnEndless.sprite.getGlobalBounds().contains(mouse)) {
+      result = MenuResult::ENDLESS_GAME;
+      mMusic.stop();
     } else if (mBtnLoad.sprite.getGlobalBounds().contains(mouse)) {
       refreshSaveSlots();
       mScreen = MenuScreen::LOAD;
@@ -387,6 +392,7 @@ void Menu::update(float dt, sf::RenderWindow &window) {
   if (mTitleAnim)
     mTitleAnim->update(dt);
   updateButton(mBtnNew, mouse, dt);
+  updateButton(mBtnEndless, mouse, dt);
   updateButton(mBtnLoad, mouse, dt);
   updateButton(mBtnSetting, mouse, dt);
   updateButton(mBtnQuit, mouse, dt);
@@ -473,6 +479,7 @@ void Menu::draw(sf::RenderWindow &window) {
   else
     window.draw(mTitle);
   drawButton(window, mBtnNew);
+  drawButton(window, mBtnEndless);
   drawButton(window, mBtnLoad);
   drawButton(window, mBtnSetting);
   drawButton(window, mBtnQuit);
@@ -680,15 +687,15 @@ void Menu::setupInfoMenu() {
   mInfoTitle.setPosition(Win_W / 2.f, 212.f);
 
   // Tab Buttons (Headers)
-  std::string tabNames[3] = {"[ 1. CONTROLS ]", "[ 2. GAMEPLAY & ERAS ]",
-                             "[ 3. ITEMS & TIPS ]"};
+  std::string tabNames[3] = {"[ 1. CONTROLS & SKILLS ]", "[ 2. GAMEPLAY & ERAS ]",
+                             "[ 3. SHOP & POWER-UPS ]"};
 
-  float tabPosX[3] = {Win_W / 2.f - 200.f, Win_W / 2.f, Win_W / 2.f + 200.f};
+  float tabPosX[3] = {Win_W / 2.f - 215.f, Win_W / 2.f, Win_W / 2.f + 215.f};
 
   for (int i = 0; i < 3; i++) {
     mInfoTabButtons[i].setFont(mFont);
     mInfoTabButtons[i].setString(tabNames[i]);
-    mInfoTabButtons[i].setCharacterSize(16);
+    mInfoTabButtons[i].setCharacterSize(15);
     mInfoTabButtons[i].setOutlineColor(sf::Color::Black);
     mInfoTabButtons[i].setOutlineThickness(2.f);
 
@@ -699,43 +706,43 @@ void Menu::setupInfoMenu() {
   }
 
   // Card Titles for each tab
-  std::string leftTitles[3] = {"GAME CONTROLS", "OBJECTIVE & RULES",
-                               "SHOP ITEMS GUIDE"};
-  std::string rightTitles[3] = {"SHORTCUTS & SYSTEM", "5 HISTORICAL ERAS",
-                                "PRO TIPS & ADVICE"};
+  std::string leftTitles[3] = {"MOVEMENT & SHORTCUTS", "RULES & OBJECTIVES",
+                               "ITEM SHOP UPGRADES"};
+  std::string rightTitles[3] = {"ACTIVE COMBAT SKILLS", "5 HISTORICAL ERAS",
+                                "IN-LANE POWER-UPS"};
 
   for (int i = 0; i < 3; i++) {
     mInfoCardTitleLeft[i].setFont(mFont);
     mInfoCardTitleLeft[i].setString(leftTitles[i]);
-    mInfoCardTitleLeft[i].setCharacterSize(18);
+    mInfoCardTitleLeft[i].setCharacterSize(17);
     mInfoCardTitleLeft[i].setFillColor(sf::Color(100, 220, 255));
     mInfoCardTitleLeft[i].setOutlineColor(sf::Color::Black);
     mInfoCardTitleLeft[i].setOutlineThickness(2.f);
     sf::FloatRect lb = mInfoCardTitleLeft[i].getLocalBounds();
     mInfoCardTitleLeft[i].setOrigin(lb.left + lb.width / 2.f,
                                     lb.top + lb.height / 2.f);
-    mInfoCardTitleLeft[i].setPosition(Win_W / 2.f - 158.f, 280.f);
+    mInfoCardTitleLeft[i].setPosition(Win_W / 2.f - 170.f, 282.f);
 
     mInfoCardTitleRight[i].setFont(mFont);
     mInfoCardTitleRight[i].setString(rightTitles[i]);
-    mInfoCardTitleRight[i].setCharacterSize(18);
+    mInfoCardTitleRight[i].setCharacterSize(17);
     mInfoCardTitleRight[i].setFillColor(sf::Color(100, 220, 255));
     mInfoCardTitleRight[i].setOutlineColor(sf::Color::Black);
     mInfoCardTitleRight[i].setOutlineThickness(2.f);
     sf::FloatRect rb = mInfoCardTitleRight[i].getLocalBounds();
     mInfoCardTitleRight[i].setOrigin(rb.left + rb.width / 2.f,
                                      rb.top + rb.height / 2.f);
-    mInfoCardTitleRight[i].setPosition(Win_W / 2.f + 165.f, 280.f);
+    mInfoCardTitleRight[i].setPosition(Win_W / 2.f + 170.f, 282.f);
   }
 
   // Helper lambda for setup left-aligned rows
   auto setupRows = [this](sf::Text texts[], const std::string lines[],
                           int count, float startX, float startY,
-                          float lineGap = 26.f) {
+                          float lineGap = 25.5f, unsigned int charSize = 13) {
     for (int i = 0; i < count; i++) {
       texts[i].setFont(mFont);
       texts[i].setString(lines[i]);
-      texts[i].setCharacterSize(14);
+      texts[i].setCharacterSize(charSize);
       texts[i].setFillColor(sf::Color(240, 240, 240));
       texts[i].setOutlineColor(sf::Color::Black);
       texts[i].setOutlineThickness(1.0f);
@@ -744,37 +751,59 @@ void Menu::setupInfoMenu() {
     }
   };
 
-  // Tab 0: Controls & Shortcuts
+  // Tab 0: Controls & Combat Skills
   std::string tab0LeftLines[] = {
-      "W / A / S / D : Move Player", "Arrow Keys : Move Player",
-      "P : Pause / Resume Game", "R : Quick Restart Level"};
+      "W / A / S / D  or  Arrows : Move Player",
+      "Shift (Hold) : Sprint (+50% Speed)",
+      "P : Pause Game | M : Main Menu",
+      "F1 - F3 : Quick Save | F4 - F6 : Load",
+      "F11 / Alt+Enter : Fullscreen | V : Debug",
+      "R : Restart Level | Space : Skip Scene"};
   std::string tab0RightLines[] = {
-      "F1 - F3 : Quick Save (Slot 1-3)", "F4 - F6 : Quick Load (Slot 1-3)",
-      "M : Toggle Sound Mute", "< / > Keys : Switch Guide Pages"};
-  setupRows(mInfoTab0Left, tab0LeftLines, 4, Win_W / 2.f - 308.f, 308.f);
-  setupRows(mInfoTab0Right, tab0RightLines, 4, Win_W / 2.f + 18.f, 308.f);
+      "E Key : Speed Surge (+50% Spd, 5s)",
+      "Q Key : Coin Magnet (Pulls Coins, 6s)",
+      "T Key : Time Freeze (Stop 100%, 5s)",
+      "Stamina : Drains on sprint, auto-regens",
+      "Energy : Drains on move (Score scaling)",
+      "Skills unlock when bought in Shop"};
+  setupRows(mInfoTab0Left, tab0LeftLines, 6, Win_W / 2.f - 318.f, 306.f, 25.5f, 13);
+  setupRows(mInfoTab0Right, tab0RightLines, 6, Win_W / 2.f + 22.f, 306.f, 25.5f, 13);
 
   // Tab 1: Gameplay & Eras
   std::string tab1LeftLines[] = {
-      "Goal: Reach Elevator to finish", "Time Limit: 45s per level",
-      "Red Light: Stop lane temporarily", "Coins: Collect gold on road"};
+      "Goal : Reach Time Elevator at top lane",
+      "Time Limit : 45s (+8s / Shop Timer)",
+      "Traffic Light : Red stops lane traffic",
+      "Health : 3 Hearts (Game Over at 0 HP)",
+      "Score : Advance + Coins + Wave Bonus",
+      "Endless Chrono : Infinite era scaling"};
   std::string tab1RightLines[] = {
-      "1. Prehistoric: Dinosaurs & Mammoths", "2. Ancient: Chariots & Horses",
-      "3. Medieval: Knights & Dragons", "4. Modern: Cars & Buses",
-      "5. Future: UFOs & Sci-Fi Vehicles"};
-  setupRows(mInfoTab1Left, tab1LeftLines, 4, Win_W / 2.f - 308.f, 308.f);
-  setupRows(mInfoTab1Right, tab1RightLines, 5, Win_W / 2.f + 18.f, 304.f, 24.f);
+      "1. Prehistoric : Dinos & Stampede",
+      "2. Ancient Egypt : Camels & Sandstorm",
+      "3. Medieval : Horses & Arrow Rain",
+      "4. Modern City : Cars & Rush Hour",
+      "5. Cyberpunk : UFOs, Lasers & Void",
+      "Each era features unique death scenes"};
+  setupRows(mInfoTab1Left, tab1LeftLines, 6, Win_W / 2.f - 318.f, 306.f, 25.5f, 13);
+  setupRows(mInfoTab1Right, tab1RightLines, 6, Win_W / 2.f + 22.f, 306.f, 25.5f, 13);
 
-  // Tab 2: Items & Shop
-  std::string tab2LeftLines[] = {"Shield (250c): Block 1 fatal hit",
-                                 "Speed (400c): +20% Speed (Key E)",
-                                 "Timer (350c): +8s Time (Key T)",
-                                 "Radar (500c): -15% Hazard (Key Q)"};
-  std::string tab2RightLines[] = {"Wait for Red Lights to cross safely",
-                                  "Items automatically save with slot",
-                                  "Collect coins in early eras for Shop!"};
-  setupRows(mInfoTab2Left, tab2LeftLines, 4, Win_W / 2.f - 308.f, 308.f);
-  setupRows(mInfoTab2Right, tab2RightLines, 3, Win_W / 2.f + 18.f, 312.f, 30.f);
+  // Tab 2: Shop & Power-Ups
+  std::string tab2LeftLines[] = {
+      "Energy Shield (250c) : Block 1 fatal hit",
+      "Speed Boots (400c) : +15% Spd & 'E' Skill",
+      "Time Extender (350c) : +8s & 'T' Skill",
+      "Coin Radar (500c) : Pull Coins & 'Q' Skill",
+      "Extra Heart (1500c) : +1 Life / Max HP",
+      "3 Save Slots : Independent Coins & Gear"};
+  std::string tab2RightLines[] = {
+      "Magnet (Blue) : Pull all coins (8s)",
+      "Time Stop (Clock) : Freeze traffic (4s)",
+      "Speed Boost : +50% Speed Surge (6s)",
+      "Shield : +1 Shield (Shop Synced)",
+      "2X Coin : 2x Score & Gold Multiplier",
+      "Coins : Collect in lanes to buy items"};
+  setupRows(mInfoTab2Left, tab2LeftLines, 6, Win_W / 2.f - 318.f, 306.f, 25.5f, 13);
+  setupRows(mInfoTab2Right, tab2RightLines, 6, Win_W / 2.f + 22.f, 306.f, 25.5f, 13);
 
   // Page Indicator Hint
   mInfoPageHint.setFont(mFont);
@@ -822,19 +851,19 @@ void Menu::drawInfoMenu(sf::RenderWindow &window) {
   }
 
   // Card Left container
-  sf::RectangleShape cardLeft(sf::Vector2f(316.f, 225.f));
+  sf::RectangleShape cardLeft(sf::Vector2f(320.f, 230.f));
   cardLeft.setFillColor(sf::Color(15, 12, 10, 210));
   cardLeft.setOutlineColor(sf::Color(218, 165, 32, 220));
   cardLeft.setOutlineThickness(1.5f);
-  cardLeft.setPosition(Win_W / 2.f - 323.f, 268.f);
+  cardLeft.setPosition(Win_W / 2.f - 330.f, 266.f);
   window.draw(cardLeft);
 
   // Card Right container
-  sf::RectangleShape cardRight(sf::Vector2f(316.f, 225.f));
+  sf::RectangleShape cardRight(sf::Vector2f(320.f, 230.f));
   cardRight.setFillColor(sf::Color(15, 12, 10, 210));
   cardRight.setOutlineColor(sf::Color(218, 165, 32, 220));
   cardRight.setOutlineThickness(1.5f);
-  cardRight.setPosition(Win_W / 2.f + 7.f, 268.f);
+  cardRight.setPosition(Win_W / 2.f + 10.f, 266.f);
   window.draw(cardRight);
 
   // Draw Card Titles for active tab
@@ -843,20 +872,20 @@ void Menu::drawInfoMenu(sf::RenderWindow &window) {
 
   // Draw Tab specific content
   if (mInfoTab == 0) {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 6; i++) {
       window.draw(mInfoTab0Left[i]);
       window.draw(mInfoTab0Right[i]);
     }
   } else if (mInfoTab == 1) {
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 6; i++) {
       window.draw(mInfoTab1Left[i]);
-    for (int i = 0; i < 5; i++)
       window.draw(mInfoTab1Right[i]);
+    }
   } else if (mInfoTab == 2) {
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 6; i++) {
       window.draw(mInfoTab2Left[i]);
-    for (int i = 0; i < 3; i++)
       window.draw(mInfoTab2Right[i]);
+    }
   }
 
   // Draw Page Hint
@@ -934,11 +963,11 @@ void Menu::setupShopMenu() {
       "assets/ui/hud/heart.png"};
 
   std::string titles[5] = {"Energy Shield", "Speed Boots", "Time Extender",
-                           "Hazard Radar", "Extra Heart"};
+                           "Coin Magnet Radar", "Extra Heart"};
 
   std::string descs[5] = {
-      "Absorbs 1 deadly hit (Consumable)", "+20% Speed movement boost",
-      "+8 Seconds level time limit", "-15% Obstacle slow & early alert",
+      "Absorbs 1 deadly hit (Consumable)", "+15% Speed & Unlocks 'E' Skill",
+      "+8s Level Time & Unlocks 'T' Skill", "Pulls all coins & Unlocks 'Q' Skill",
       "+1 Extra Life / Restore Health"};
 
   int prices[5] = {250, 400, 350, 500, 1500};
@@ -990,7 +1019,7 @@ void Menu::setupShopMenu() {
               530.f, "assets/ui/menu/btn_back_hover.png");
 }
 
-void Menu::drawShopMenu(sf::RenderWindow &window) {
+void Menu::drawShopMenu(sf::RenderWindow &window, int currentHp, int maxHp) {
   window.draw(mBgSprite);
   window.draw(mPanelSprite);
   window.draw(mShopTitle);
@@ -1052,7 +1081,7 @@ void Menu::drawShopMenu(sf::RenderWindow &window) {
 
   std::string itemIds[5] = {"shield", "speed", "time", "radar", "heart"};
   std::string titles[5] = {"Energy Shield", "Speed Boots", "Time Extender",
-                           "Hazard Radar", "Extra Heart"};
+                           "Coin Magnet Radar", "Extra Heart"};
   int prices[5] = {250, 400, 350, 500, 1500};
 
   for (int i = 0; i < 5; i++) {
@@ -1072,10 +1101,16 @@ void Menu::drawShopMenu(sf::RenderWindow &window) {
     mItemDescTexts[i].setPosition(Win_W / 2.f - 195.f, itemY + 18.f);
     mItemBuyButtons[i].sprite.setPosition(Win_W / 2.f + 205.f, itemY + 10.f);
 
+    bool isHeart = (itemIds[i] == "heart");
+    bool isFullHp = (isHeart && currentHp >= maxHp);
+
     int count = ShopData::getItemCount(itemIds[i]);
-    std::string titleStr =
-        titles[i] +
-        (count > 0 ? (" (x" + std::to_string(count) + ")") : " (x0)");
+    std::string titleStr = titles[i];
+    if (isHeart) {
+      titleStr += " (" + std::to_string(currentHp) + "/" + std::to_string(maxHp) + " HP)";
+    } else {
+      titleStr += (count > 0 ? (" (x" + std::to_string(count) + ")") : " (x0)");
+    }
     mItemTitleTexts[i].setString(titleStr);
 
     window.draw(mItemSprites[i]);
@@ -1084,10 +1119,16 @@ void Menu::drawShopMenu(sf::RenderWindow &window) {
 
     mItemPriceTexts[i].setString(std::to_string(prices[i]) + " Gold");
     mItemPriceTexts[i].setFillColor(sf::Color(255, 215, 0));
-    if (coins < prices[i]) {
+
+    if (isFullHp) {
+      mItemBuyButtons[i].label.setString("FULL HP");
+      mItemBuyButtons[i].label.setFillColor(sf::Color(140, 255, 140));
+    } else if (coins < prices[i]) {
       mItemBuyButtons[i].label.setString("NO GOLD");
+      mItemBuyButtons[i].label.setFillColor(sf::Color(255, 100, 100));
     } else {
       mItemBuyButtons[i].label.setString("BUY");
+      mItemBuyButtons[i].label.setFillColor(sf::Color::White);
     }
 
     // Right-align price text so it sits cleanly to the left of the compact BUY button
@@ -1109,7 +1150,7 @@ void Menu::drawShopMenu(sf::RenderWindow &window) {
 }
 
 void Menu::handleShopEvent(const sf::Event &event, sf::RenderWindow &window,
-                           MenuResult &result) {
+                           MenuResult &result, int* currentHpPtr, int maxHp) {
   if (event.type == sf::Event::MouseButtonPressed &&
       event.mouseButton.button == sf::Mouse::Left) {
     sf::Vector2f mouse = window.mapPixelToCoords(
@@ -1138,10 +1179,29 @@ void Menu::handleShopEvent(const sf::Event &event, sf::RenderWindow &window,
 
     for (int i = 0; i < 5; i++) {
       if (mItemBuyButtons[i].sprite.getGlobalBounds().contains(mouse)) {
-        if (ShopData::buyItem(itemIds[i], prices[i])) {
-          printf("Purchased shop item '%s' (Count now: %d) for Slot %d\n",
-                 itemIds[i].c_str(), ShopData::getItemCount(itemIds[i]),
-                 ShopData::getActiveSlot());
+        if (itemIds[i] == "heart") {
+          int curHp = (currentHpPtr ? *currentHpPtr : 3);
+          if (curHp >= maxHp) {
+            printf("Player is already at full health (%d/%d HP)!\n", curHp, maxHp);
+            return;
+          }
+          if (ShopData::getCoins() >= prices[i]) {
+            if (ShopData::spendCoins(prices[i])) {
+              if (currentHpPtr) {
+                (*currentHpPtr)++;
+                if (*currentHpPtr > maxHp) *currentHpPtr = maxHp;
+              }
+              printf("Restored 1 Heart! Health now: %d/%d HP for Slot %d\n",
+                     (currentHpPtr ? *currentHpPtr : 3), maxHp,
+                     ShopData::getActiveSlot());
+            }
+          }
+        } else {
+          if (ShopData::buyItem(itemIds[i], prices[i])) {
+            printf("Purchased shop item '%s' (Count now: %d) for Slot %d\n",
+                   itemIds[i].c_str(), ShopData::getItemCount(itemIds[i]),
+                   ShopData::getActiveSlot());
+          }
         }
         return;
       }

@@ -149,8 +149,10 @@ void SoundManager::loadCoinSound(const std::string &path) {
 }
 
 void SoundManager::playCoinSound() {
-  if (mCoinSound.getBuffer())
+  if (mCoinSoundCooldown <= 0.f && mCoinSound.getBuffer()) {
     mCoinSound.play();
+    mCoinSoundCooldown = 0.055f; // 55ms throttle prevents lag during rapid coin suction
+  }
 }
 
 void SoundManager::setMusicVolume(float v) {
@@ -167,6 +169,12 @@ void SoundManager::setMusicDuckingFactor(float factor) {
 }
 
 void SoundManager::update(float dt) {
+  if (mCoinSoundCooldown > 0.f) {
+    mCoinSoundCooldown -= dt;
+    if (mCoinSoundCooldown < 0.f)
+      mCoinSoundCooldown = 0.f;
+  }
+
   if (std::abs(mCurrentDuckingFactor - mTargetDuckingFactor) > 0.001f) {
     float speed = 2.5f; // Fast and smooth fade transition (~0.4s)
     if (mCurrentDuckingFactor < mTargetDuckingFactor) {

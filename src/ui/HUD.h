@@ -56,6 +56,13 @@ public:
     void update(int level, int score, float timeSeconds);
     void draw(sf::RenderWindow& window);
     void drawStats(sf::RenderWindow& window, const PlayerStats& stats);
+    void drawPowerUpBuffs(sf::RenderWindow& window, float magnetRem, float timeStopRem,
+                          float speedRem, float scoreX2Rem, bool hasShield);
+    void setEndlessMode(bool isEndless, int wave = 1) { mIsEndless = isEndless; mEndlessWave = wave; }
+    bool isEndlessMode() const { return mIsEndless; }
     void reloadHudBar(const std::string& hudPath);
     sf::FloatRect getPauseIconBounds() const;
+private:
+    bool mIsEndless = false;
+    int  mEndlessWave = 1;
 };

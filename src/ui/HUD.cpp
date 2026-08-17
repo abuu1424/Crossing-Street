@@ -63,7 +63,12 @@ bool HUD::isLoaded() const { return mLoaded; }
 void HUD::update(int level, int score, float timeSeconds) {
     if (!mLoaded) return;
 
-    if (level != mLastLevel) {
+    if (mIsEndless) {
+        mLevelText.setString("Wave " + std::to_string(mEndlessWave));
+        sf::FloatRect b = mLevelText.getLocalBounds();
+        mLevelText.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
+        mLevelText.setPosition(mLevelCenter);
+    } else if (level != mLastLevel) {
         mLastLevel = level;
         mLevelText.setString("Level " + std::to_string(level));
         sf::FloatRect b = mLevelText.getLocalBounds();
@@ -358,4 +363,73 @@ sf::FloatRect HUD::getPauseIconBounds() const {
     float w = hudBounds.width * (90.f / 1536.f);
     float h = hudBounds.height * (90.f / 1024.f);
     return sf::FloatRect(x, y, w, h);
+}
+
+void HUD::drawPowerUpBuffs(sf::RenderWindow& window, float magnetRem, float timeStopRem,
+                          float speedRem, float scoreX2Rem, bool hasShield) {
+    if (!mLoaded) return;
+
+    struct ActiveBuff {
+        std::string label;
+        float remaining;
+        float maxDuration;
+        sf::Color color;
+    };
+
+    std::vector<ActiveBuff> buffs;
+    if (magnetRem > 0.f) buffs.push_back({ "COIN MAGNET", magnetRem, 8.0f, sf::Color(0, 240, 255) });
+    if (timeStopRem > 0.f) buffs.push_back({ "TIME STOP", timeStopRem, 4.0f, sf::Color(140, 180, 255) });
+    if (speedRem > 0.f) buffs.push_back({ "SPEED SURGE", speedRem, 6.0f, sf::Color(255, 110, 40) });
+    if (scoreX2Rem > 0.f) buffs.push_back({ "COIN 2X", scoreX2Rem, 10.0f, sf::Color(255, 215, 0) });
+    int shieldCount = ShopData::getItemCount("shield");
+    if (hasShield || shieldCount > 0) {
+        std::string sLabel = shieldCount > 1 ? ("SHIELD x" + std::to_string(shieldCount)) : "SHIELD ACTIVE";
+        buffs.push_back({ sLabel, 1.0f, 1.0f, sf::Color(255, 230, 80) });
+    }
+
+    if (buffs.empty()) return;
+
+    float startX = 18.f;
+    float startY = 120.f;
+    float cardW = 125.f;
+    float cardH = 24.f;
+    float gap = 6.f;
+
+    for (size_t i = 0; i < buffs.size(); ++i) {
+        const auto& b = buffs[i];
+        float y = startY + i * (cardH + gap);
+
+        // Container Pill
+        sf::RectangleShape box(sf::Vector2f(cardW, cardH));
+        box.setPosition(startX, y);
+        box.setFillColor(sf::Color(15, 18, 28, 220));
+        box.setOutlineColor(b.color);
+        box.setOutlineThickness(1.2f);
+        window.draw(box);
+
+        // Progress Bar
+        float ratio = std::clamp(b.remaining / b.maxDuration, 0.f, 1.f);
+        sf::RectangleShape progress(sf::Vector2f((cardW - 4.f) * ratio, cardH - 4.f));
+        progress.setPosition(startX + 2.f, y + 2.f);
+        progress.setFillColor(sf::Color(b.color.r, b.color.g, b.color.b, 65));
+        window.draw(progress);
+
+        // Text
+        sf::Text txt;
+        txt.setFont(mFont);
+        txt.setCharacterSize(12);
+        txt.setStyle(sf::Text::Bold);
+        txt.setFillColor(b.color);
+
+        if (b.label == "SHIELD") {
+            txt.setString("SHIELD ACTIVE");
+        } else {
+            char buf[32];
+            snprintf(buf, sizeof(buf), "%s %.1fs", b.label.c_str(), b.remaining);
+            txt.setString(buf);
+        }
+
+        txt.setPosition(startX + 8.f, y + 3.f);
+        window.draw(txt);
+    }
 }

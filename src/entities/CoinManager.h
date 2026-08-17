@@ -26,7 +26,9 @@ public:
     CoinManager();
 
     void spawnForLevel(int level);
-    void update(float dt, const sf::FloatRect& playerHitbox, SoundManager* sound = nullptr);
+    void update(float dt, const sf::FloatRect& playerHitbox, SoundManager* sound = nullptr,
+                bool magnetActive = false, const sf::Vector2f& playerPos = sf::Vector2f(0.f, 0.f),
+                int scoreMultiplier = 1);
     void draw(sf::RenderWindow& window);
 
 private:

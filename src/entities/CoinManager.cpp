@@ -60,10 +60,24 @@ void CoinManager::spawnForLevel(int level) {
 }
 
 void CoinManager::update(float dt, const sf::FloatRect &playerHitbox,
-                         SoundManager *sound) {
+                         SoundManager *sound, bool magnetActive,
+                         const sf::Vector2f& playerPos, int scoreMultiplier) {
   for (auto &coin : mCoins) {
     if (coin.collected)
       continue;
+
+    // Magnet Effect: Hút coin về phía Player (Coin Magnet Radar)
+    if (magnetActive) {
+      float dx = playerPos.x - coin.position.x;
+      float dy = playerPos.y - coin.position.y;
+      float distSq = dx * dx + dy * dy;
+      if (distSq <= 700.f * 700.f && distSq > 4.f) {
+        float dist = std::sqrt(distSq);
+        float pullSpeed = 560.f * dt;
+        coin.position.x += (dx / dist) * pullSpeed;
+        coin.position.y += (dy / dist) * pullSpeed;
+      }
+    }
 
     // Spinning animation (8 frames from 4x2 grid in 128x64 texture)
     coin.animTimer += dt;
@@ -83,12 +97,14 @@ void CoinManager::update(float dt, const sf::FloatRect &playerHitbox,
     if (playerHitbox.intersects(coinHitbox)) {
       coin.collected = true;
 
-      // Award +25 Gold to player slot balance
-      ShopData::addCoins(25);
+      // Award +25 Gold to player slot balance (multiplied by scoreMultiplier)
+      int earnedGold = 25 * scoreMultiplier;
+      ShopData::addCoins(earnedGold);
 
-      // Add floating feedback text "+25 Gold"
+      // Add floating feedback text
       FloatingCoinText ft;
-      ft.text = "+25 Gold";
+      ft.text = (scoreMultiplier > 1) ? ("+" + std::to_string(earnedGold) + " Gold (2X!)")
+                                      : ("+" + std::to_string(earnedGold) + " Gold");
       ft.position = sf::Vector2f(coin.position.x, coin.position.y - 10.f);
       ft.alpha = 255.f;
       ft.lifetime = 0.85f;
@@ -101,11 +117,11 @@ void CoinManager::update(float dt, const sf::FloatRect &playerHitbox,
     }
   }
 
-  // Update floating feedback texts
+  // Update floating text lifespans
   for (auto it = mFloatingTexts.begin(); it != mFloatingTexts.end();) {
     it->lifetime -= dt;
-    it->position.y -= 25.f * dt; // Rise up
-    it->alpha = std::max(0.f, (it->lifetime / 0.85f) * 255.f);
+    it->position.y -= dt * 35.f; // Float upward
+    it->alpha = (it->lifetime / 0.85f) * 255.f;
 
     if (it->lifetime <= 0.f) {
       it = mFloatingTexts.erase(it);
@@ -119,21 +135,23 @@ void CoinManager::draw(sf::RenderWindow &window) {
   if (!mTextureLoaded)
     return;
 
+  // Draw shadows and animated coin sprites
   for (const auto &coin : mCoins) {
     if (coin.collected)
       continue;
 
     float bobY = std::sin(coin.bobbingTimer) * 3.5f;
 
-    // Draw ground shadow
+    // Shadow on ground
     mShadowShape.setPosition(coin.position.x, coin.position.y + 12.f);
     window.draw(mShadowShape);
 
-    // Draw coin sprite (32x32 frames in 4x2 grid)
-    int col = coin.currentFrame % 4;
-    int row = coin.currentFrame / 4;
-    mCoinSprite.setTextureRect(sf::IntRect(col * 32, row * 32, 32, 32));
+    // Frame clipping: 8 frames across a 4x2 sprite sheet (32x32 per frame)
+    int frameX = (coin.currentFrame % 4) * 32;
+    int frameY = (coin.currentFrame / 4) * 32;
+    mCoinSprite.setTextureRect(sf::IntRect(frameX, frameY, 32, 32));
     mCoinSprite.setPosition(coin.position.x, coin.position.y + bobY);
+
     window.draw(mCoinSprite);
   }
 
@@ -143,19 +161,18 @@ void CoinManager::draw(sf::RenderWindow &window) {
     text.setFont(mFont);
     text.setCharacterSize(16);
     text.setStyle(sf::Text::Bold);
-    text.setOutlineThickness(1.8f);
 
     for (const auto &ft : mFloatingTexts) {
       text.setString(ft.text);
-      text.setFillColor(
-          sf::Color(255, 230, 40, static_cast<sf::Uint8>(ft.alpha)));
-      text.setOutlineColor(
-          sf::Color(20, 15, 0, static_cast<sf::Uint8>(ft.alpha)));
+      sf::Uint8 a = static_cast<sf::Uint8>(std::max(0.f, std::min(255.f, ft.alpha)));
+      text.setFillColor(sf::Color(255, 215, 0, a));
+      text.setOutlineColor(sf::Color(0, 0, 0, a));
+      text.setOutlineThickness(1.5f);
 
-      sf::FloatRect bounds = text.getLocalBounds();
-      text.setOrigin(bounds.left + bounds.width / 2.f,
-                     bounds.top + bounds.height / 2.f);
+      sf::FloatRect b = text.getLocalBounds();
+      text.setOrigin(b.width / 2.f, b.height / 2.f);
       text.setPosition(ft.position);
+
       window.draw(text);
     }
   }

@@ -71,12 +71,19 @@ void CPEOPLE::update(float dt) {
         if (mInvulnerableTimer < 0.f) mInvulnerableTimer = 0.f;
     }
 
+    mBubblePulseTimer += dt * 5.f;
+
     mAuraRotation += dt * 500.f;
     if (mAuraRotation >= 360.f) mAuraRotation -= 360.f;
 
     if (mStats.cooldownWarningTimer > 0.f) {
         mStats.cooldownWarningTimer -= dt;
         if (mStats.cooldownWarningTimer < 0.f) mStats.cooldownWarningTimer = 0.f;
+    }
+
+    mStats.maxHp = 3;
+    if (mStats.currentHp > mStats.maxHp) {
+        mStats.currentHp = mStats.maxHp;
     }
 
     // Update Skill 'E' timer
@@ -138,39 +145,60 @@ void CPEOPLE::update(float dt) {
 }
 
 void CPEOPLE::activateSpeedSkill() {
-    if (mStats.hasSpeedSkill || ShopData::getItemCount("speed") > 0 || ShopData::isItemPurchased("speed")) {
+    if (ShopData::getItemCount("speed") > 0 || mStats.hasSpeedSkill) {
         if (mStats.skillCooldownTimer <= 0.f && !mStats.skillActive) {
+            if (ShopData::getItemCount("speed") > 0) {
+                ShopData::consumeItem("speed");
+            }
             mStats.skillActive = true;
             mStats.skillTimer = mStats.skillDuration; // 5.0s
-            printf("SPEED SURGE SKILL ACTIVATED (+0.5 Initial Speed Boost)!\n");
+            printf("SPEED SURGE SKILL ACTIVATED (Count left: %d)!\n", ShopData::getItemCount("speed"));
         } else if (mStats.skillCooldownTimer > 0.f) {
-            triggerCooldownWarning();
+            mStats.cooldownWarningMsg = "SKILL ON COOLDOWN";
+            mStats.cooldownWarningTimer = 1.2f;
         }
+    } else {
+        mStats.cooldownWarningMsg = "NO SPEED BOOTS IN INVENTORY";
+        mStats.cooldownWarningTimer = 1.2f;
     }
 }
 
 void CPEOPLE::activateRadarSkill() {
-    if (mStats.hasRadarSkill || ShopData::getItemCount("radar") > 0 || ShopData::isItemPurchased("radar")) {
+    if (ShopData::getItemCount("radar") > 0 || mStats.hasRadarSkill) {
         if (mStats.radarCooldownTimer <= 0.f && !mStats.radarActive) {
+            if (ShopData::getItemCount("radar") > 0) {
+                ShopData::consumeItem("radar");
+            }
             mStats.radarActive = true;
-            mStats.radarTimer = mStats.radarDuration; // 3.5s
+            mStats.radarTimer = mStats.radarDuration; // 6.0s duration of Coin Magnet suction
             mStats.radarPulseRadius = 0.f;
-            printf("RADAR EMP SONAR PULSE ACTIVATED (50%% Obstacle Slow)!\n");
+            printf("COIN MAGNET RADAR ACTIVATED (Count left: %d)!\n", ShopData::getItemCount("radar"));
         } else if (mStats.radarCooldownTimer > 0.f) {
-            triggerCooldownWarning();
+            mStats.cooldownWarningMsg = "SKILL ON COOLDOWN";
+            mStats.cooldownWarningTimer = 1.2f;
         }
+    } else {
+        mStats.cooldownWarningMsg = "NO COIN RADAR IN INVENTORY";
+        mStats.cooldownWarningTimer = 1.2f;
     }
 }
 
 void CPEOPLE::activateTimeSkill() {
-    if (mStats.hasTimeSkill || ShopData::getItemCount("time") > 0 || ShopData::isItemPurchased("time")) {
+    if (ShopData::getItemCount("time") > 0 || mStats.hasTimeSkill) {
         if (mStats.timeFreezeCooldownTimer <= 0.f && !mStats.timeFreezeActive) {
+            if (ShopData::getItemCount("time") > 0) {
+                ShopData::consumeItem("time");
+            }
             mStats.timeFreezeActive = true;
             mStats.timeFreezeTimer = mStats.timeFreezeDuration; // 5.0s
-            printf("TIME FREEZE CLOCK ACTIVATED (100%% Freeze)!\n");
+            printf("TIME FREEZE CLOCK ACTIVATED (Count left: %d)!\n", ShopData::getItemCount("time"));
         } else if (mStats.timeFreezeCooldownTimer > 0.f) {
-            triggerCooldownWarning();
+            mStats.cooldownWarningMsg = "SKILL ON COOLDOWN";
+            mStats.cooldownWarningTimer = 1.2f;
         }
+    } else {
+        mStats.cooldownWarningMsg = "NO TIME EXTENDER IN INVENTORY";
+        mStats.cooldownWarningTimer = 1.2f;
     }
 }
 
@@ -245,33 +273,33 @@ void CPEOPLE::Move(float dt, int score, bool hasActiveHazard)
         mStats.energy += mStats.energyRegenRate * dt;
         if (mStats.energy > mStats.maxEnergy) mStats.energy = mStats.maxEnergy;
     }
-
     // Energy Speed Multiplier (Ranges from 60% to 100% based on energy)
     float energyMultiplier = 0.6f + 0.4f * (mStats.energy / mStats.maxEnergy);
 
     // Hazard Slow Penalty (25% slower when hazard is active)
     float hazardPenalty = hasActiveHazard ? 0.75f : 1.0f;
 
-    // Decaying Speed Skill 'E' Boost (+0.5 initially, decaying to 0 over 5 seconds)
+    // Speed Skill 'E' Boost (+50% speed while active for 5.0 seconds)
     float skillBoost = 0.f;
-    if (mStats.skillActive && mStats.skillDuration > 0.f) {
-        float ratio = mStats.skillTimer / mStats.skillDuration; // 1.0 -> 0.0
-        skillBoost = 0.5f * ratio; // Starts at +0.5 multiplier, decays down
+    if (mStats.skillActive) {
+        skillBoost = 0.5f;
     }
 
     float sprintBoost = mStats.isSprinting ? 0.35f : 0.f;
-    float bootsMultiplier = 1.0f + 0.15f * ShopData::getItemCount("speed");
+    float bootsMultiplier = 1.0f;
 
-    float totalMultiplier = bootsMultiplier * energyMultiplier * hazardPenalty * (1.0f + skillBoost + sprintBoost);
+    // Total Multiplier Calculation
+    float totalMultiplier = bootsMultiplier * energyMultiplier * hazardPenalty * (1.0f + skillBoost + sprintBoost) * mPowerUpSpeedMultiplier;
     mStats.currentCalculatedSpeed = mSpeed * totalMultiplier;
-
     mPosition.x += dir.x * mStats.currentCalculatedSpeed * dt;
     mPosition.y += dir.y * mStats.currentCalculatedSpeed * dt;
+
+    // Clamp inside window boundaries
     mPosition.x = std::max(0.f, std::min(mPosition.x, (float)Win_W - Player_W));
     mPosition.y = std::max(0.f, std::min(mPosition.y, (float)Win_H - Player_H));
+
     mSprite.setPosition(mPosition);
 }
-
 
 bool CPEOPLE::takeDamage(int amount) {
     if (mInvulnerableTimer > 0.f || mIsDead) return false;
@@ -301,6 +329,7 @@ void CPEOPLE::knockback(float distanceY) {
 }
 
 void CPEOPLE::resetStats() {
+    mStats.maxHp = 3;
     mStats.resetHp();
     mIsDead = false;
     mIsFinish = false;
@@ -364,30 +393,47 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
     float playerCenterX = mPosition.x + Player_W / 2.f;
     float playerCenterY = mPosition.y + Player_H / 2.f;
 
-    // 1. Radar Sonar Pulse Wave Effect [Q]
+    // 1. Coin Magnet Radar Suction Field Effect [Q]
     if (mStats.radarActive) {
-        if (mRadarLoaded) {
-            float waveScale = std::min(mStats.radarPulseRadius / 64.f, 4.5f);
-            float alphaRatio = std::clamp(mStats.radarTimer / mStats.radarDuration, 0.f, 1.f);
-            mRadarWaveSprite.setPosition(playerCenterX, playerCenterY);
-            mRadarWaveSprite.setScale(waveScale, waveScale);
-            mRadarWaveSprite.setColor(sf::Color(0, 240, 255, static_cast<sf::Uint8>(180 * alphaRatio)));
-            window.draw(mRadarWaveSprite);
-        } else {
-            float r = std::max(20.f, mStats.radarPulseRadius);
-            sf::CircleShape radarRing(r);
-            radarRing.setOrigin(r, r);
-            radarRing.setPosition(playerCenterX, playerCenterY);
-            radarRing.setFillColor(sf::Color::Transparent);
-            float alphaRatio = std::clamp(mStats.radarTimer / mStats.radarDuration, 0.f, 1.f);
-            radarRing.setOutlineColor(sf::Color(0, 240, 255, static_cast<sf::Uint8>(160 * alphaRatio)));
-            radarRing.setOutlineThickness(3.f);
-            window.draw(radarRing);
+        float alphaRatio = std::clamp(mStats.radarTimer / mStats.radarDuration, 0.f, 1.f);
+        sf::Uint8 alpha = static_cast<sf::Uint8>(220 * alphaRatio);
+
+        // Core pulsating magnetic vortex sphere
+        float pulseR = 28.f + std::sin(mAuraRotation * 4.f) * 4.f;
+        sf::CircleShape coreRing(pulseR);
+        coreRing.setOrigin(pulseR, pulseR);
+        coreRing.setPosition(playerCenterX, playerCenterY);
+        coreRing.setFillColor(sf::Color(0, 210, 255, static_cast<sf::Uint8>(45 * alphaRatio)));
+        coreRing.setOutlineColor(sf::Color(0, 245, 255, alpha));
+        coreRing.setOutlineThickness(2.2f);
+        window.draw(coreRing);
+
+        // Orbiting magnetic suction nodes & inward converging stream lines
+        for (int k = 0; k < 4; ++k) {
+            float angle = mAuraRotation * 2.5f + k * (3.14159265f / 2.f);
+            float orbitRadius = 40.f + std::sin(mAuraRotation * 5.f + k) * 5.f;
+            float px = playerCenterX + std::cos(angle) * orbitRadius;
+            float py = playerCenterY + std::sin(angle) * orbitRadius;
+
+            sf::CircleShape node(4.f);
+            node.setOrigin(4.f, 4.f);
+            node.setPosition(px, py);
+            node.setFillColor(sf::Color(255, 235, 100, alpha)); // Golden suction spark
+            node.setOutlineColor(sf::Color(0, 240, 255, alpha));
+            node.setOutlineThickness(1.5f);
+            window.draw(node);
+
+            // Inward magnetic stream line converging towards player center
+            sf::Vertex streamLine[] = {
+                sf::Vertex(sf::Vector2f(px, py), sf::Color(0, 240, 255, static_cast<sf::Uint8>(180 * alphaRatio))),
+                sf::Vertex(sf::Vector2f(playerCenterX, playerCenterY), sf::Color(255, 215, 0, static_cast<sf::Uint8>(60 * alphaRatio)))
+            };
+            window.draw(streamLine, 2, sf::Lines);
         }
     }
 
-    // 2. Flash Speed Lightning Aura Effect [E]
-    if (mStats.skillActive) {
+    // 2. Flash Speed Lightning Aura Effect [E] or In-Lane Speed Boost
+    if (mStats.skillActive || mPowerUpSpeedMultiplier > 1.0f) {
         if (mAuraLoaded) {
             mFlashAuraSprite.setPosition(playerCenterX, playerCenterY);
             mFlashAuraSprite.setScale(1.25f, 1.25f);
@@ -424,7 +470,8 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
         }
     }
 
-    if (ShopData::isItemPurchased("shield") && !mIsDead) {
+    // 4. Energy Shield Aura (Shop shield or In-lane Bubble Shield)
+    if ((ShopData::getItemCount("shield") > 0 || mHasPowerUpShield) && !mIsDead) {
         float centerX = playerCenterX;
         float centerY = playerCenterY;
 
@@ -487,7 +534,37 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
         mSprite.setColor(sf::Color(255, 255, 255, 255));
     }
 
+    // Nitro Speed Power-Up After-Image Trail
+    if (mPowerUpSpeedMultiplier > 1.1f && mIsMoving) {
+        sf::Sprite ghost = mSprite;
+        ghost.setColor(sf::Color(255, 120, 40, 110));
+        ghost.setPosition(mPosition.x - (mRow == 1 ? -10.f : (mRow == 2 ? 10.f : 0.f)),
+                           mPosition.y - (mRow == 3 ? -10.f : (mRow == 0 ? 10.f : 0.f)));
+        window.draw(ghost);
+    }
+
     window.draw(mSprite);
+
+    // Dynamic PowerUp Shield Bubble (Golden Energy Sphere)
+    if (mHasPowerUpShield && !mIsDead) {
+        float bubbleRadius = 27.f + std::sin(mBubblePulseTimer) * 2.5f;
+        sf::CircleShape bubble(bubbleRadius);
+        bubble.setOrigin(bubbleRadius, bubbleRadius);
+        bubble.setPosition(playerCenterX, playerCenterY);
+        bubble.setFillColor(sf::Color(255, 215, 0, 45));
+        bubble.setOutlineColor(sf::Color(255, 230, 80, 200));
+        bubble.setOutlineThickness(2.2f);
+        window.draw(bubble);
+
+        // Orbiting golden spark
+        float sparkAngle = mBubblePulseTimer * 2.5f;
+        sf::CircleShape spark(3.f);
+        spark.setOrigin(3.f, 3.f);
+        spark.setPosition(playerCenterX + std::cos(sparkAngle) * (bubbleRadius + 3.f),
+                          playerCenterY + std::sin(sparkAngle) * (bubbleRadius + 3.f));
+        spark.setFillColor(sf::Color(255, 255, 200, 240));
+        window.draw(spark);
+    }
 
     // Draw Cooldown Warning Floating Text if active ("SKILL ON COOLDOWN")
     if (mStats.cooldownWarningTimer > 0.f && mWarnFontLoaded) {

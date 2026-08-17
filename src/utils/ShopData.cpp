@@ -38,13 +38,26 @@ std::string trimStr(const std::string& str) {
     size_t last = str.find_last_not_of(" \t\r\n");
     return str.substr(first, (last - first + 1));
 }
+
+// In-memory slot caching to avoid disk read/write storms during gameplay
+ShopState sSlotCache[4];
+bool sSlotCacheValid[4] = {false, false, false, false};
 }
 
 ShopState ShopData::load(int slot) {
+  int targetSlot = (slot >= 1 && slot <= 3) ? slot : sActiveSlot;
+  if (targetSlot < 1 || targetSlot > 3) targetSlot = 1;
+
+  if (sSlotCacheValid[targetSlot]) {
+    return sSlotCache[targetSlot];
+  }
+
   ShopState state;
-  std::ifstream file(getFilePath(slot));
+  std::ifstream file(getFilePath(targetSlot));
   if (!file.is_open()) {
-    save(state, slot); // Create initial save file for this slot
+    save(state, targetSlot); // Create initial save file for this slot
+    sSlotCache[targetSlot] = state;
+    sSlotCacheValid[targetSlot] = true;
     return state;
   }
 
@@ -97,12 +110,21 @@ ShopState ShopData::load(int slot) {
   state.hasTimeExtender = (state.timeCount > 0);
   state.hasRadar = (state.radarCount > 0);
 
+  sSlotCache[targetSlot] = state;
+  sSlotCacheValid[targetSlot] = true;
+
   return state;
 }
 
 void ShopData::save(const ShopState &state, int slot) {
+  int targetSlot = (slot >= 1 && slot <= 3) ? slot : sActiveSlot;
+  if (targetSlot < 1 || targetSlot > 3) targetSlot = 1;
+
+  sSlotCache[targetSlot] = state;
+  sSlotCacheValid[targetSlot] = true;
+
   std::filesystem::create_directories("saves");
-  std::ofstream file(getFilePath(slot));
+  std::ofstream file(getFilePath(targetSlot));
   if (!file.is_open())
     return;
 
@@ -120,9 +142,14 @@ void ShopData::save(const ShopState &state, int slot) {
 }
 
 void ShopData::resetSlot(int slot) {
+  int targetSlot = (slot >= 1 && slot <= 3) ? slot : sActiveSlot;
+  if (targetSlot < 1 || targetSlot > 3) targetSlot = 1;
+
+  sSlotCacheValid[targetSlot] = false;
+
   ShopState freshState;
-  save(freshState, slot);
-  std::string path = getFilePath(slot);
+  save(freshState, targetSlot);
+  std::string path = getFilePath(targetSlot);
   std::remove(path.c_str());
 }
 
@@ -194,12 +221,37 @@ bool ShopData::buyItem(const std::string &itemId, int price, int slot) {
   return true;
 }
 
-void ShopData::consumeShield(int slot) {
+bool ShopData::consumeItem(const std::string &itemId, int slot) {
   ShopState state = load(slot);
-  if (state.shieldCount > 0) {
+  bool consumed = false;
+  if (itemId == "shield" && state.shieldCount > 0) {
     state.shieldCount--;
+    consumed = true;
+  } else if (itemId == "speed" && state.speedCount > 0) {
+    state.speedCount--;
+    consumed = true;
+  } else if (itemId == "time" && state.timeCount > 0) {
+    state.timeCount--;
+    consumed = true;
+  } else if (itemId == "radar" && state.radarCount > 0) {
+    state.radarCount--;
+    consumed = true;
+  } else if (itemId == "heart" && state.heartCount > 0) {
+    state.heartCount--;
+    consumed = true;
   }
-  state.hasShield = (state.shieldCount > 0);
-  save(state, slot);
+
+  if (consumed) {
+    state.hasShield = (state.shieldCount > 0);
+    state.hasSpeedBoots = (state.speedCount > 0);
+    state.hasTimeExtender = (state.timeCount > 0);
+    state.hasRadar = (state.radarCount > 0);
+    save(state, slot);
+  }
+  return consumed;
+}
+
+void ShopData::consumeShield(int slot) {
+  consumeItem("shield", slot);
 }
 

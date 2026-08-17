@@ -89,4 +89,5 @@ private:
     float mBaseMusicVolume = 40.f;
     float mCurrentDuckingFactor = 1.0f;
     float mTargetDuckingFactor = 1.0f;
+    float mCoinSoundCooldown = 0.f;
 };

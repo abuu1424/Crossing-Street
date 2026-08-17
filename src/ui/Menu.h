@@ -18,7 +18,8 @@ enum class MenuResult {
     LOAD_SLOT_2,
     LOAD_SLOT_3,
     QUIT,
-    SETTING
+    SETTING,
+    ENDLESS_GAME
 };
 
 enum class MenuScreen {
@@ -46,6 +47,7 @@ class Menu
 
     // Buttons
     MenuButton mBtnNew;
+    MenuButton mBtnEndless;
     MenuButton mBtnLoad;
     MenuButton mBtnQuit;
     MenuButton mBtnSetting;
@@ -110,17 +112,17 @@ class Menu
     sf::Text mInfoCardTitleLeft[3];
     sf::Text mInfoCardTitleRight[3];
 
-    // Tab 0: Controls & Shortcuts
-    sf::Text mInfoTab0Left[4];
-    sf::Text mInfoTab0Right[4];
+    // Tab 0: Controls & Combat Skills
+    sf::Text mInfoTab0Left[6];
+    sf::Text mInfoTab0Right[6];
 
     // Tab 1: Gameplay & 5 Eras
-    sf::Text mInfoTab1Left[4];
-    sf::Text mInfoTab1Right[5];
+    sf::Text mInfoTab1Left[6];
+    sf::Text mInfoTab1Right[6];
 
-    // Tab 2: Shop & Tips
-    sf::Text mInfoTab2Left[4];
-    sf::Text mInfoTab2Right[3];
+    // Tab 2: Shop & In-Lane Power-Ups
+    sf::Text mInfoTab2Left[6];
+    sf::Text mInfoTab2Right[6];
 
     sf::Text mInfoPageHint;
     MenuButton mBtnBackInfo;
@@ -192,10 +194,12 @@ public:
     MenuScreen getScreen() const { return mScreen; }
     void setScreen(MenuScreen s) { mScreen = s; }
 
-    void drawShopMenu(sf::RenderWindow& window);
+    void drawShopMenu(sf::RenderWindow& window, int currentHp = 3, int maxHp = 3);
     void handleShopEvent(const sf::Event& event,
                          sf::RenderWindow& window,
-                         MenuResult& result);
+                         MenuResult& result,
+                         int* currentHpPtr = nullptr,
+                         int maxHp = 3);
 
 
     float getMusicVolume() const { return mMuteAll ? 0.f : mMusicSlider.value; }

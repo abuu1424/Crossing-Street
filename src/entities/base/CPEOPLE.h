@@ -45,6 +45,12 @@ public:
     void triggerInvulnerability(float duration = 1.2f);
     bool isInvulnerable() const;
 
+    // PowerUp Integrations
+    void setPowerUpSpeedMultiplier(float mult) { mPowerUpSpeedMultiplier = mult; }
+    float getPowerUpSpeedMultiplier() const { return mPowerUpSpeedMultiplier; }
+    void setPowerUpShield(bool shield) { mHasPowerUpShield = shield; }
+    bool hasPowerUpShield() const { return mHasPowerUpShield; }
+
     // Stats & Combat mechanics
     const PlayerStats& getStats() const { return mStats; }
     PlayerStats& getStats() { return mStats; }
@@ -59,6 +65,11 @@ private:
     bool  mEPressedLast = false;
     bool  mQPressedLast = false;
     bool  mTPressedLast = false;
+
+    // PowerUp Active Visuals
+    float mPowerUpSpeedMultiplier = 1.0f;
+    bool  mHasPowerUpShield = false;
+    float mBubblePulseTimer = 0.f;
 
     // Skill animation visual assets
     sf::Texture mFlashAuraTexture;

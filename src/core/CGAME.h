@@ -12,6 +12,7 @@
 #include "Utils.h"
 #include "HazardManager.h"
 #include "CoinManager.h"
+#include "PowerUpManager.h"
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
@@ -33,6 +34,16 @@ class CGAME {
   EntityManager mEntities;
   HazardManager mHazardManager;
   CoinManager mCoinManager;
+  PowerUpManager mPowerUpManager;
+
+  // Endless Mode State
+  bool mIsEndlessMode = false;
+  int mEndlessWave = 1;
+  int mEndlessHighScore = 0;
+
+  void startEndlessGame();
+  void loadEndlessHighScore();
+  void saveEndlessHighScore();
 
   // Collision Effects
   std::string mCollisionSpritePath;

@@ -22,18 +22,18 @@ struct PlayerStats {
   bool isSprinting = false;
 
   // Skill Speed Burst 'E'
-  bool hasSpeedSkill = true;
+  bool hasSpeedSkill = false;
   bool skillActive = false;
   float skillTimer = 0.f; // 5.0s duration
   float skillDuration = 5.0f;
   float skillCooldownTimer = 0.f; // 10.0s cooldown
   float skillCooldownDuration = 10.0f;
 
-  // Skill EMP Sonar Radar 'Q'
+  // Skill Coin Magnet Radar 'Q'
   bool hasRadarSkill = false;
   bool radarActive = false;
-  float radarTimer = 0.f; // 3.5s duration
-  float radarDuration = 3.5f;
+  float radarTimer = 0.f; // 6.0s duration
+  float radarDuration = 6.0f;
   float radarCooldownTimer = 0.f; // 10.0s cooldown
   float radarCooldownDuration = 10.0f;
   float radarPulseRadius = 0.f;

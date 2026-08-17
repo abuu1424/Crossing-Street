@@ -34,6 +34,7 @@ public:
   static int getItemCount(const std::string &itemId, int slot = 0);
   static bool isItemPurchased(const std::string &itemId, int slot = 0);
   static bool buyItem(const std::string &itemId, int price, int slot = 0);
+  static bool consumeItem(const std::string &itemId, int slot = 0);
   static void consumeShield(int slot = 0);
 
 private:
