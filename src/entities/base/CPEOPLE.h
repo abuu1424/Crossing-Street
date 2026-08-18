@@ -59,6 +59,14 @@ public:
     void knockback(float distanceY = 160.f);
     void resetStats();
 
+    // Bot AI & Visual customization
+    void setBaseColor(const sf::Color& color) { mBaseColor = color; }
+    sf::Color getBaseColor() const { return mBaseColor; }
+    void setBot(bool bot) { mIsBot = bot; }
+    bool isBot() const { return mIsBot; }
+    void setFacingRow(int row) { mRow = row; }
+    void setMoving(bool moving) { mIsMoving = moving; }
+
     void Draw(sf::RenderWindow& window);
 private:
     float mInvulnerableTimer = 0.f;
@@ -85,4 +93,6 @@ private:
     bool        mRadarLoaded = false;
     bool        mTimeFreezeLoaded = false;
     bool        mWarnFontLoaded = false;
+    sf::Color   mBaseColor = sf::Color::White;
+    bool        mIsBot = false;
 };

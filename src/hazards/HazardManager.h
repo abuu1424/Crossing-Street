@@ -118,6 +118,8 @@ public:
     bool         isWarningActive()    const { return mIsWarning; }
     bool         isHazardActive()     const { return mIsActive; }
 
+    std::vector<sf::FloatRect> getDangerZones() const;
+
 private:
     SoundManager* mSound         = nullptr;
     HazardType    mCurrentHazard = HazardType::NONE;

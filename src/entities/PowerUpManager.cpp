@@ -1,6 +1,7 @@
 #include "PowerUpManager.h"
 #include "SoundManager.h"
 #include "ShopData.h"
+#include "CPEOPLE.h"
 #include <cmath>
 #include <iostream>
 #include <algorithm>
@@ -33,6 +34,7 @@ void PowerUpManager::reset() {
     mTimeStopTimer = 0.f;
     mSpeedBoostTimer = 0.f;
     mScoreX2Timer = 0.f;
+    mBotSpeedBoostTimer = 0.f;
     mHasShield = false;
 }
 
@@ -81,8 +83,12 @@ void PowerUpManager::update(float dt, const sf::FloatRect& playerHitbox, SoundMa
         mScoreX2Timer -= dt;
         if (mScoreX2Timer < 0.f) mScoreX2Timer = 0.f;
     }
+    if (mBotSpeedBoostTimer > 0.f) {
+        mBotSpeedBoostTimer -= dt;
+        if (mBotSpeedBoostTimer < 0.f) mBotSpeedBoostTimer = 0.f;
+    }
 
-    // 2. Check Item Collisions
+    // 2. Check Item Collisions with Player
     for (auto& item : mItems) {
         if (item.collected) continue;
 
@@ -106,6 +112,53 @@ void PowerUpManager::update(float dt, const sf::FloatRect& playerHitbox, SoundMa
             it = mFloatingTexts.erase(it);
         } else {
             ++it;
+        }
+    }
+}
+
+void PowerUpManager::checkBotPickup(const sf::FloatRect& botHitbox, CPEOPLE& botPlayer, SoundManager* sound) {
+    if (botPlayer.isDead()) return;
+
+    for (auto& item : mItems) {
+        if (item.collected) continue;
+
+        sf::FloatRect itemBox(item.position.x - 22.f, item.position.y - 22.f, 44.f, 44.f);
+        if (botHitbox.intersects(itemBox)) {
+            item.collected = true;
+            if (sound) {
+                sound->playCoinSound();
+            }
+
+            FloatingPowerUpText ft;
+            ft.position = item.position;
+
+            switch (item.type) {
+                case PowerUpType::MAGNET:
+                    ft.text = "+BOT MAGNET!";
+                    ft.color = sf::Color(0, 240, 255);
+                    break;
+                case PowerUpType::TIME_STOP:
+                    mTimeStopTimer = getTimeStopDuration();
+                    ft.text = "+BOT TIME STOP!";
+                    ft.color = sf::Color(140, 180, 255);
+                    break;
+                case PowerUpType::SPEED_BOOST:
+                    mBotSpeedBoostTimer = getSpeedBoostDuration();
+                    botPlayer.setPowerUpSpeedMultiplier(1.6f);
+                    ft.text = "+BOT SPEED SURGE (+60%)!";
+                    ft.color = sf::Color(255, 100, 50);
+                    break;
+                case PowerUpType::SHIELD:
+                    botPlayer.setPowerUpShield(true);
+                    ft.text = "+BOT ENERGY SHIELD!";
+                    ft.color = sf::Color(255, 225, 60);
+                    break;
+                case PowerUpType::SCORE_X2:
+                    ft.text = "+BOT 2X BOOST!";
+                    ft.color = sf::Color(255, 215, 0);
+                    break;
+            }
+            mFloatingTexts.push_back(ft);
         }
     }
 }

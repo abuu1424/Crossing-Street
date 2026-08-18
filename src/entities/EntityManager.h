@@ -23,6 +23,8 @@ public:
     const std::vector<std::unique_ptr<CANIMAL>>&  animals()   const { return mAnimals; }
     CTRAFFICLIGHT* traffic() const { return mTraffic.get(); }
 
+    std::vector<sf::FloatRect> getPredictedHitboxes(float lookaheadTime) const;
+
 private:
     std::vector<std::unique_ptr<CVEHICLE>> mObstacles;
     std::vector<std::unique_ptr<CANIMAL>>  mAnimals;

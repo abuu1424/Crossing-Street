@@ -13,6 +13,7 @@
 #include "HazardManager.h"
 #include "CoinManager.h"
 #include "PowerUpManager.h"
+#include "BotAI.h"
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
@@ -30,6 +31,15 @@ class CGAME {
 
   // Player
   CPEOPLE mPlayer;
+
+  // VS BOT Mode State
+  bool mIsVsBotMode = false;
+  BotDifficulty mSelectedBotDifficulty = BotDifficulty::NORMAL;
+  BotAI mBotAI;
+  CPEOPLE mBotPlayer;
+
+  void startVsBotGame(BotDifficulty diff);
+  void restartCurrentMode();
 
   EntityManager mEntities;
   HazardManager mHazardManager;

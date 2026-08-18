@@ -20,6 +20,8 @@ public:
 	virtual bool loadSprite(const std::string& texturePath, float x, float y);
 
 	sf::Vector2f getPosition() const { return mSprite.getPosition(); }
+	float getSpeed() const { return mSpeed; }
+	float getDirection() const { return mDirection; }
 
     sf::FloatRect getBounds() const { return mSprite.getGlobalBounds(); }
     virtual sf::FloatRect getHitbox() const;

@@ -20,7 +20,10 @@ enum class MenuResult {
     LOAD_SLOT_3,
     QUIT,
     SETTING,
-    ENDLESS_GAME
+    ENDLESS_GAME,
+    VS_BOT_EASY,
+    VS_BOT_NORMAL,
+    VS_BOT_HARD
 };
 
 enum class MenuScreen {
@@ -29,7 +32,8 @@ enum class MenuScreen {
     LOAD,
     SETTINGS,
     INFO,
-    SHOP
+    SHOP,
+    BOT_DIFFICULTY
 };
 
 class Menu
@@ -49,10 +53,28 @@ class Menu
     // Buttons
     MenuButton mBtnNew;
     MenuButton mBtnEndless;
+    MenuButton mBtnVsBot;
     MenuButton mBtnLoad;
     MenuButton mBtnQuit;
     MenuButton mBtnSetting;
     MenuButton mBtnBack;
+
+    // Bot Difficulty Menu
+    MenuButton mBtnDifficultyEasy;
+    MenuButton mBtnDifficultyNormal;
+    MenuButton mBtnDifficultyHard;
+    MenuButton mBtnDifficultyBack;
+    sf::Text   mDiffTitle;
+    sf::Sprite mDiffCardSprites[3];
+    sf::Text   mDiffCardTitles[3];
+    sf::Text   mDiffCardDescs[3];
+    sf::Text   mDiffCardBadges[3];
+
+    void setupDifficultyMenu();
+    void drawDifficultyMenu(sf::RenderWindow& window);
+    void handleDifficultyEvent(const sf::Event& event,
+                               sf::RenderWindow& window,
+                               MenuResult& result);
 
     // Load menu
     MenuScreen mScreen = MenuScreen::MAIN;

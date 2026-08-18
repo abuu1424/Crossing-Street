@@ -175,3 +175,25 @@ void EntityManager::draw(sf::RenderWindow &window) const {
   if (mTraffic)
     mTraffic->Draw(window);
 }
+
+std::vector<sf::FloatRect>
+EntityManager::getPredictedHitboxes(float lookaheadTime) const {
+  std::vector<sf::FloatRect> boxes;
+  boxes.reserve(mObstacles.size() + mAnimals.size());
+
+  for (const auto &obs : mObstacles) {
+    sf::FloatRect r = obs->getHitbox();
+    float vx = obs->isStopped() ? 0.f : (obs->getSpeed() * obs->getDirection());
+    r.left += vx * lookaheadTime;
+    boxes.push_back(r);
+  }
+
+  for (const auto &ani : mAnimals) {
+    sf::FloatRect r = ani->getHitbox();
+    float vx = ani->getSpeed() * ani->getDirection();
+    r.left += vx * lookaheadTime;
+    boxes.push_back(r);
+  }
+
+  return boxes;
+}

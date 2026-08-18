@@ -898,13 +898,65 @@ void HazardManager::draw(sf::RenderWindow& window) const {
     }
 }
 
-// =========================================================
-// drawUI
-// =========================================================
 void HazardManager::drawUI(sf::RenderWindow& window) const {
     if (mCurrentHazard == HazardType::NONE) return;
     if (mIsWarning) {
         window.draw(mWarningBox);
         window.draw(mWarningText);
     }
+}
+
+std::vector<sf::FloatRect> HazardManager::getDangerZones() const {
+    std::vector<sf::FloatRect> zones;
+    if (!mIsActive && !mIsWarning) return zones;
+
+    switch (mCurrentHazard) {
+    case HazardType::DINO_STAMPEDE:
+        for (const auto& herd : mHerdLanes) {
+            if (!herd.active) continue;
+            if (herd.warningTimer > 0.f) {
+                // Entire lane is dangerous during warning
+                zones.push_back(sf::FloatRect(0.f, herd.laneY - 24.f, (float)Win_W, 48.f));
+            } else {
+                for (const auto& an : herd.animals) {
+                    if (an.offScreen) continue;
+                    float hw = an.frameW * an.scale * 0.45f;
+                    float hh = an.frameH * an.scale * 0.45f;
+                    zones.push_back(sf::FloatRect(an.posX - hw, an.laneY - hh, hw * 2.f, hh * 2.f));
+                }
+            }
+        }
+        break;
+
+    case HazardType::ARROW_RAIN:
+        for (const auto& t : mArrowTargets) {
+            if (t.active && !t.struck) {
+                zones.push_back(sf::FloatRect(t.position.x - 24.f, t.position.y - 24.f, 48.f, 48.f));
+            }
+        }
+        break;
+
+    case HazardType::RUSH_HOUR:
+        for (const auto& ls : mLightningStrikes) {
+            if (ls.active || ls.warningTimer > 0.f) {
+                zones.push_back(sf::FloatRect(ls.strikeX - 34.f, ls.laneY - 20.f, 68.f, 40.f));
+            }
+        }
+        break;
+
+    case HazardType::BLACK_HOLE:
+        for (const auto& bh : mBlackHoles) {
+            zones.push_back(sf::FloatRect(bh.position.x - 30.f, bh.position.y - 30.f, 60.f, 60.f));
+        }
+        for (const auto& l : mLaserLanes) {
+            if (l.active || l.warningTimer > 0.f) {
+                zones.push_back(sf::FloatRect(0.f, l.laneY - 16.f, (float)Win_W, 32.f));
+            }
+        }
+        break;
+
+    default:
+        break;
+    }
+    return zones;
 }

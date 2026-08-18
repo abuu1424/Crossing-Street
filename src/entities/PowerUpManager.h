@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 class SoundManager;
+class CPEOPLE;
 
 enum class PowerUpType {
     MAGNET,       // Hút coin trong phạm vi lớn (8s)
@@ -61,6 +62,19 @@ public:
     float getSpeedBoostDuration() const { return 6.0f; }
     float getScoreX2Duration() const { return 10.0f; }
 
+    // Bot PowerUp pickup handling
+    void checkBotPickup(const sf::FloatRect& botHitbox, CPEOPLE& botPlayer, SoundManager* sound = nullptr);
+    bool isBotSpeedBoostActive() const { return mBotSpeedBoostTimer > 0.f; }
+
+    bool hasItemNear(const sf::FloatRect& cellRect) const {
+        for (const auto& item : mItems) {
+            if (!item.collected && cellRect.contains(item.position)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 private:
     sf::Font mFont;
     bool mFontLoaded = false;
@@ -80,6 +94,7 @@ private:
     float mTimeStopTimer = 0.f;
     float mSpeedBoostTimer = 0.f;
     float mScoreX2Timer = 0.f;
+    float mBotSpeedBoostTimer = 0.f;
     bool mHasShield = false;
 
     // Visual aura & particles

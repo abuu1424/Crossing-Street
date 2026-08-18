@@ -395,7 +395,7 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
     float playerCenterY = mPosition.y + Player_H / 2.f;
 
     // 1. Coin Magnet Radar Suction Field Effect [Q]
-    if (mStats.radarActive) {
+    if (!mIsBot && mStats.radarActive) {
         float alphaRatio = std::clamp(mStats.radarTimer / mStats.radarDuration, 0.f, 1.f);
         sf::Uint8 alpha = static_cast<sf::Uint8>(220 * alphaRatio);
 
@@ -434,7 +434,7 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
     }
 
     // 2. Flash Speed Lightning Aura Effect [E] or In-Lane Speed Boost
-    if (mStats.skillActive || mPowerUpSpeedMultiplier > 1.0f) {
+    if ((!mIsBot && mStats.skillActive) || mPowerUpSpeedMultiplier > 1.0f) {
         if (mAuraLoaded) {
             mFlashAuraSprite.setPosition(playerCenterX, playerCenterY);
             mFlashAuraSprite.setScale(1.25f, 1.25f);
@@ -453,7 +453,7 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
     }
 
     // 3. Time Freeze Clock Aura Effect [T]
-    if (mStats.timeFreezeActive) {
+    if (!mIsBot && mStats.timeFreezeActive) {
         if (mTimeFreezeLoaded) {
             mTimeFreezeSprite.setPosition(playerCenterX, playerCenterY);
             mTimeFreezeSprite.setScale(0.85f, 0.85f);
@@ -471,8 +471,8 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
         }
     }
 
-    // 4. Energy Shield Aura (Shop shield or In-lane Bubble Shield)
-    if ((ShopData::getItemCount("shield") > 0 || mHasPowerUpShield) && !mIsDead) {
+    // 4. Energy Shield Aura (Shop shield for human player)
+    if (!mIsBot && ShopData::getItemCount("shield") > 0 && !mIsDead) {
         float centerX = playerCenterX;
         float centerY = playerCenterY;
 
@@ -529,10 +529,10 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
         if (static_cast<int>(mInvulnerableTimer * 20.f) % 2 == 0) {
             mSprite.setColor(sf::Color(100, 220, 255, 220));
         } else {
-            mSprite.setColor(sf::Color(255, 255, 255, 255));
+            mSprite.setColor(mBaseColor);
         }
     } else {
-        mSprite.setColor(sf::Color(255, 255, 255, 255));
+        mSprite.setColor(mBaseColor);
     }
 
     // Nitro Speed Power-Up After-Image Trail
@@ -545,6 +545,44 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
     }
 
     window.draw(mSprite);
+
+    // Bot Identification Badge & 3 Mini Hearts
+    if (mIsBot && !mIsDead && mWarnFontLoaded) {
+        sf::RectangleShape botBadgeBg(sf::Vector2f(34.f, 14.f));
+        botBadgeBg.setOrigin(17.f, 7.f);
+        botBadgeBg.setPosition(playerCenterX, mPosition.y - 8.f);
+        botBadgeBg.setFillColor(sf::Color(220, 40, 40, 210));
+        botBadgeBg.setOutlineColor(sf::Color(255, 220, 220, 240));
+        botBadgeBg.setOutlineThickness(1.2f);
+        window.draw(botBadgeBg);
+
+        sf::Text botBadgeText;
+        botBadgeText.setFont(mWarnFont);
+        botBadgeText.setString("BOT");
+        botBadgeText.setCharacterSize(11);
+        botBadgeText.setFillColor(sf::Color::White);
+        sf::FloatRect b = botBadgeText.getLocalBounds();
+        botBadgeText.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
+        botBadgeText.setPosition(playerCenterX, mPosition.y - 8.f);
+        window.draw(botBadgeText);
+
+        // 3 Mini Heart Indicators for Bot HP
+        int curHp = mStats.currentHp;
+        for (int h = 0; h < 3; ++h) {
+            sf::CircleShape miniHeart(2.5f);
+            miniHeart.setOrigin(2.5f, 2.5f);
+            miniHeart.setPosition(playerCenterX - 8.f + h * 8.f, mPosition.y - 18.f);
+            if (h < curHp) {
+                miniHeart.setFillColor(sf::Color(255, 60, 60));
+                miniHeart.setOutlineColor(sf::Color(255, 200, 200));
+            } else {
+                miniHeart.setFillColor(sf::Color(50, 50, 50, 200));
+                miniHeart.setOutlineColor(sf::Color(90, 90, 90, 160));
+            }
+            miniHeart.setOutlineThickness(0.8f);
+            window.draw(miniHeart);
+        }
+    }
 
     // Dynamic PowerUp Shield Bubble (Golden Energy Sphere)
     if (mHasPowerUpShield && !mIsDead) {

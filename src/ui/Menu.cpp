@@ -34,18 +34,20 @@ Menu::Menu() {
       );
 
   // Buttons
-  float btnY = 245.f;
-  float gap = 65.f;
+  float btnY = 220.f;
+  float gap = 58.f;
   setupButton(mBtnNew, "assets/ui/menu/btn_newgame.png", "CAMPAIGN",
               Win_W / 2.f, btnY);
   setupButton(mBtnEndless, "assets/ui/menu/btn_newgame.png", "ENDLESS MODE",
               Win_W / 2.f, btnY + gap);
-  setupButton(mBtnLoad, "assets/ui/menu/btn_loadgame.png", "LOAD GAME",
+  setupButton(mBtnVsBot, "assets/ui/menu/btn_newgame.png", "VS BOT AI",
               Win_W / 2.f, btnY + gap * 2);
-  setupButton(mBtnSetting, "assets/ui/menu/btn_setting.png", "SETTINGS",
+  setupButton(mBtnLoad, "assets/ui/menu/btn_loadgame.png", "LOAD GAME",
               Win_W / 2.f, btnY + gap * 3);
+  setupButton(mBtnSetting, "assets/ui/menu/btn_setting.png", "SETTINGS",
+              Win_W / 2.f, btnY + gap * 4);
   setupButton(mBtnQuit, "assets/ui/menu/btn_quit.png", "QUIT", Win_W / 2.f,
-              btnY + gap * 4);
+              btnY + gap * 5);
 
   // Icon ? button (Info/Help) ở góc trên bên phải — dùng texture gỗ chuẩn
   setupButton(mBtnInfo, "assets/ui/menu/btn_info.png", "?", Win_W - 65.f, 65.f,
@@ -60,6 +62,7 @@ Menu::Menu() {
   setupNewGameNamePopup();
   setupInfoMenu();
   setupShopMenu();
+  setupDifficultyMenu();
 
   // Nhạc nền
   if (!mMusic.openFromFile("assets/sounds/menu/menu_music.ogg"))
@@ -257,6 +260,10 @@ void Menu::handleEvent(const sf::Event &event, sf::RenderWindow &window,
     handleShopEvent(event, window, result);
     return;
   }
+  if (mScreen == MenuScreen::BOT_DIFFICULTY) {
+    handleDifficultyEvent(event, window, result);
+    return;
+  }
 
   if (event.type == sf::Event::MouseButtonPressed &&
       event.mouseButton.button == sf::Mouse::Left) {
@@ -274,6 +281,8 @@ void Menu::handleEvent(const sf::Event &event, sf::RenderWindow &window,
     } else if (mBtnEndless.sprite.getGlobalBounds().contains(mouse)) {
       result = MenuResult::ENDLESS_GAME;
       mMusic.stop();
+    } else if (mBtnVsBot.sprite.getGlobalBounds().contains(mouse)) {
+      mScreen = MenuScreen::BOT_DIFFICULTY;
     } else if (mBtnLoad.sprite.getGlobalBounds().contains(mouse)) {
       refreshSaveSlots();
       mScreen = MenuScreen::LOAD;
@@ -391,10 +400,19 @@ void Menu::update(float dt, sf::RenderWindow &window) {
     return;
   }
 
+  if (mScreen == MenuScreen::BOT_DIFFICULTY) {
+    updateButton(mBtnDifficultyEasy, mouse, dt);
+    updateButton(mBtnDifficultyNormal, mouse, dt);
+    updateButton(mBtnDifficultyHard, mouse, dt);
+    updateButton(mBtnDifficultyBack, mouse, dt);
+    return;
+  }
+
   if (mTitleAnim)
     mTitleAnim->update(dt);
   updateButton(mBtnNew, mouse, dt);
   updateButton(mBtnEndless, mouse, dt);
+  updateButton(mBtnVsBot, mouse, dt);
   updateButton(mBtnLoad, mouse, dt);
   updateButton(mBtnSetting, mouse, dt);
   updateButton(mBtnQuit, mouse, dt);
@@ -475,6 +493,10 @@ void Menu::draw(sf::RenderWindow &window) {
     drawShopMenu(window);
     return;
   }
+  if (mScreen == MenuScreen::BOT_DIFFICULTY) {
+    drawDifficultyMenu(window);
+    return;
+  }
   window.draw(mBgSprite);
   if (mTitleAnim)
     window.draw(mTitleSprite);
@@ -482,6 +504,7 @@ void Menu::draw(sf::RenderWindow &window) {
     window.draw(mTitle);
   drawButton(window, mBtnNew);
   drawButton(window, mBtnEndless);
+  drawButton(window, mBtnVsBot);
   drawButton(window, mBtnLoad);
   drawButton(window, mBtnSetting);
   drawButton(window, mBtnQuit);
@@ -1207,6 +1230,126 @@ void Menu::handleShopEvent(const sf::Event &event, sf::RenderWindow &window,
         }
         return;
       }
+    }
+  }
+
+  if (event.type == sf::Event::KeyPressed) {
+    if (event.key.code == sf::Keyboard::Escape) {
+      mScreen = MenuScreen::MAIN;
+    }
+  }
+}
+
+void Menu::setupDifficultyMenu() {
+  mDiffTitle.setFont(mFont);
+  mDiffTitle.setString("SELECT BOT DIFFICULTY");
+  mDiffTitle.setCharacterSize(26);
+  mDiffTitle.setFillColor(sf::Color(255, 215, 0));
+  mDiffTitle.setOutlineColor(sf::Color::Black);
+  mDiffTitle.setOutlineThickness(2.f);
+
+  sf::FloatRect tb = mDiffTitle.getLocalBounds();
+  mDiffTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
+  mDiffTitle.setPosition(Win_W / 2.f, 220.f);
+
+  // 3 Compact Buttons (160x50 px)
+  setupButton(mBtnDifficultyEasy, "assets/ui/menu/btn_yes.png", "EASY",
+              Win_W / 2.f - 180.f, 280.f, "assets/ui/menu/btn_yes_hover.png", 20);
+  setupButton(mBtnDifficultyNormal, "assets/ui/menu/btn_yes.png", "NORMAL",
+              Win_W / 2.f - 180.f, 355.f, "assets/ui/menu/btn_yes_hover.png", 20);
+  setupButton(mBtnDifficultyHard, "assets/ui/menu/btn_yes.png", "HARD",
+              Win_W / 2.f - 180.f, 430.f, "assets/ui/menu/btn_yes_hover.png", 20);
+  setupButton(mBtnDifficultyBack, "assets/ui/menu/btn_back.png", "BACK",
+              Win_W / 2.f, 510.f, "assets/ui/menu/btn_back_hover.png", 22);
+
+  // Titles & Concise English Descriptions
+  const char *titles[3] = {"EASY BOT", "NORMAL BOT", "HARD BOT"};
+  const char *badges[3] = {"[BEGINNER]", "[RECOMMENDED]", "[CHALLENGE]"};
+  const char *descs[3] = {
+      "Slow reactions & occasional missteps",
+      "Smart pathfinding, dodges most hazards",
+      "Near-flawless Dijkstra with instant reflexes"};
+  sf::Color colors[3] = {sf::Color(120, 255, 140), sf::Color(255, 220, 80),
+                         sf::Color(255, 90, 90)};
+
+  for (int i = 0; i < 3; i++) {
+    float y = 280.f + i * 75.f;
+
+    mDiffCardTitles[i].setFont(mFont);
+    mDiffCardTitles[i].setString(titles[i]);
+    mDiffCardTitles[i].setCharacterSize(18);
+    mDiffCardTitles[i].setFillColor(colors[i]);
+    mDiffCardTitles[i].setOutlineColor(sf::Color::Black);
+    mDiffCardTitles[i].setOutlineThickness(1.5f);
+    mDiffCardTitles[i].setPosition(Win_W / 2.f - 75.f, y - 20.f);
+
+    mDiffCardBadges[i].setFont(mFont);
+    mDiffCardBadges[i].setString(badges[i]);
+    mDiffCardBadges[i].setCharacterSize(14);
+    mDiffCardBadges[i].setFillColor(colors[i]);
+    mDiffCardBadges[i].setOutlineColor(sf::Color::Black);
+    mDiffCardBadges[i].setOutlineThickness(1.0f);
+    mDiffCardBadges[i].setPosition(Win_W / 2.f + 140.f, y - 18.f);
+
+    mDiffCardDescs[i].setFont(mFont);
+    mDiffCardDescs[i].setString(descs[i]);
+    mDiffCardDescs[i].setCharacterSize(14);
+    mDiffCardDescs[i].setFillColor(sf::Color(220, 220, 220));
+    mDiffCardDescs[i].setOutlineColor(sf::Color::Black);
+    mDiffCardDescs[i].setOutlineThickness(1.0f);
+    mDiffCardDescs[i].setPosition(Win_W / 2.f - 75.f, y + 4.f);
+  }
+}
+
+void Menu::drawDifficultyMenu(sf::RenderWindow &window) {
+  window.draw(mBgSprite);
+  window.draw(mPanelSprite);
+  window.draw(mDiffTitle);
+
+  for (int i = 0; i < 3; i++) {
+    float y = 280.f + i * 75.f;
+    sf::RectangleShape cardBox(sf::Vector2f(560.f, 64.f));
+    cardBox.setOrigin(280.f, 32.f);
+    cardBox.setPosition(Win_W / 2.f, y);
+    cardBox.setFillColor(sf::Color(20, 22, 34, 210));
+    cardBox.setOutlineColor(sf::Color(90, 100, 130, 200));
+    cardBox.setOutlineThickness(1.5f);
+    window.draw(cardBox);
+
+    window.draw(mDiffCardTitles[i]);
+    window.draw(mDiffCardBadges[i]);
+    window.draw(mDiffCardDescs[i]);
+  }
+
+  drawButton(window, mBtnDifficultyEasy);
+  drawButton(window, mBtnDifficultyNormal);
+  drawButton(window, mBtnDifficultyHard);
+  drawButton(window, mBtnDifficultyBack);
+}
+
+void Menu::handleDifficultyEvent(const sf::Event &event,
+                                 sf::RenderWindow &window,
+                                 MenuResult &result) {
+  if (event.type == sf::Event::MouseButtonPressed &&
+      event.mouseButton.button == sf::Mouse::Left) {
+    sf::Vector2f mouse = window.mapPixelToCoords(
+        sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+
+    sf::FloatRect easyRect(Win_W / 2.f - 280.f, 280.f - 32.f, 560.f, 64.f);
+    sf::FloatRect normalRect(Win_W / 2.f - 280.f, 355.f - 32.f, 560.f, 64.f);
+    sf::FloatRect hardRect(Win_W / 2.f - 280.f, 430.f - 32.f, 560.f, 64.f);
+
+    if (mBtnDifficultyEasy.contains(mouse) || easyRect.contains(mouse)) {
+      result = MenuResult::VS_BOT_EASY;
+      mMusic.stop();
+    } else if (mBtnDifficultyNormal.contains(mouse) || normalRect.contains(mouse)) {
+      result = MenuResult::VS_BOT_NORMAL;
+      mMusic.stop();
+    } else if (mBtnDifficultyHard.contains(mouse) || hardRect.contains(mouse)) {
+      result = MenuResult::VS_BOT_HARD;
+      mMusic.stop();
+    } else if (mBtnDifficultyBack.contains(mouse)) {
+      mScreen = MenuScreen::MAIN;
     }
   }
 
