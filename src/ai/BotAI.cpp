@@ -61,16 +61,16 @@ float BotAI::getNodeCost(GridNode n,
     // Active hazard danger zones penalty
     for (const auto& dz : dangerZones) {
         if (dz.intersects(cellRect)) {
-            cost += mParams.dangerPenalty * 1.5f;
+            cost += mParams.dangerPenalty * 1.8f;
         }
     }
 
     // Power-up attraction
     if (mPowerUpManager && mPowerUpManager->hasItemNear(cellRect)) {
-        cost -= 0.4f;
+        cost -= mParams.powerUpAttractionWeight;
     }
 
-    return std::max(0.1f, cost);
+    return std::max(0.05f, cost);
 }
 
 std::vector<GridNode> BotAI::runDijkstra(GridNode start, int goalRow) const {
@@ -153,6 +153,20 @@ void BotAI::update(float dt, CPEOPLE& botEntity, int goalRow) {
         return;
     }
 
+    // 1. Emergency Reflex Check: if an obstacle is dangerously close or about to crash into bot
+    if (mParams.emergencyDodge && mEntityManager) {
+        sf::FloatRect botBox = botEntity.getHitbox();
+        sf::FloatRect threatBox(botBox.left - 10.f, botBox.top - 4.f, botBox.width + 20.f, botBox.height + 8.f);
+        auto immediateObstacles = mEntityManager->getPredictedHitboxes(0.15f);
+        for (const auto& obs : immediateObstacles) {
+            if (obs.intersects(threatBox)) {
+                mReplanTimer = 0.f; // Force immediate replan to dodge away
+                break;
+            }
+        }
+    }
+
+    // 2. Periodic Dijkstra Path Replanning
     mReplanTimer -= dt;
     if (mReplanTimer <= 0.f) {
         mReplanTimer = mParams.replanInterval;
@@ -161,21 +175,22 @@ void BotAI::update(float dt, CPEOPLE& botEntity, int goalRow) {
         mPathIndex = 1; // Step 0 is current cell, move to step 1
 
         // Mistake chance: low difficulty bot occasionally chooses an alternate safe step
-        if (mCurrentPath.size() > 1 &&
+        if (mCurrentPath.size() > 1 && mParams.mistakeChance > 0.f &&
             (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) < mParams.mistakeChance)) {
             auto neighbors = getNeighbors(start);
             if (!neighbors.empty()) {
                 GridNode altStep = neighbors[rand() % neighbors.size()];
-                std::vector<sf::FloatRect> obs = mEntityManager ? mEntityManager->getPredictedHitboxes(0.f) : std::vector<sf::FloatRect>{};
-                std::vector<sf::FloatRect> dz  = (mHazardManager && mHazardManager->isHazardActive()) ? mHazardManager->getDangerZones() : std::vector<sf::FloatRect>{};
+                std::vector<sf::FloatRect> obs = mEntityManager ? mEntityManager->getPredictedHitboxes(0.1f) : std::vector<sf::FloatRect>{};
+                std::vector<sf::FloatRect> dz  = (mHazardManager && (mHazardManager->isHazardActive() || mHazardManager->isWarningActive())) ? mHazardManager->getDangerZones() : std::vector<sf::FloatRect>{};
                 // Only take alternate step if it is safe (< penalty threshold)
-                if (getNodeCost(altStep, obs, dz) < mParams.dangerPenalty * 0.8f) {
+                if (getNodeCost(altStep, obs, dz) < mParams.dangerPenalty * 0.5f) {
                     mCurrentPath[1] = altStep;
                 }
             }
         }
     }
 
+    // 3. Movement Execution with Speed Factor & Walk Direction Animation
     if (mPathIndex < mCurrentPath.size()) {
         sf::Vector2f target = gridToWorld(mCurrentPath[mPathIndex]);
         sf::Vector2f cur = botEntity.getPosition();
@@ -189,8 +204,9 @@ void BotAI::update(float dt, CPEOPLE& botEntity, int goalRow) {
             }
         } else {
             dir /= dist;
-            float speed = botEntity.getSpeed();
-            botEntity.setPosition(cur.x + dir.x * speed * dt, cur.y + dir.y * speed * dt);
+            float baseSpeed = botEntity.getSpeed();
+            float effectiveSpeed = baseSpeed * mParams.speedFactor * botEntity.getPowerUpSpeedMultiplier();
+            botEntity.setPosition(cur.x + dir.x * effectiveSpeed * dt, cur.y + dir.y * effectiveSpeed * dt);
             botEntity.setMoving(true);
 
             // Update walk animation facing direction

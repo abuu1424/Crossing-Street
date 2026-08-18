@@ -179,20 +179,46 @@ void EntityManager::draw(sf::RenderWindow &window) const {
 std::vector<sf::FloatRect>
 EntityManager::getPredictedHitboxes(float lookaheadTime) const {
   std::vector<sf::FloatRect> boxes;
-  boxes.reserve(mObstacles.size() + mAnimals.size());
+  boxes.reserve((mObstacles.size() + mAnimals.size()) * 2);
 
   for (const auto &obs : mObstacles) {
     sf::FloatRect r = obs->getHitbox();
-    float vx = obs->isStopped() ? 0.f : (obs->getSpeed() * obs->getDirection());
-    r.left += vx * lookaheadTime;
+    // 1. Current position hitbox
     boxes.push_back(r);
+
+    // 2. Continuous swept trajectory over [0, lookaheadTime]
+    if (!obs->isStopped() && lookaheadTime > 0.f) {
+      float vx = obs->getSpeed() * obs->getDirection();
+      float shift = vx * lookaheadTime;
+      sf::FloatRect swept = r;
+      if (shift < 0.f) {
+        swept.left += shift;
+        swept.width += -shift;
+      } else {
+        swept.width += shift;
+      }
+      boxes.push_back(swept);
+    }
   }
 
   for (const auto &ani : mAnimals) {
     sf::FloatRect r = ani->getHitbox();
-    float vx = ani->getSpeed() * ani->getDirection();
-    r.left += vx * lookaheadTime;
+    // 1. Current position hitbox
     boxes.push_back(r);
+
+    // 2. Continuous swept trajectory over [0, lookaheadTime]
+    if (lookaheadTime > 0.f) {
+      float vx = ani->getSpeed() * ani->getDirection();
+      float shift = vx * lookaheadTime;
+      sf::FloatRect swept = r;
+      if (shift < 0.f) {
+        swept.left += shift;
+        swept.width += -shift;
+      } else {
+        swept.width += shift;
+      }
+      boxes.push_back(swept);
+    }
   }
 
   return boxes;

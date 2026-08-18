@@ -14,23 +14,49 @@ class CPEOPLE;
 enum class BotDifficulty { EASY, NORMAL, HARD };
 
 struct BotDifficultyParams {
-    float replanInterval;      // seconds between Dijkstra recalculations
-    float predictionHorizon;   // seconds to project dynamic obstacle hitboxes
-    float dangerPenalty;       // weight penalty for hazardous cells
-    float mistakeChance;       // 0..1 probability of taking a non-optimal safe step
-    float reactionDelay;       // reaction latency
+    float replanInterval;          // seconds between Dijkstra recalculations
+    float predictionHorizon;       // seconds to project dynamic obstacle hitboxes
+    float dangerPenalty;           // weight penalty for hazardous cells
+    float speedFactor;             // speed multiplier relative to player base speed
+    float mistakeChance;           // 0..1 probability of taking a non-optimal safe step
+    bool  emergencyDodge;          // instant reaction reflex on imminent threat
+    float powerUpAttractionWeight; // incentive to route toward power-ups
 };
 
 inline BotDifficultyParams getBotParams(BotDifficulty d) {
     switch (d) {
         case BotDifficulty::EASY:
-            return { /*replan*/0.5f, /*horizon*/0.25f, /*danger*/1500.f, /*mistake*/0.25f, /*delay*/0.20f };
+            return {
+                /*replanInterval*/          0.38f,
+                /*predictionHorizon*/       0.20f,
+                /*dangerPenalty*/           900.f,
+                /*speedFactor*/             0.84f,  // -16% speed, forgiving for beginner players
+                /*mistakeChance*/           0.20f,  // occasional hesitation / alternate safe route
+                /*emergencyDodge*/          false,
+                /*powerUpAttractionWeight*/ 0.3f
+            };
         case BotDifficulty::NORMAL:
-            return { /*replan*/0.3f, /*horizon*/0.35f, /*danger*/3000.f, /*mistake*/0.10f, /*delay*/0.10f };
+            return {
+                /*replanInterval*/          0.18f,
+                /*predictionHorizon*/       0.45f,
+                /*dangerPenalty*/           3000.f,
+                /*speedFactor*/             1.00f,  // 100% equal speed to player
+                /*mistakeChance*/           0.04f,
+                /*emergencyDodge*/          true,   // dodges oncoming close-range cars
+                /*powerUpAttractionWeight*/ 0.85f   // collects nearby powerups
+            };
         case BotDifficulty::HARD:
-            return { /*replan*/0.12f, /*horizon*/0.5f, /*danger*/6000.f, /*mistake*/0.02f, /*delay*/0.02f };
+            return {
+                /*replanInterval*/          0.08f,  // 12.5 Hz fast Dijkstra replanning
+                /*predictionHorizon*/       0.70f,  // long lookahead with swept danger boxes
+                /*dangerPenalty*/           8000.f, // strict hazard avoidance
+                /*speedFactor*/             1.10f,  // +10% speed, swift & highly competitive
+                /*mistakeChance*/           0.00f,  // 0% mistakes, optimal path execution
+                /*emergencyDodge*/          true,   // instant reflex evasion
+                /*powerUpAttractionWeight*/ 1.40f   // actively seeks Speed Boost / Shield
+            };
     }
-    return { 0.3f, 0.35f, 3000.f, 0.10f, 0.10f };
+    return { 0.18f, 0.45f, 3000.f, 1.0f, 0.04f, true, 0.85f };
 }
 
 struct GridNode {

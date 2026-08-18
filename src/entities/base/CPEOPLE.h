@@ -66,6 +66,7 @@ public:
     bool isBot() const { return mIsBot; }
     void setFacingRow(int row) { mRow = row; }
     void setMoving(bool moving) { mIsMoving = moving; }
+    bool isMoving() const { return mIsMoving; }
 
     void Draw(sf::RenderWindow& window);
 private:
