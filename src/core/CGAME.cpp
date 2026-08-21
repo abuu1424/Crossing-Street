@@ -241,6 +241,29 @@ void CGAME::setupUI() {
                               mt.top + mt.height / 2.f);
   mMenuConfirmTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 40.f);
 
+  // Bảng Restart Confirm
+  mRestartConfirmTitle.setFont(mFont);
+  mRestartConfirmTitle.setString("Restart Game?");
+  mRestartConfirmTitle.setCharacterSize(28);
+  mRestartConfirmTitle.setFillColor(sf::Color::White);
+  mRestartConfirmTitle.setOutlineColor(sf::Color(20, 15, 10, 230));
+  mRestartConfirmTitle.setOutlineThickness(1.5f);
+  sf::FloatRect rct = mRestartConfirmTitle.getLocalBounds();
+  mRestartConfirmTitle.setOrigin(rct.left + rct.width / 2.f,
+                                 rct.top + rct.height / 2.f);
+  mRestartConfirmTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 40.f);
+
+  mRestartConfirmSubTitle.setFont(mFont);
+  mRestartConfirmSubTitle.setString("All current wave progress will be reset!");
+  mRestartConfirmSubTitle.setCharacterSize(16);
+  mRestartConfirmSubTitle.setFillColor(sf::Color(255, 215, 0));
+  mRestartConfirmSubTitle.setOutlineColor(sf::Color(20, 15, 10, 230));
+  mRestartConfirmSubTitle.setOutlineThickness(1.2f);
+  sf::FloatRect rcst = mRestartConfirmSubTitle.getLocalBounds();
+  mRestartConfirmSubTitle.setOrigin(rcst.left + rcst.width / 2.f,
+                                    rcst.top + rcst.height / 2.f);
+  mRestartConfirmSubTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 5.f);
+
   // Bảng Pause
   // Bảng Pause — dùng size lớn hơn để chứa slider
   float pboxW = 450.f, pboxH = 340.f;
@@ -515,15 +538,23 @@ void CGAME::loadLevel(int level) {
   clearEntities();
   LevelConfig cfg = getLevel(level);
 
+  mInCutscene = false;
+  mCutscene.skip();
   mDeathCutscene.reset();
   mIsDying = false;
   mLevelCleared = false;
+  mShowLevelClear = false;
+  mShowRestartConfirm = false;
   mCurrentLevel = cfg.level;
   mlevelTime = 0.f;
   mCollisionSpritePath = cfg.collisionSpritePath;
 
   // 1. Dọn dẹp âm thanh hiệu ứng & reset ducking trước khi phát nhạc mới
   mSound.stopAllEffects();
+  mSound.stopVictory();
+  mSound.stopLevelClear();
+  mSound.stopLevelDeathSounds();
+  mSound.stopHazardSounds();
   mSound.resetDucking();
   mHazardManager.startLevel(cfg.level);
 
@@ -576,6 +607,13 @@ void CGAME::loadLevel(int level) {
     mPlayer.setPlayerLabel("P1");
     mPlayer.setPosition(SPAWN_X - 40.f, SPAWN_Y);
 
+    // Khi qua level khác, nếu bot mất hết 3 tim thì hồi 1 tim (hoặc hồi +1 tim nếu mất máu)
+    if (mBotPlayer.getStats().currentHp <= 0) {
+      mBotPlayer.getStats().currentHp = 1;
+    } else if (mBotPlayer.getStats().currentHp < mBotPlayer.getStats().maxHp) {
+      mBotPlayer.getStats().currentHp = std::min(mBotPlayer.getStats().maxHp, mBotPlayer.getStats().currentHp + 1);
+    }
+
     mBotPlayer.reloadSprite(cfg.playerSpritePath);
     mBotPlayer.setSpeed(levelPlayerSpeed);
     mBotPlayer.setDead(false);
@@ -583,8 +621,6 @@ void CGAME::loadLevel(int level) {
     mBotPlayer.setBot(true);
     mBotPlayer.setBaseColor(sf::Color(255, 110, 110));
     mBotPlayer.setPosition(SPAWN_X + 60.f, SPAWN_Y);
-    mBotAI.init(mSelectedBotDifficulty, &mEntities, &mHazardManager, &mPowerUpManager);
-    mBotAI.reset();
   } else {
     mPlayer.setControlScheme(PlayerControlScheme::SINGLE_PLAYER_ALL);
     mPlayer.setPlayerLabel("");
@@ -600,10 +636,15 @@ void CGAME::loadLevel(int level) {
     mHUD.update(mCurrentLevel, mScore, mlevelTime);
   }
 
-  // Spawn obstacle/animal/traffic light — xem EntityManager::spawnFromLevel
+  // Spawn obstacle/animal/traffic light FIRST, then initialize Bot AI
   mEntities.spawnFromLevel(cfg);
   mCoinManager.spawnForLevel(cfg.level);
   mPowerUpManager.spawnForLevel(cfg.level, mIsEndlessMode);
+
+  if (mIsVsBotMode) {
+    mBotAI.init(mSelectedBotDifficulty, &mEntities, &mHazardManager, &mPowerUpManager);
+    mBotAI.reset();
+  }
 }
 
 void CGAME::restartCurrentMode() {
@@ -612,7 +653,10 @@ void CGAME::restartCurrentMode() {
   mSound.resetDucking();
   mSound.stopLevelClear();
   mSound.stopVictory();
+  mSound.stopLevelDeathSounds();
+  mSound.stopHazardSounds();
   mHazardManager.reset();
+  mShowRestartConfirm = false;
   if (mIsTwoPlayerMode || mIsVsBotMode) {
     restartLevel();
   } else if (mIsEndlessMode) {
@@ -627,8 +671,13 @@ void CGAME::reset() {
   mSound.stopMusic();
   mSound.resetDucking();
   mSound.stopLevelClear();
+  mSound.stopVictory();
+  mSound.stopLevelDeathSounds();
+  mSound.stopHazardSounds();
   mHazardManager.reset();
 
+  mInCutscene = false;
+  mCutscene.skip();
   mDeathCutscene.reset();
   mPowerUpManager.reset();
   mEffects.clear();
@@ -640,6 +689,8 @@ void CGAME::reset() {
   mLevelCleared = false;
   mShowLevelClear = false;
   mShowMenuConfirm = false;
+  mShowQuitConfirm = false;
+  mShowRestartConfirm = false;
   mSelectingSaveSlot = false;
   mEnteringSaveName = false;
   mIsEndlessMode = false;
@@ -679,13 +730,23 @@ void CGAME::restartLevel() {
   mSound.stopMusic();
   mSound.resetDucking();
   mSound.stopLevelClear();
+  mSound.stopVictory();
+  mSound.stopLevelDeathSounds();
+  mSound.stopHazardSounds();
   mHazardManager.reset();
 
   mlevelTime = 0.f;
+  mIsDying = false;
+  mLevelCleared = false;
   mShowLevelClear = false;
   mShowMenuConfirm = false;
+  mShowQuitConfirm = false;
+  mShowRestartConfirm = false;
   mSelectingSaveSlot = false;
   mEnteringSaveName = false;
+  mInCutscene = false;
+  mCutscene.skip();
+  mDeathCutscene.reset();
   mPowerUpManager.reset();
   mEffects.clear();
 
@@ -717,8 +778,6 @@ void CGAME::restartLevel() {
     mBotPlayer.setBot(true);
     mBotPlayer.setBaseColor(sf::Color(255, 110, 110));
     mBotPlayer.setPosition(SPAWN_X + 60.f, SPAWN_Y);
-    mBotAI.init(mSelectedBotDifficulty, &mEntities, &mHazardManager, &mPowerUpManager);
-    mBotAI.reset();
   } else {
     mPlayer.setPosition(SPAWN_X, SPAWN_Y);
   }
@@ -750,9 +809,15 @@ void CGAME::startTwoPlayerGame() {
   mPaused = false;
   mShowMenuConfirm = false;
   mShowQuitConfirm = false;
+  mShowRestartConfirm = false;
   mShowLevelClear = false;
   mSelectingSaveSlot = false;
   mEnteringSaveName = false;
+  mInCutscene = false;
+  mCutscene.skip();
+  mDeathCutscene.reset();
+  mIsDying = false;
+  mLevelCleared = false;
 
   mDeadText.setString("ROUND OVER");
   mDeadSubText.setString("A player crashed!");
@@ -766,7 +831,12 @@ void CGAME::startTwoPlayerGame() {
   mSound.stopMusic();
   mSound.resetDucking();
   mSound.stopLevelClear();
+  mSound.stopVictory();
+  mSound.stopLevelDeathSounds();
+  mSound.stopHazardSounds();
   mHazardManager.reset();
+  mPowerUpManager.reset();
+  mEffects.clear();
 
   mPlayer.setControlScheme(PlayerControlScheme::PLAYER_1_WASD);
   mPlayer.setPlayerLabel("P1");
@@ -784,7 +854,6 @@ void CGAME::startTwoPlayerGame() {
   mPlayer2.setBaseColor(sf::Color(255, 170, 255));
   mPlayer2.setPosition(SPAWN_X + 60.f, SPAWN_Y);
 
-  mPowerUpManager.reset();
   loadLevel(1);
   printf(">>> STARTING 2-PLAYER LOCAL VERSUS MODE! <<<\n");
 }
@@ -801,9 +870,15 @@ void CGAME::startVsBotGame(BotDifficulty diff) {
   mPaused = false;
   mShowMenuConfirm = false;
   mShowQuitConfirm = false;
+  mShowRestartConfirm = false;
   mShowLevelClear = false;
   mSelectingSaveSlot = false;
   mEnteringSaveName = false;
+  mInCutscene = false;
+  mCutscene.skip();
+  mDeathCutscene.reset();
+  mIsDying = false;
+  mLevelCleared = false;
 
   mDeadText.setString("GAME OVER");
   mDeadSubText.setString("Failed to cross the street!");
@@ -820,7 +895,12 @@ void CGAME::startVsBotGame(BotDifficulty diff) {
   mSound.stopMusic();
   mSound.resetDucking();
   mSound.stopLevelClear();
+  mSound.stopVictory();
+  mSound.stopLevelDeathSounds();
+  mSound.stopHazardSounds();
   mHazardManager.reset();
+  mPowerUpManager.reset();
+  mEffects.clear();
 
   mPlayer.resetStats();
   mPlayer.setDead(false);
@@ -834,16 +914,14 @@ void CGAME::startVsBotGame(BotDifficulty diff) {
   mBotPlayer.setBaseColor(sf::Color(255, 110, 110));
   mBotPlayer.setPosition(SPAWN_X + 60.f, SPAWN_Y);
 
-  mBotAI.init(diff, &mEntities, &mHazardManager, &mPowerUpManager);
-  mBotAI.reset();
-
-  mPowerUpManager.reset();
   loadLevel(1);
   printf(">>> STARTING VS BOT RACE MODE (Difficulty: %d)! <<<\n", static_cast<int>(diff));
 }
 
 void CGAME::startEndlessGame() {
   mIsEndlessMode = true;
+  mIsVsBotMode = false;
+  mIsTwoPlayerMode = false;
   mEndlessWave = 1;
   mScore = 0;
   mLevelStartScore = 0;
@@ -852,23 +930,34 @@ void CGAME::startEndlessGame() {
   mPaused = false;
   mShowMenuConfirm = false;
   mShowQuitConfirm = false;
+  mShowRestartConfirm = false;
   mShowLevelClear = false;
   mSelectingSaveSlot = false;
   mEnteringSaveName = false;
+  mInCutscene = false;
+  mCutscene.skip();
+  mDeathCutscene.reset();
+  mIsDying = false;
+  mLevelCleared = false;
 
   mHUD.setEndlessMode(true, 1);
+  mHUD.setTwoPlayerMode(false);
   mSound.stopAllEffects();
   mSound.stopMusic();
   mSound.resetDucking();
   mSound.stopLevelClear();
+  mSound.stopVictory();
+  mSound.stopLevelDeathSounds();
+  mSound.stopHazardSounds();
   mHazardManager.reset();
+  mPowerUpManager.reset();
+  mEffects.clear();
 
   mPlayer.resetStats();
   mPlayer.setDead(false);
   mPlayer.setFinish(false);
   mPlayer.setPosition(SPAWN_X, SPAWN_Y);
 
-  mPowerUpManager.reset();
   loadLevel(1);
   printf(">>> STARTING ENDLESS CHRONO MODE! Wave 1 (Prehistoric Era) <<<\n");
 }
@@ -1035,6 +1124,34 @@ void CGAME::handleEvents() {
       continue;
     }
 
+    // Bảng RESTART confirm
+    if (mShowRestartConfirm) {
+      if (event.type == sf::Event::KeyPressed) {
+        if (event.key.code == sf::Keyboard::Escape ||
+            event.key.code == sf::Keyboard::N) {
+          mShowRestartConfirm = false;
+        } else if (event.key.code == sf::Keyboard::Y ||
+                   event.key.code == sf::Keyboard::Enter ||
+                   event.key.code == sf::Keyboard::Space) {
+          mShowRestartConfirm = false;
+          restartCurrentMode();
+        }
+      }
+
+      if (event.type == sf::Event::MouseButtonPressed &&
+          event.mouseButton.button == sf::Mouse::Left) {
+
+        if (mBtnYes.contains(mouse)) {
+          mShowRestartConfirm = false;
+          restartCurrentMode();
+        } else if (mBtnNo.contains(mouse)) {
+          mShowRestartConfirm = false;
+        }
+      }
+
+      continue;
+    }
+
     // Bảng GAME OVER (DEAD)
     if (mPlayer.isDead() && !mShowLevelClear) {
       if (event.type == sf::Event::KeyPressed) {
@@ -1175,6 +1292,9 @@ void CGAME::handleEvents() {
         } else if (event.key.code == sf::Keyboard::M) {
           mPaused = false;
           mShowMenuConfirm = true;
+        } else if (event.key.code == sf::Keyboard::R) {
+          mPaused = false;
+          mShowRestartConfirm = true;
         } else if (event.key.code == sf::Keyboard::Escape) {
           mPaused = false;
           mShowQuitConfirm = true;
@@ -1567,9 +1687,8 @@ void CGAME::handleEvents() {
       } else if (event.key.code == sf::Keyboard::M) {
         mShowMenuConfirm = true;
       } else if (event.key.code == sf::Keyboard::R) {
-        if (mResetCooldownClock.getElapsedTime().asSeconds() >= 0.35f) {
-          mResetCooldownClock.restart();
-          restartCurrentMode();
+        if (!mShowQuitConfirm && !mShowMenuConfirm && !mShowRestartConfirm && !mPlayer.isDead() && !mShowLevelClear) {
+          mShowRestartConfirm = true;
         }
       } else if (event.key.code == sf::Keyboard::P) {
         mPaused = true;
@@ -1624,13 +1743,20 @@ void CGAME::handleEvents() {
 
 void CGAME::handleCollision() {
   if (mPlayer.isDead() || mPlayer.isFinish() || mIsDying ||
-      mDeathCutscene.isActive())
+      mDeathCutscene.isActive() || mLevelCleared || mShowLevelClear)
     return;
 
   sf::FloatRect pb = mPlayer.getHitbox();
 
   auto triggerHit = [&](sf::Vector2f hitPos) {
     if (mPlayer.isInvulnerable()) {
+      return;
+    }
+    if (mPlayer.hasPowerUpShield()) {
+      mPlayer.setPowerUpShield(false);
+      mPlayer.triggerInvulnerability(1.5f);
+      mPlayer.knockback(160.f);
+      mEffects.push_back(std::make_unique<CollisionEffect>(hitPos));
       return;
     }
     int p1Slot = mIsTwoPlayerMode ? ShopData::SLOT_P1_2P : mActiveSlot;
@@ -1681,7 +1807,8 @@ void CGAME::handleCollision() {
   }
 
   // Handle Player 2 collisions in 2-Player mode
-  if (mIsTwoPlayerMode && !mPlayer2.isDead() && !mPlayer2.isInvulnerable()) {
+  if (mIsTwoPlayerMode && !mPlayer2.isDead() && !mPlayer2.isInvulnerable() &&
+      !mPlayer2.isFinish() && !mLevelCleared && !mShowLevelClear) {
     sf::FloatRect p2b = mPlayer2.getHitbox();
     bool p2Hit = false;
     for (const auto &obs : mEntities.obstacles()) {
@@ -1776,15 +1903,14 @@ void CGAME::handleCollision() {
 }
 
 void CGAME::checkFinish() {
-  if (mPlayer.isDead() && !mIsTwoPlayerMode)
-    return;
-  if (mPlayer.isFinish() || mLevelCleared)
+  if (mPlayer.isFinish() || mLevelCleared || mShowLevelClear)
     return;
 
   // 2-PLAYER Mode Outcomes
   if (mIsTwoPlayerMode) {
     // 1. Both crashed -> Mutual Crash / Draw
-    if (mPlayer.isDead() && mPlayer2.isDead() && !mShowLevelClear) {
+    if (mPlayer.isDead() && mPlayer2.isDead()) {
+      mLevelCleared = true;
       mSound.stopMusic();
       mSound.stopAllEffects();
       mSound.resetDucking();
@@ -1808,7 +1934,7 @@ void CGAME::checkFinish() {
     }
 
     // 2. P1 died, P2 alive -> P2 wins round
-    if (mPlayer.isDead() && !mPlayer2.isDead() && !mLevelCleared) {
+    if (mPlayer.isDead() && !mPlayer2.isDead()) {
       mLevelCleared = true;
       mPlayer2.setFinish(true);
       mP2Wins++;
@@ -1828,7 +1954,7 @@ void CGAME::checkFinish() {
     }
 
     // 3. P2 died, P1 alive -> P1 wins round
-    if (mPlayer2.isDead() && !mPlayer.isDead() && !mLevelCleared) {
+    if (mPlayer2.isDead() && !mPlayer.isDead()) {
       mLevelCleared = true;
       mPlayer.setFinish(true);
       mP1Wins++;
@@ -1848,7 +1974,7 @@ void CGAME::checkFinish() {
     }
 
     // 4. P1 reached elevator first
-    if (mPlayer.getPosition().y < 80.f && !mPlayer.isFinish() && !mLevelCleared) {
+    if (mPlayer.getPosition().y < 80.f && !mPlayer.isFinish()) {
       mLevelCleared = true;
       mPlayer.setFinish(true);
       mP1Wins++;
@@ -1868,7 +1994,7 @@ void CGAME::checkFinish() {
     }
 
     // 5. P2 reached elevator first
-    if (mPlayer2.getPosition().y < 80.f && !mPlayer2.isFinish() && !mLevelCleared) {
+    if (mPlayer2.getPosition().y < 80.f && !mPlayer2.isFinish()) {
       mLevelCleared = true;
       mPlayer2.setFinish(true);
       mP2Wins++;
@@ -1892,7 +2018,7 @@ void CGAME::checkFinish() {
   // VS BOT Mode Race Outcomes
   if (mIsVsBotMode) {
     // If bot died / crashed from 3 hits, Player automatically wins the race!
-    if (mBotPlayer.isDead() && !mLevelCleared) {
+    if (mBotPlayer.isDead()) {
       mLevelCleared = true;
       mPlayer.setFinish(true);
       mSound.stopMusic();
@@ -1915,6 +2041,7 @@ void CGAME::checkFinish() {
 
     if (mBotPlayer.getPosition().y < 80.f && !mBotPlayer.isFinish()) {
       mBotPlayer.setFinish(true);
+      mPlayer.setDead(true);
       mSound.stopMusic();
       mSound.stopAllEffects();
       mSound.resetDucking();
@@ -1933,7 +2060,31 @@ void CGAME::checkFinish() {
       mDeadSubText.setOrigin(dsb.left + dsb.width / 2.f, dsb.top + dsb.height / 2.f);
       mDeadSubText.setPosition(Win_W / 2.f, Win_H / 2.f - 55.f);
 
-      mPlayer.setDead(true);
+      sf::FloatRect dsc = mDeadScore.getLocalBounds();
+      mDeadScore.setOrigin(dsc.left + dsc.width / 2.f, dsc.top + dsc.height / 2.f);
+      mDeadScore.setPosition(Win_W / 2.f, Win_H / 2.f - 20.f);
+      return;
+    }
+
+    if (mPlayer.isDead()) {
+      mLevelCleared = true;
+      mSound.stopMusic();
+      mSound.stopAllEffects();
+      mSound.resetDucking();
+      mHazardManager.reset();
+      mSound.playDead();
+
+      mDeadText.setString("BOT WINS!");
+      mDeadSubText.setString("The AI beat you across the street!\nYou must retry.");
+      mDeadScore.setString("BOT DIFFICULTY: " + std::string(mSelectedBotDifficulty == BotDifficulty::EASY ? "EASY" : (mSelectedBotDifficulty == BotDifficulty::NORMAL ? "NORMAL" : "HARD")));
+
+      sf::FloatRect dtb = mDeadText.getLocalBounds();
+      mDeadText.setOrigin(dtb.left + dtb.width / 2.f, dtb.top + dtb.height / 2.f);
+      mDeadText.setPosition(Win_W / 2.f, Win_H / 2.f - 105.f);
+
+      sf::FloatRect dsb = mDeadSubText.getLocalBounds();
+      mDeadSubText.setOrigin(dsb.left + dsb.width / 2.f, dsb.top + dsb.height / 2.f);
+      mDeadSubText.setPosition(Win_W / 2.f, Win_H / 2.f - 55.f);
       return;
     }
 
@@ -2089,21 +2240,29 @@ void CGAME::update(float dt) {
 
 
 
-  if (mShowQuitConfirm || mShowMenuConfirm) {
+  if (mShowQuitConfirm || mShowMenuConfirm || mShowRestartConfirm) {
     mBtnYes.update(mousePos, dt);
     mBtnNo.update(mousePos, dt);
     return;
   }
 
   if (mPlayer.isDead() && !mShowLevelClear) {
-    mBtnDeadRestart.update(mousePos, dt);
-    mBtnDeadMenu.update(mousePos, dt);
-    return;
-  }
-
-  if (mPlayer.isFinish() && mCurrentLevel == Max_Level && !mShowLevelClear) {
-    mBtnVictoryPlayAgain.update(mousePos, dt);
-    mBtnVictoryMenu.update(mousePos, dt);
+    if (mIsVsBotMode || (mIsTwoPlayerMode && mPlayer2.isDead())) {
+      mBtnDeadRestart.sprite.setPosition(Win_W / 2.f - 110.f, Win_H / 2.f + 65.f);
+      mBtnDeadRestart.label.setPosition(Win_W / 2.f - 110.f, Win_H / 2.f + 65.f);
+      mBtnDeadMenu.sprite.setPosition(Win_W / 2.f + 110.f, Win_H / 2.f + 65.f);
+      mBtnDeadMenu.label.setPosition(Win_W / 2.f + 110.f, Win_H / 2.f + 65.f);
+      mBtnDeadRestart.update(mousePos, dt);
+      mBtnDeadMenu.update(mousePos, dt);
+    } else if (!mIsTwoPlayerMode) {
+      mBtnDeadRestart.sprite.setPosition(Win_W / 2.f - 180.f, Win_H / 2.f + 85.f);
+      mBtnDeadRestart.label.setPosition(Win_W / 2.f - 180.f, Win_H / 2.f + 85.f);
+      mBtnDeadMenu.sprite.setPosition(Win_W / 2.f + 180.f, Win_H / 2.f + 85.f);
+      mBtnDeadMenu.label.setPosition(Win_W / 2.f + 180.f, Win_H / 2.f + 85.f);
+      mBtnDeadRevive.update(mousePos, dt);
+      mBtnDeadRestart.update(mousePos, dt);
+      mBtnDeadMenu.update(mousePos, dt);
+    }
     return;
   }
 
@@ -2174,9 +2333,10 @@ void CGAME::update(float dt) {
     return;
   }
 
-  // Cập nhật gameplay khi không pause, không cutscene, không chết
+  // Cập nhật gameplay khi không pause, không cutscene, không chết, không qua màn
   if (!mPaused && !mShowLevelClear && !mInCutscene && !mIsDying &&
-      !mDeathCutscene.isActive()) {
+      !mDeathCutscene.isActive() && !mLevelCleared && !mPlayer.isFinish() &&
+      (!mPlayer.isDead() || (mIsTwoPlayerMode && !mPlayer2.isDead()))) {
     if (!mPlayer.getStats().timeFreezeActive) {
       mlevelTime += dt;
     }
@@ -2680,7 +2840,7 @@ void CGAME::render() {
     mWindow.draw(mSaveInput);
   }
 
-  if (mShowQuitConfirm || mShowMenuConfirm || mPaused || mSelectingSaveSlot || mShowLevelClear) {
+  if (mShowQuitConfirm || mShowMenuConfirm || mShowRestartConfirm || mPaused || mSelectingSaveSlot || mShowLevelClear) {
     sf::RectangleShape modalBackdrop(
         sf::Vector2f(static_cast<float>(Win_W), static_cast<float>(Win_H)));
     modalBackdrop.setFillColor(sf::Color(0, 0, 0, 160));
@@ -2705,6 +2865,18 @@ void CGAME::render() {
       mWindow.draw(mQuitBox);
 
     mWindow.draw(mMenuConfirmTitle);
+    mBtnYes.draw(mWindow);
+    mBtnNo.draw(mWindow);
+  }
+
+  if (mShowRestartConfirm) {
+    if (mSpritePopupQuitConfirm.getTexture())
+      mWindow.draw(mSpritePopupQuitConfirm);
+    else
+      mWindow.draw(mQuitBox);
+
+    mWindow.draw(mRestartConfirmTitle);
+    mWindow.draw(mRestartConfirmSubTitle);
     mBtnYes.draw(mWindow);
     mBtnNo.draw(mWindow);
   }

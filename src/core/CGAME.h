@@ -139,6 +139,11 @@ class CGAME {
   bool mShowMenuConfirm = false;
   sf::Text mMenuConfirmTitle;
 
+  // Bảng Restart Confirm
+  bool mShowRestartConfirm = false;
+  sf::Text mRestartConfirmTitle;
+  sf::Text mRestartConfirmSubTitle;
+
   // Bảng Level Clear
   bool mShowLevelClear = false;
   sf::RectangleShape mLevelClearBox;
@@ -160,7 +165,6 @@ class CGAME {
   sf::Text mResumeText;
   sf::Text mMenuFromPauseText;
   sf::Text mQuitFromPauseText;
-  sf::Text mPauseSettingsTitle;
   float mPauseMusicVol = 50.f;
   float mPauseSFXVol = 50.f;
   sf::RectangleShape mPauseMusicTrack;

@@ -33,9 +33,9 @@ Menu::Menu() {
                                   true   // Loop
       );
 
-  // Main Buttons (Clean 5-button layout)
-  float btnY = 225.f;
-  float gap = 62.f;
+  // Main Buttons (Clean 6-button layout with Credits)
+  float btnY = 210.f;
+  float gap = 55.f;
   setupButton(mBtnNew, "assets/ui/menu/btn_newgame.png", "CAMPAIGN",
               Win_W / 2.f, btnY);
   setupButton(mBtnChallenges, "assets/ui/menu/btn_newgame.png", "CHALLENGES",
@@ -44,8 +44,10 @@ Menu::Menu() {
               Win_W / 2.f, btnY + gap * 2);
   setupButton(mBtnSetting, "assets/ui/menu/btn_setting.png", "SETTINGS",
               Win_W / 2.f, btnY + gap * 3);
+  setupButton(mBtnCredits, "assets/ui/menu/btn_setting.png", "CREDITS",
+              Win_W / 2.f, btnY + gap * 4);
   setupButton(mBtnQuit, "assets/ui/menu/btn_quit.png", "QUIT", Win_W / 2.f,
-              btnY + gap * 4);
+              btnY + gap * 5);
 
   // Icon ? button (Info/Help) ở góc trên bên phải — dùng texture gỗ chuẩn
   setupButton(mBtnInfo, "assets/ui/menu/btn_info.png", "?", Win_W - 65.f, 65.f,
@@ -62,6 +64,7 @@ Menu::Menu() {
   setupShopMenu();
   setupChallengeMenu();
   setupDifficultyMenu();
+  setupCreditsMenu();
 
   // Nhạc nền
   if (!mMusic.openFromFile("assets/sounds/menu/menu_music.ogg"))
@@ -267,6 +270,10 @@ void Menu::handleEvent(const sf::Event &event, sf::RenderWindow &window,
     handleDifficultyEvent(event, window, result);
     return;
   }
+  if (mScreen == MenuScreen::CREDITS) {
+    handleCreditsEvent(event, window, result);
+    return;
+  }
 
   if (event.type == sf::Event::MouseButtonPressed &&
       event.mouseButton.button == sf::Mouse::Left) {
@@ -290,6 +297,11 @@ void Menu::handleEvent(const sf::Event &event, sf::RenderWindow &window,
       result = MenuResult::QUIT;
     } else if (mBtnSetting.sprite.getGlobalBounds().contains(mouse)) {
       mScreen = MenuScreen::SETTINGS;
+    } else if (mBtnCredits.sprite.getGlobalBounds().contains(mouse)) {
+      mCreditsScrollY = 0.f;
+      mCreditsPaused = false;
+      mCreditsFastSpeed = false;
+      mScreen = MenuScreen::CREDITS;
     } else if (mBtnInfo.sprite.getGlobalBounds().contains(mouse)) {
       mScreen = MenuScreen::INFO;
     } else if (mBtnShop.sprite.getGlobalBounds().contains(mouse)) {
@@ -415,12 +427,18 @@ void Menu::update(float dt, sf::RenderWindow &window) {
     return;
   }
 
+  if (mScreen == MenuScreen::CREDITS) {
+    updateCredits(dt, mouse);
+    return;
+  }
+
   if (mTitleAnim)
     mTitleAnim->update(dt);
   updateButton(mBtnNew, mouse, dt);
   updateButton(mBtnChallenges, mouse, dt);
   updateButton(mBtnLoad, mouse, dt);
   updateButton(mBtnSetting, mouse, dt);
+  updateButton(mBtnCredits, mouse, dt);
   updateButton(mBtnQuit, mouse, dt);
   updateButton(mBtnInfo, mouse, dt);
   updateButton(mBtnShop, mouse, dt);
@@ -507,6 +525,10 @@ void Menu::draw(sf::RenderWindow &window) {
     drawDifficultyMenu(window);
     return;
   }
+  if (mScreen == MenuScreen::CREDITS) {
+    drawCreditsMenu(window);
+    return;
+  }
   window.draw(mBgSprite);
   if (mTitleAnim)
     window.draw(mTitleSprite);
@@ -516,6 +538,7 @@ void Menu::draw(sf::RenderWindow &window) {
   drawButton(window, mBtnChallenges);
   drawButton(window, mBtnLoad);
   drawButton(window, mBtnSetting);
+  drawButton(window, mBtnCredits);
   drawButton(window, mBtnQuit);
   drawButton(window, mBtnInfo);
   drawButton(window, mBtnShop);
@@ -1325,18 +1348,18 @@ void Menu::setupChallengeMenu() {
   mChallengeTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
   mChallengeTitle.setPosition(Win_W / 2.f, 215.f);
 
-  // 3 Challenge Buttons (Clean, evenly spaced layout)
-  float startY = 275.f;
-  float cardGap = 72.f;
+  // 3 Challenge Buttons (Clean, sci-fi sleek frames matching Load Game & Back button)
+  float startY = 280.f;
+  float cardGap = 75.f;
 
-  setupButton(mBtnChallenge2P, "assets/ui/menu/btn_newgame.png", "2 PLAYERS VERSUS",
-              Win_W / 2.f, startY, "", 23);
-  setupButton(mBtnChallengeBot, "assets/ui/menu/btn_newgame.png", "VS BOT AI",
-              Win_W / 2.f, startY + cardGap, "", 23);
-  setupButton(mBtnChallengeEndless, "assets/ui/menu/btn_newgame.png", "ENDLESS MODE",
-              Win_W / 2.f, startY + cardGap * 2, "", 23);
+  setupButton(mBtnChallenge2P, "assets/ui/menu/slot_frame.png", "2 PLAYERS VERSUS",
+              Win_W / 2.f, startY, "assets/ui/menu/slot_frame_hover.png", 22);
+  setupButton(mBtnChallengeBot, "assets/ui/menu/slot_frame.png", "VS BOT AI",
+              Win_W / 2.f, startY + cardGap, "assets/ui/menu/slot_frame_hover.png", 22);
+  setupButton(mBtnChallengeEndless, "assets/ui/menu/slot_frame.png", "ENDLESS MODE",
+              Win_W / 2.f, startY + cardGap * 2, "assets/ui/menu/slot_frame_hover.png", 22);
   setupButton(mBtnChallengeBack, "assets/ui/menu/btn_back.png", "BACK",
-              Win_W / 2.f, 505.f, "assets/ui/menu/btn_back_hover.png", 22);
+              Win_W / 2.f, 510.f, "assets/ui/menu/btn_back_hover.png", 22);
 }
 
 void Menu::drawChallengeMenu(sf::RenderWindow &window) {
@@ -1491,6 +1514,528 @@ void Menu::handleDifficultyEvent(const sf::Event &event,
   if (event.type == sf::Event::KeyPressed) {
     if (event.key.code == sf::Keyboard::Escape) {
       mScreen = MenuScreen::CHALLENGES;
+    }
+  }
+}
+
+// ============================================================================
+// CINEMATIC CREDITS MENU IMPLEMENTATION (MOVIE ROLL)
+// ============================================================================
+void Menu::setupCreditsMenu() {
+  mCreditItems.clear();
+
+  // Load avatar textures
+  std::string avatarPaths[4] = {
+    "assets/credits/pgh.png",
+    "assets/credits/nvh.png",
+    "assets/credits/pdq.png",
+    "assets/credits/nht.png"
+  };
+  std::string fallbackPaths[4] = {
+    "assets/pgh.png",
+    "assets/nvh.png",
+    "assets/pdq.png",
+    "assets/nht.png"
+  };
+
+  for (int i = 0; i < 4; ++i) {
+    if (!mCreditsAvatarTextures[i].loadFromFile(avatarPaths[i])) {
+      mCreditsAvatarTextures[i].loadFromFile(fallbackPaths[i]);
+    }
+    mCreditsAvatarTextures[i].setSmooth(true);
+    mCreditsAvatarSprites[i].setTexture(mCreditsAvatarTextures[i]);
+    sf::Vector2u sz = mCreditsAvatarTextures[i].getSize();
+    if (sz.x > 0 && sz.y > 0) {
+      mCreditsAvatarSprites[i].setScale(120.f / sz.x, 120.f / sz.y);
+    }
+  }
+
+  auto addSpacer = [&](float h) {
+    CreditItem it;
+    it.type = CreditItem::SPACER;
+    it.height = h;
+    mCreditItems.push_back(it);
+  };
+  auto addDivider = [&]() {
+    CreditItem it;
+    it.type = CreditItem::DIVIDER;
+    it.line1 = "------------------------------------------";
+    it.height = 36.f;
+    mCreditItems.push_back(it);
+  };
+  auto addMainTitle = [&](const std::string &text) {
+    CreditItem it;
+    it.type = CreditItem::MAIN_TITLE;
+    it.line1 = text;
+    it.height = 50.f;
+    mCreditItems.push_back(it);
+  };
+  auto addSubTitle = [&](const std::string &text) {
+    CreditItem it;
+    it.type = CreditItem::SUB_TITLE;
+    it.line1 = text;
+    it.height = 32.f;
+    mCreditItems.push_back(it);
+  };
+  auto addSection = [&](const std::string &text) {
+    CreditItem it;
+    it.type = CreditItem::SECTION_TITLE;
+    it.line1 = text;
+    it.height = 46.f;
+    mCreditItems.push_back(it);
+  };
+  auto addSubHeader = [&](const std::string &text) {
+    CreditItem it;
+    it.type = CreditItem::SUB_HEADER;
+    it.line1 = text;
+    it.height = 28.f;
+    mCreditItems.push_back(it);
+  };
+  auto addText = [&](const std::string &text) {
+    CreditItem it;
+    it.type = CreditItem::TEXT_LINE;
+    it.line1 = text;
+    it.height = 26.f;
+    mCreditItems.push_back(it);
+  };
+  auto addHighlight = [&](const std::string &text) {
+    CreditItem it;
+    it.type = CreditItem::HIGHLIGHT_LINE;
+    it.line1 = text;
+    it.height = 27.f;
+    mCreditItems.push_back(it);
+  };
+  auto addMemberCard = [&](int idx, const std::string &name,
+                          const std::string &role, const std::string &modules,
+                          const std::string &desc) {
+    CreditItem it;
+    it.type = CreditItem::MEMBER_CARD;
+    it.memberIndex = idx;
+    it.line1 = name;
+    it.line2 = role;
+    it.line3 = modules;
+    it.line4 = desc;
+    it.height = 170.f;
+    mCreditItems.push_back(it);
+  };
+
+  // 1. OPENING / INTRO
+  addSpacer(120.f);
+  addMainTitle("CROSSING STREET: TIME ODYSSEY");
+  addSubTitle("A CINEMATIC TIME-CROSSING ARCADE EXPERIENCE");
+  addDivider();
+  addSubHeader("HO CHI MINH CITY UNIVERSITY OF SCIENCE (HCMUS)");
+  addText("Faculty of Information Technology  |  Object-Oriented Programming (OOP)");
+  addHighlight("Core Engine: C++17  |  Framework: SFML 2.6.2  |  Build: CMake 3.16+");
+  addSpacer(45.f);
+
+  // 2. EXECUTIVE DEVELOPMENT TEAM
+  addSection("[ EXECUTIVE DEVELOPMENT TEAM ]");
+  addSubTitle("Game Architects & Core Subsystem Engineers");
+  addSpacer(25.f);
+
+  addMemberCard(0,
+    "PHAN GIA HUY",
+    "LEAD ARCHITECT & AI ENGINEER",
+    "Core Modules: CGAME  |  BotAI (Spatio-Temporal A*)  |  SaveData  |  LevelConfig",
+    "Engine architecture, multi-state game loop, 16.6Hz Bot pathfinding,\ncinematic elevator transitions, save serialization & memory management.");
+  addSpacer(15.f);
+
+  addMemberCard(1,
+    "NGUYEN VAN HAI",
+    "AUDIO & ENTITY SIMULATION ENGINEER",
+    "Core Modules: CANIMAL Base & Derived  |  SoundManager  |  Dynamic Audio Ducking",
+    "Adaptive sound engine with real-time ducking, animal AI behaviors,\nflying projectiles & ambient historical era soundscapes.");
+  addSpacer(15.f);
+
+  addMemberCard(2,
+    "PHAN DINH QUOC",
+    "UI/UX DIRECTOR & SYSTEMS DESIGNER",
+    "Core Modules: Menu Systems  |  HUD Telemetry  |  ShopData  |  Item Shop  |  High Scores",
+    "Multi-screen stateful menu navigation, real-time dual telemetry HUD,\npersistent multi-slot save system, shop economy & modal dialogs.");
+  addSpacer(15.f);
+
+  addMemberCard(3,
+    "NGUYEN HOANG NHAT",
+    "WORLD ARTIST & GAMEPLAY PROGRAMMER",
+    "Core Modules: CPEOPLE  |  5 Era Obstacles & Traffic  |  Environmental Hazards  |  VFX",
+    "Player physics & active skill system, era-specific obstacle simulation (20+ entities),\ndynamic hazard mechanics, particle VFX & animated death cutscenes.");
+  addSpacer(35.f);
+  addDivider();
+
+  // 3. THE 5 HISTORICAL ERAS
+  addSection("[ THE 5 HISTORICAL ERAS & WORLDS ]");
+  addSubTitle("A Relentless Journey Across Space and Time");
+  addSpacer(20.f);
+
+  addHighlight("ERA 1: PREHISTORIC JUNGLE");
+  addText("Ground: Mighty Dinosaurs, Ancient Mammoths   |   Air: Pterodactyls");
+  addText("Catastrophe Hazard: Stampede Surge   |   Death VFX: Swamp Monster Chomp");
+  addSpacer(16.f);
+
+  addHighlight("ERA 2: ANCIENT EGYPTIAN EMPIRE");
+  addText("Ground: Desert Camels, Sacred Sphinxes   |   Air: Horus Eagles");
+  addText("Catastrophe Hazard: Sandstorm Wind Drift   |   Death VFX: Quicksand Sink");
+  addSpacer(16.f);
+
+  addHighlight("ERA 3: MEDIEVAL KINGDOM");
+  addText("Ground: Royal Warhorses, Timber Logs, Rickshaws   |   Air: Volley Arrows");
+  addText("Catastrophe Hazard: Flaming Arrow Rain   |   Death VFX: Leaf Whirlwind");
+  addSpacer(16.f);
+
+  addHighlight("ERA 4: MODERN METROPOLIS");
+  addText("Ground: Supercars, Transit Buses, Motorbikes   |   Air: Jetliners & Missiles");
+  addText("Catastrophe Hazard: Rush Hour & Lightning   |   Death VFX: Smoke Dissolve");
+  addSpacer(16.f);
+
+  addHighlight("ERA 5: CYBERNETIC FUTURE");
+  addText("Ground: Hyperloop Trains, Hovercrafts   |   Air: Alien UFOs & Combat Drones");
+  addText("Catastrophe Hazard: Singularity Black Hole & Lasers   |   Death VFX: Plasma Disintegration");
+  addSpacer(35.f);
+  addDivider();
+
+  // 4. GAME MODES & ADVANCED MECHANICS
+  addSection("[ GAME MODES & ADVANCED MECHANICS ]");
+  addSubTitle("Diverse Gameplay Designed for Mastery & Competition");
+  addSpacer(20.f);
+
+  addHighlight("1. STORY CAMPAIGN");
+  addText("5 historical eras, time trials, coin collection & era elevator cinematics.");
+  addSpacer(12.f);
+
+  addHighlight("2. LOCAL 2-PLAYER VERSUS (1v1)");
+  addText("Shared keyboard split controls (WASD vs Arrows), independent HP & round win counters.");
+  addSpacer(12.f);
+
+  addHighlight("3. VS BOT AI (SPATIO-TEMPORAL A*)");
+  addText("Adaptive lookahead algorithm with 3 difficulty tiers (Easy, Normal, Hard).");
+  addSpacer(12.f);
+
+  addHighlight("4. ENDLESS CHRONO MODE");
+  addText("Infinite wave progression across eras with escalating speed & multipliers.");
+  addSpacer(12.f);
+
+  addHighlight("5. ACTIVE SKILLS & IN-LANE POWER-UPS");
+  addText("Sprint (Shift), Speed Surge (E), Magnet Radar (Q), Time Freeze Clock (T).");
+  addText("In-Lane Buffs: Magnet Orb, Time Stop, Speed Flame, Bubble Shield, 2X Multiplier.");
+  addSpacer(35.f);
+  addDivider();
+
+  // 5. OOP DESIGN PATTERNS
+  addSection("[ OBJECT-ORIENTED ARCHITECTURE ]");
+  addSubTitle("Rigorous Software Engineering Principles");
+  addSpacer(20.f);
+
+  addHighlight("ENCAPSULATION");
+  addText("Strict internal state encapsulation across entities, audio engine & hazards.");
+  addSpacer(12.f);
+
+  addHighlight("INHERITANCE");
+  addText("Hierarchical base classes CANIMAL, CVEHICLE, CPEOPLE powering 20+ entities.");
+  addSpacer(12.f);
+
+  addHighlight("POLYMORPHISM");
+  addText("Dynamic virtual dispatch for Draw(), Move(), update() and sprite animations.");
+  addSpacer(12.f);
+
+  addHighlight("ABSTRACTION & DECOUPLING");
+  addText("Modular subsystem managers (EntityManager, HazardManager, PowerUpManager, CoinManager).");
+  addSpacer(12.f);
+
+  addHighlight("FACTORY METHOD PATTERN");
+  addText("Dynamic era-specific object instantiation driven by LevelConfig parameters.");
+  addSpacer(35.f);
+  addDivider();
+
+  // 6. SPECIAL THANKS & CLOSING
+  addSection("[ SPECIAL THANKS & ACKNOWLEDGMENTS ]");
+  addSpacer(15.f);
+  addText("Faculty of Information Technology - HCMUS Instructors & Teaching Assistants");
+  addText("SFML (Simple and Fast Multimedia Library) Development Community");
+  addText("Retro Pixel Artists & Sound Creators");
+  addSpacer(25.f);
+  addHighlight("And YOU - for playing and exploring the timelines!");
+  addSpacer(60.f);
+
+  addMainTitle("THE END");
+  addSubTitle("CROSSING STREET: TIME ODYSSEY - HCMUS 2026");
+  addSpacer(180.f);
+
+  // Compute total height
+  mCreditsTotalHeight = 0.f;
+  for (const auto &it : mCreditItems) {
+    mCreditsTotalHeight += it.height;
+  }
+
+  // Setup HUD buttons (Clean sci-fi style matching btn_back)
+  setupButton(mBtnBackCredits, "assets/ui/menu/btn_back.png", "BACK [ESC]",
+              110.f, 32.f, "assets/ui/menu/btn_back_hover.png", 17);
+
+  setupButton(mBtnCreditsPause, "assets/ui/menu/btn_back.png", "PAUSE [P]",
+              Win_W / 2.f - 110.f, Win_H - 32.f, "assets/ui/menu/btn_back_hover.png", 16);
+
+  setupButton(mBtnCreditsSpeed, "assets/ui/menu/btn_back.png", "SPEED: 1X",
+              Win_W / 2.f + 110.f, Win_H - 32.f, "assets/ui/menu/btn_back_hover.png", 16);
+
+  setupButton(mBtnCreditsRestart, "assets/ui/menu/btn_back.png", "RESTART [R]",
+              Win_W - 110.f, 32.f, "assets/ui/menu/btn_back_hover.png", 16);
+}
+
+void Menu::updateCredits(float dt, sf::Vector2f mousePos) {
+  updateButton(mBtnBackCredits, mousePos, dt);
+  updateButton(mBtnCreditsPause, mousePos, dt);
+  updateButton(mBtnCreditsSpeed, mousePos, dt);
+  updateButton(mBtnCreditsRestart, mousePos, dt);
+
+  // Update button labels dynamically
+  mBtnCreditsPause.label.setString(mCreditsPaused ? "RESUME [P]" : "PAUSE [P]");
+  sf::FloatRect pb = mBtnCreditsPause.label.getLocalBounds();
+  mBtnCreditsPause.label.setOrigin(pb.left + pb.width / 2.f, pb.top + pb.height / 2.f);
+  mBtnCreditsPause.label.setPosition(mBtnCreditsPause.sprite.getPosition());
+
+  mBtnCreditsSpeed.label.setString(mCreditsFastSpeed ? "SPEED: 3X" : "SPEED: 1X");
+  sf::FloatRect sb = mBtnCreditsSpeed.label.getLocalBounds();
+  mBtnCreditsSpeed.label.setOrigin(sb.left + sb.width / 2.f, sb.top + sb.height / 2.f);
+  mBtnCreditsSpeed.label.setPosition(mBtnCreditsSpeed.sprite.getPosition());
+
+  if (!mCreditsPaused) {
+    float speed = mCreditsFastSpeed ? (mCreditsScrollSpeed * 3.2f) : mCreditsScrollSpeed;
+    mCreditsScrollY += speed * dt;
+    if (mCreditsScrollY > mCreditsTotalHeight) {
+      mCreditsScrollY = mCreditsTotalHeight;
+    }
+  }
+}
+
+void Menu::drawCreditsMenu(sf::RenderWindow &window) {
+  window.draw(mBgSprite);
+
+  // Deep cinematic backdrop
+  sf::RectangleShape backdrop(sf::Vector2f(static_cast<float>(Win_W), static_cast<float>(Win_H)));
+  backdrop.setFillColor(sf::Color(6, 10, 20, 230));
+  window.draw(backdrop);
+
+  float curY = 0.f;
+  const float scrollY = mCreditsScrollY;
+
+  for (const auto &item : mCreditItems) {
+    float drawY = curY - scrollY;
+    curY += item.height;
+
+    // View frustum culling: only draw elements currently on screen
+    if (drawY + item.height < -50.f || drawY > Win_H + 50.f) {
+      continue;
+    }
+
+    if (item.type == CreditItem::SPACER) {
+      continue;
+    }
+
+    if (item.type == CreditItem::MEMBER_CARD && item.memberIndex >= 0 && item.memberIndex < 4) {
+      int idx = item.memberIndex;
+      sf::Vector2u texSize = mCreditsAvatarTextures[idx].getSize();
+
+      const float cardW = 780.f;
+      const float cardH = 155.f;
+      const float cardX = (Win_W - cardW) / 2.f;
+
+      // Draw Member Showcase Box
+      sf::RectangleShape cardBox(sf::Vector2f(cardW, cardH));
+      cardBox.setPosition(cardX, drawY);
+      cardBox.setFillColor(sf::Color(16, 22, 38, 230));
+      cardBox.setOutlineColor(sf::Color(0, 180, 230, 180));
+      cardBox.setOutlineThickness(2.f);
+      window.draw(cardBox);
+
+      // Compute avatar dimensions dynamically to preserve exact aspect ratio without distortion
+      float maxAvatarH = cardH - 24.f;
+      float aspect = (texSize.y > 0) ? (static_cast<float>(texSize.x) / static_cast<float>(texSize.y)) : 0.75f;
+      float avatarH = maxAvatarH;
+      float avatarW = avatarH * aspect;
+      if (avatarW > 120.f) {
+        avatarW = 120.f;
+        avatarH = avatarW / aspect;
+      }
+
+      float avatarX = cardX + 16.f;
+      float avatarY = drawY + (cardH - avatarH) / 2.f;
+
+      if (texSize.x > 0 && texSize.y > 0) {
+        mCreditsAvatarSprites[idx].setScale(avatarW / texSize.x, avatarH / texSize.y);
+      }
+      mCreditsAvatarSprites[idx].setPosition(avatarX, avatarY);
+      window.draw(mCreditsAvatarSprites[idx]);
+
+      // Avatar frame outline fitting exact avatar dimensions
+      sf::RectangleShape avatarFrame(sf::Vector2f(avatarW, avatarH));
+      avatarFrame.setPosition(avatarX, avatarY);
+      avatarFrame.setFillColor(sf::Color::Transparent);
+      avatarFrame.setOutlineColor(sf::Color(255, 215, 0, 220));
+      avatarFrame.setOutlineThickness(2.f);
+      window.draw(avatarFrame);
+
+      // Text block on the right
+      float textX = avatarX + avatarW + 18.f;
+
+      // Name
+      sf::Text tName(item.line1, mFont, 21);
+      tName.setFillColor(sf::Color(255, 225, 100));
+      tName.setOutlineColor(sf::Color::Black);
+      tName.setOutlineThickness(1.8f);
+      tName.setPosition(textX, drawY + 14.f);
+      window.draw(tName);
+
+      // Role
+      sf::Text tRole(item.line2, mFont, 14);
+      tRole.setFillColor(sf::Color(0, 230, 255));
+      tRole.setOutlineColor(sf::Color::Black);
+      tRole.setOutlineThickness(1.2f);
+      tRole.setPosition(textX, drawY + 44.f);
+      window.draw(tRole);
+
+      // Modules
+      sf::Text tMod(item.line3, mFont, 13);
+      tMod.setFillColor(sf::Color(255, 215, 0, 220));
+      tMod.setOutlineColor(sf::Color::Black);
+      tMod.setOutlineThickness(1.f);
+      tMod.setPosition(textX, drawY + 68.f);
+      window.draw(tMod);
+
+      // Desc
+      sf::Text tDesc(item.line4, mFont, 12);
+      tDesc.setFillColor(sf::Color(220, 225, 235));
+      tDesc.setOutlineColor(sf::Color::Black);
+      tDesc.setOutlineThickness(1.f);
+      tDesc.setLineSpacing(1.2f);
+      tDesc.setPosition(textX, drawY + 92.f);
+      window.draw(tDesc);
+      continue;
+    }
+
+    // Centered Typography Elements
+    sf::Text txt;
+    txt.setFont(mFont);
+    txt.setString(item.line1);
+
+    if (item.type == CreditItem::MAIN_TITLE) {
+      txt.setCharacterSize(32);
+      txt.setFillColor(sf::Color(255, 215, 0));
+      txt.setOutlineColor(sf::Color::Black);
+      txt.setOutlineThickness(2.5f);
+    } else if (item.type == CreditItem::SECTION_TITLE) {
+      txt.setCharacterSize(22);
+      txt.setFillColor(sf::Color(255, 220, 90));
+      txt.setOutlineColor(sf::Color::Black);
+      txt.setOutlineThickness(2.f);
+    } else if (item.type == CreditItem::SUB_TITLE) {
+      txt.setCharacterSize(16);
+      txt.setFillColor(sf::Color(0, 220, 255));
+      txt.setOutlineColor(sf::Color::Black);
+      txt.setOutlineThickness(1.5f);
+    } else if (item.type == CreditItem::SUB_HEADER) {
+      txt.setCharacterSize(17);
+      txt.setFillColor(sf::Color(255, 255, 255));
+      txt.setOutlineColor(sf::Color::Black);
+      txt.setOutlineThickness(1.5f);
+    } else if (item.type == CreditItem::HIGHLIGHT_LINE) {
+      txt.setCharacterSize(14);
+      txt.setFillColor(sf::Color(255, 205, 70));
+      txt.setOutlineColor(sf::Color::Black);
+      txt.setOutlineThickness(1.2f);
+    } else if (item.type == CreditItem::DIVIDER) {
+      txt.setCharacterSize(15);
+      txt.setFillColor(sf::Color(0, 190, 230, 180));
+      txt.setOutlineColor(sf::Color::Black);
+      txt.setOutlineThickness(1.f);
+    } else { // TEXT_LINE
+      txt.setCharacterSize(13);
+      txt.setFillColor(sf::Color(215, 220, 230));
+      txt.setOutlineColor(sf::Color::Black);
+      txt.setOutlineThickness(1.f);
+    }
+
+    sf::FloatRect b = txt.getLocalBounds();
+    txt.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
+    txt.setPosition(Win_W / 2.f, drawY + item.height / 2.f);
+    window.draw(txt);
+  }
+
+  // Top & Bottom Cinematic Fade Gradient (Letterbox effect)
+  sf::Vertex topFade[] = {
+    sf::Vertex(sf::Vector2f(0.f, 0.f), sf::Color(6, 10, 20, 255)),
+    sf::Vertex(sf::Vector2f(static_cast<float>(Win_W), 0.f), sf::Color(6, 10, 20, 255)),
+    sf::Vertex(sf::Vector2f(static_cast<float>(Win_W), 65.f), sf::Color(6, 10, 20, 0)),
+    sf::Vertex(sf::Vector2f(0.f, 65.f), sf::Color(6, 10, 20, 0))
+  };
+  window.draw(topFade, 4, sf::Quads);
+
+  sf::Vertex btmFade[] = {
+    sf::Vertex(sf::Vector2f(0.f, Win_H - 65.f), sf::Color(6, 10, 20, 0)),
+    sf::Vertex(sf::Vector2f(static_cast<float>(Win_W), Win_H - 65.f), sf::Color(6, 10, 20, 0)),
+    sf::Vertex(sf::Vector2f(static_cast<float>(Win_W), static_cast<float>(Win_H)), sf::Color(6, 10, 20, 255)),
+    sf::Vertex(sf::Vector2f(0.f, static_cast<float>(Win_H)), sf::Color(6, 10, 20, 255))
+  };
+  window.draw(btmFade, 4, sf::Quads);
+
+  // HUD Controls
+  drawButton(window, mBtnBackCredits);
+  drawButton(window, mBtnCreditsPause);
+  drawButton(window, mBtnCreditsSpeed);
+  drawButton(window, mBtnCreditsRestart);
+}
+
+void Menu::handleCreditsEvent(const sf::Event &event, sf::RenderWindow &window,
+                              MenuResult &result) {
+  if (event.type == sf::Event::MouseWheelScrolled) {
+    if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
+      mCreditsScrollY -= event.mouseWheelScroll.delta * 45.f;
+      mCreditsScrollY = std::max(0.f, std::min(mCreditsTotalHeight, mCreditsScrollY));
+      return;
+    }
+  }
+
+  if (event.type == sf::Event::KeyPressed) {
+    if (event.key.code == sf::Keyboard::Escape ||
+        event.key.code == sf::Keyboard::BackSpace) {
+      mScreen = MenuScreen::MAIN;
+      return;
+    }
+    if (event.key.code == sf::Keyboard::Space) {
+      mCreditsFastSpeed = !mCreditsFastSpeed;
+      return;
+    }
+    if (event.key.code == sf::Keyboard::P) {
+      mCreditsPaused = !mCreditsPaused;
+      return;
+    }
+    if (event.key.code == sf::Keyboard::R) {
+      mCreditsScrollY = 0.f;
+      return;
+    }
+    if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::W) {
+      mCreditsScrollY -= 40.f;
+      mCreditsScrollY = std::max(0.f, mCreditsScrollY);
+      return;
+    }
+    if (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::S) {
+      mCreditsScrollY += 40.f;
+      mCreditsScrollY = std::min(mCreditsTotalHeight, mCreditsScrollY);
+      return;
+    }
+  }
+
+  if (event.type == sf::Event::MouseButtonPressed &&
+      event.mouseButton.button == sf::Mouse::Left) {
+    sf::Vector2f mouse = window.mapPixelToCoords(
+        sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+    if (mBtnBackCredits.sprite.getGlobalBounds().contains(mouse)) {
+      mScreen = MenuScreen::MAIN;
+    } else if (mBtnCreditsPause.sprite.getGlobalBounds().contains(mouse)) {
+      mCreditsPaused = !mCreditsPaused;
+    } else if (mBtnCreditsSpeed.sprite.getGlobalBounds().contains(mouse)) {
+      mCreditsFastSpeed = !mCreditsFastSpeed;
+    } else if (mBtnCreditsRestart.sprite.getGlobalBounds().contains(mouse)) {
+      mCreditsScrollY = 0.f;
     }
   }
 }

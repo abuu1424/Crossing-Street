@@ -154,60 +154,32 @@ void CPEOPLE::update(float dt) {
 }
 
 void CPEOPLE::activateSpeedSkill() {
-  int slot = (mShopSlot > 0) ? mShopSlot : ShopData::getActiveSlot();
-  if (ShopData::getItemCount("speed", slot) > 0 || mStats.hasSpeedSkill) {
-    if (mStats.skillCooldownTimer <= 0.f && !mStats.skillActive) {
-      if (ShopData::getItemCount("speed", slot) > 0) {
-        ShopData::consumeItem("speed", slot);
-      }
-      mStats.skillActive = true;
-      mStats.skillTimer = mStats.skillDuration; // 5.0s
-    } else if (mStats.skillCooldownTimer > 0.f) {
-      mStats.cooldownWarningMsg = "SKILL ON COOLDOWN";
-      mStats.cooldownWarningTimer = 1.2f;
-    }
-  } else {
-    mStats.cooldownWarningMsg = "NO SPEED BOOTS IN INVENTORY";
+  if (mStats.skillCooldownTimer <= 0.f && !mStats.skillActive) {
+    mStats.skillActive = true;
+    mStats.skillTimer = mStats.skillDuration; // 5.0s
+  } else if (mStats.skillCooldownTimer > 0.f) {
+    mStats.cooldownWarningMsg = "SPEED BOOST ON COOLDOWN";
     mStats.cooldownWarningTimer = 1.2f;
   }
 }
 
 void CPEOPLE::activateRadarSkill() {
-  int slot = (mShopSlot > 0) ? mShopSlot : ShopData::getActiveSlot();
-  if (ShopData::getItemCount("radar", slot) > 0 || mStats.hasRadarSkill) {
-    if (mStats.radarCooldownTimer <= 0.f && !mStats.radarActive) {
-      if (ShopData::getItemCount("radar", slot) > 0) {
-        ShopData::consumeItem("radar", slot);
-      }
-      mStats.radarActive = true;
-      mStats.radarTimer =
-          mStats.radarDuration; // 6.0s duration of Coin Magnet suction
-      mStats.radarPulseRadius = 0.f;
-    } else if (mStats.radarCooldownTimer > 0.f) {
-      mStats.cooldownWarningMsg = "SKILL ON COOLDOWN";
-      mStats.cooldownWarningTimer = 1.2f;
-    }
-  } else {
-    mStats.cooldownWarningMsg = "NO COIN RADAR IN INVENTORY";
+  if (mStats.radarCooldownTimer <= 0.f && !mStats.radarActive) {
+    mStats.radarActive = true;
+    mStats.radarTimer = mStats.radarDuration; // 6.0s duration of Coin Magnet suction
+    mStats.radarPulseRadius = 0.f;
+  } else if (mStats.radarCooldownTimer > 0.f) {
+    mStats.cooldownWarningMsg = "MAGNET RADAR ON COOLDOWN";
     mStats.cooldownWarningTimer = 1.2f;
   }
 }
 
 void CPEOPLE::activateTimeSkill() {
-  int slot = (mShopSlot > 0) ? mShopSlot : ShopData::getActiveSlot();
-  if (ShopData::getItemCount("time", slot) > 0 || mStats.hasTimeSkill) {
-    if (mStats.timeFreezeCooldownTimer <= 0.f && !mStats.timeFreezeActive) {
-      if (ShopData::getItemCount("time", slot) > 0) {
-        ShopData::consumeItem("time", slot);
-      }
-      mStats.timeFreezeActive = true;
-      mStats.timeFreezeTimer = mStats.timeFreezeDuration; // 5.0s
-    } else if (mStats.timeFreezeCooldownTimer > 0.f) {
-      mStats.cooldownWarningMsg = "SKILL ON COOLDOWN";
-      mStats.cooldownWarningTimer = 1.2f;
-    }
-  } else {
-    mStats.cooldownWarningMsg = "NO TIME EXTENDER IN INVENTORY";
+  if (mStats.timeFreezeCooldownTimer <= 0.f && !mStats.timeFreezeActive) {
+    mStats.timeFreezeActive = true;
+    mStats.timeFreezeTimer = mStats.timeFreezeDuration; // 5.0s
+  } else if (mStats.timeFreezeCooldownTimer > 0.f) {
+    mStats.cooldownWarningMsg = "TIME FREEZE ON COOLDOWN";
     mStats.cooldownWarningTimer = 1.2f;
   }
 }

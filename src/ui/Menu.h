@@ -42,7 +42,8 @@ enum class MenuScreen {
     INFO,
     SHOP,
     CHALLENGES,
-    BOT_DIFFICULTY
+    BOT_DIFFICULTY,
+    CREDITS
 };
 
 class Menu
@@ -59,11 +60,12 @@ class Menu
     std::unique_ptr<Animation> mTitleAnim;
 
 
-    // Main Buttons (Clean 5-button layout)
+    // Main Buttons (Clean 6-button layout with Credits)
     MenuButton mBtnNew;
     MenuButton mBtnChallenges;
     MenuButton mBtnLoad;
     MenuButton mBtnSetting;
+    MenuButton mBtnCredits;
     MenuButton mBtnQuit;
     MenuButton mBtnBack;
 
@@ -191,6 +193,53 @@ class Menu
     MenuButton mBtnBackShop;
 
     void setupShopMenu();
+
+    // Cinematic Credits System (Movie Roll)
+    struct CreditItem {
+        enum Type {
+            MAIN_TITLE,
+            SUB_TITLE,
+            SECTION_TITLE,
+            SUB_HEADER,
+            TEXT_LINE,
+            HIGHLIGHT_LINE,
+            DIVIDER,
+            SPACER,
+            MEMBER_CARD
+        } type = TEXT_LINE;
+        std::string line1;
+        std::string line2;
+        std::string line3;
+        std::string line4;
+        int memberIndex = -1; // 0: PGH, 1: NVH, 2: PDQ, 3: NHT
+        float height = 30.f;
+    };
+
+    std::vector<CreditItem> mCreditItems;
+    float mCreditsScrollY = 0.f;
+    float mCreditsTotalHeight = 2800.f;
+    float mCreditsScrollSpeed = 48.f;
+    bool  mCreditsPaused = false;
+    bool  mCreditsFastSpeed = false;
+
+    MenuButton mBtnBackCredits;
+    MenuButton mBtnCreditsPause;
+    MenuButton mBtnCreditsSpeed;
+    MenuButton mBtnCreditsRestart;
+
+    sf::Texture mCreditsAvatarTextures[4];
+    sf::Sprite  mCreditsAvatarSprites[4];
+    sf::RectangleShape mCreditsMemberCards[4];
+
+    sf::Text mCreditsTempText;
+    sf::Text mCreditsHudHint;
+
+    void setupCreditsMenu();
+    void updateCredits(float dt, sf::Vector2f mousePos);
+    void drawCreditsMenu(sf::RenderWindow& window);
+    void handleCreditsEvent(const sf::Event& event,
+                            sf::RenderWindow& window,
+                            MenuResult& result);
 
 
     void setupSettingsMenu();
