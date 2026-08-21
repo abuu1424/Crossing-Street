@@ -111,8 +111,14 @@ void ElevatorCutscene::start(int fromLevel, int toLevel) {
   mFlashAlpha = 0.f;
   mIsMorphed = false;
 
-  if (mSound)
+  if (mSound) {
+    mSound->stopLevelClear();
+    mSound->stopVictory();
+    mSound->stopAllEffects();
+    mSound->stopMusic();
+    mSound->resetDucking();
     mSound->playElevatorDoor();
+  }
 
   LevelConfig oldCfg = getLevel(mFromLevel);
   LevelConfig newCfg = getLevel(mToLevel);

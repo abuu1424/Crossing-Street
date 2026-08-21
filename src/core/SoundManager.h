@@ -17,6 +17,7 @@ public:
     void stopAllEffects();
 
     void playVictory();
+    void stopVictory();
     void playDead();
     void playLevelClear();
     void stopLevelClear();
@@ -54,9 +55,10 @@ public:
     void setMusicVolume(float v);
     void setSFXVolume(float v);
 
-    // Music Ducking cho Hazard
+    // Music Ducking & Transition Management
     void update(float dt);
     void setMusicDuckingFactor(float factor);
+    void resetDucking();
     float getMusicDuckingFactor() const { return mTargetDuckingFactor; }
 
 private:

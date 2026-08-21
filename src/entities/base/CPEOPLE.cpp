@@ -225,30 +225,33 @@ void CPEOPLE::Move(float dt, int score, bool hasActiveHazard) {
 
   // Check Skills based on control scheme
   if (mControlScheme == PlayerControlScheme::PLAYER_2_ARROWS) {
-    // Player 2 Skill keys: '[' or 'O' (Speed), ']' or 'K' (Radar), '\' or 'L' (Freeze)
-    bool p2Skill1Now = sf::Keyboard::isKeyPressed(sf::Keyboard::LBracket) ||
-                       sf::Keyboard::isKeyPressed(sf::Keyboard::O);
+    // Player 2 Skill keys: 'I' / '[' (Speed), 'K' / ']' (Radar/Coin Magnet), 'L' / '\' (Time Freeze)
+    bool p2Skill1Now = sf::Keyboard::isKeyPressed(sf::Keyboard::I) ||
+                       sf::Keyboard::isKeyPressed(sf::Keyboard::LBracket);
     if (p2Skill1Now && !mP2Skill1PressedLast) {
       activateSpeedSkill();
     }
     mP2Skill1PressedLast = p2Skill1Now;
 
-    bool p2Skill2Now = sf::Keyboard::isKeyPressed(sf::Keyboard::RBracket) ||
-                       sf::Keyboard::isKeyPressed(sf::Keyboard::K);
+    bool p2Skill2Now = sf::Keyboard::isKeyPressed(sf::Keyboard::K) ||
+                       sf::Keyboard::isKeyPressed(sf::Keyboard::RBracket) ||
+                       sf::Keyboard::isKeyPressed(sf::Keyboard::O);
     if (p2Skill2Now && !mP2Skill2PressedLast) {
       activateRadarSkill();
     }
     mP2Skill2PressedLast = p2Skill2Now;
 
-    bool p2Skill3Now = sf::Keyboard::isKeyPressed(sf::Keyboard::BackSlash) ||
-                       sf::Keyboard::isKeyPressed(sf::Keyboard::L);
+    bool p2Skill3Now = sf::Keyboard::isKeyPressed(sf::Keyboard::L) ||
+                       sf::Keyboard::isKeyPressed(sf::Keyboard::BackSlash) ||
+                       sf::Keyboard::isKeyPressed(sf::Keyboard::P);
     if (p2Skill3Now && !mP2Skill3PressedLast) {
       activateTimeSkill();
     }
     mP2Skill3PressedLast = p2Skill3Now;
   } else {
-    // Player 1 or Single Player skills: E, Q, T
-    bool ePressedNow = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
+    // Player 1 or Single Player skills: E / Space (Speed), Q (Radar/Coin Magnet), T (Time Freeze)
+    bool ePressedNow = sf::Keyboard::isKeyPressed(sf::Keyboard::E) ||
+                       sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
     if (ePressedNow && !mEPressedLast) {
       activateSpeedSkill();
     }

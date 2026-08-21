@@ -1,5 +1,7 @@
 #include "SoundManager.h"
 #include <cstdio>
+#include <cmath>
+#include <algorithm>
 
 void SoundManager::loadEffects(const std::string &victoryPath,
                                const std::string &deadPath,
@@ -41,6 +43,11 @@ void SoundManager::loadElevatorSounds(const std::string &doorPath,
 
 void SoundManager::playLevelMusic(const std::string &musicPath, float volume) {
   mBaseMusicVolume = volume;
+  if (musicPath.empty()) {
+    stopMusic();
+    return;
+  }
+
   if (mCurrentMusicPath == musicPath &&
       mLevelMusic.getStatus() == sf::Music::Playing) {
     mLevelMusic.setVolume(mBaseMusicVolume * mCurrentDuckingFactor);
@@ -48,13 +55,17 @@ void SoundManager::playLevelMusic(const std::string &musicPath, float volume) {
   }
 
   mLevelMusic.stop();
+  mCurrentDuckingFactor = 1.0f;
+  mTargetDuckingFactor = 1.0f;
+
   if (mLevelMusic.openFromFile(musicPath)) {
     mCurrentMusicPath = musicPath;
     mLevelMusic.setLoop(true);
-    mCurrentDuckingFactor = 1.0f;
-    mTargetDuckingFactor = 1.0f;
     mLevelMusic.setVolume(mBaseMusicVolume * mCurrentDuckingFactor);
     mLevelMusic.play();
+  } else {
+    mCurrentMusicPath.clear();
+    printf("Note: Failed to open level music (%s)\n", musicPath.c_str());
   }
 }
 
@@ -65,8 +76,7 @@ void SoundManager::loadLevelDeathSounds() {
     if (mLevelDeathBuffers[i - 1].loadFromFile(path)) {
       mLevelDeathSounds[i - 1].setBuffer(mLevelDeathBuffers[i - 1]);
     } else {
-      printf("Note: Level %d death sound not found at (%s). Fallback to "
-             "dead.ogg\n",
+      printf("Note: Level %d death sound not found at (%s). Fallback to dead.ogg\n",
              i, path.c_str());
     }
   }
@@ -75,6 +85,7 @@ void SoundManager::loadLevelDeathSounds() {
 void SoundManager::playLevelDeathSound(int level) {
   stopLevelDeathSounds();
   if (level >= 1 && level <= 5 && mLevelDeathSounds[level - 1].getBuffer()) {
+    mLevelDeathSounds[level - 1].stop();
     mLevelDeathSounds[level - 1].play();
   } else {
     playDead();
@@ -83,41 +94,82 @@ void SoundManager::playLevelDeathSound(int level) {
 
 void SoundManager::stopLevelDeathSounds() {
   for (int i = 0; i < 5; ++i) {
-    mLevelDeathSounds[i].stop();
+    if (mLevelDeathSounds[i].getBuffer()) {
+      mLevelDeathSounds[i].stop();
+    }
   }
 }
 
 void SoundManager::stopMusic() {
   mLevelMusic.stop();
   mCurrentMusicPath.clear();
+  mCurrentDuckingFactor = 1.0f;
+  mTargetDuckingFactor = 1.0f;
+}
+
+void SoundManager::resetDucking() {
+  mCurrentDuckingFactor = 1.0f;
+  mTargetDuckingFactor = 1.0f;
+  if (mLevelMusic.getStatus() == sf::Music::Playing) {
+    mLevelMusic.setVolume(mBaseMusicVolume);
+  }
 }
 
 void SoundManager::stopAllEffects() {
-  mDeadSound.stop();
-  mVictorySound.stop();
-  mLevelClearSound.stop();
-  mElevatorDoorSound.stop();
-  mElevatorMoveSound.stop();
-  mElevatorDingSound.stop();
+  if (mDeadSound.getBuffer()) mDeadSound.stop();
+  if (mVictorySound.getBuffer()) mVictorySound.stop();
+  if (mLevelClearSound.getBuffer()) mLevelClearSound.stop();
+  if (mElevatorDoorSound.getBuffer()) mElevatorDoorSound.stop();
+  if (mElevatorMoveSound.getBuffer()) {
+    mElevatorMoveSound.stop();
+    mElevatorMoveSound.setLoop(false);
+  }
+  if (mElevatorDingSound.getBuffer()) mElevatorDingSound.stop();
+  if (mCoinSound.getBuffer()) mCoinSound.stop();
   stopHazardSounds();
   stopLevelDeathSounds();
 }
 
 void SoundManager::playVictory() { 
-  stopLevelDeathSounds();
-  mVictorySound.play(); 
+  stopAllEffects();
+  if (mVictorySound.getBuffer()) {
+    mVictorySound.stop();
+    mVictorySound.play(); 
+  }
+}
+
+void SoundManager::stopVictory() {
+  if (mVictorySound.getBuffer()) {
+    mVictorySound.stop();
+  }
 }
 
 void SoundManager::playDead() { 
   stopLevelDeathSounds();
-  mDeadSound.play(); 
+  if (mDeadSound.getBuffer()) {
+    mDeadSound.stop();
+    mDeadSound.play(); 
+  }
 }
-void SoundManager::playLevelClear() { mLevelClearSound.play(); }
-void SoundManager::stopLevelClear() { mLevelClearSound.stop(); }
+
+void SoundManager::playLevelClear() { 
+  if (mLevelClearSound.getBuffer()) {
+    mLevelClearSound.stop();
+    mLevelClearSound.play();
+  }
+}
+
+void SoundManager::stopLevelClear() { 
+  if (mLevelClearSound.getBuffer()) {
+    mLevelClearSound.stop();
+  }
+}
 
 void SoundManager::playElevatorDoor() {
-  if (mElevatorDoorSound.getBuffer())
+  if (mElevatorDoorSound.getBuffer()) {
+    mElevatorDoorSound.stop();
     mElevatorDoorSound.play();
+  }
 }
 
 void SoundManager::playElevatorMove() {
@@ -129,13 +181,17 @@ void SoundManager::playElevatorMove() {
 }
 
 void SoundManager::stopElevatorMove() {
-  if (mElevatorMoveSound.getBuffer())
+  if (mElevatorMoveSound.getBuffer()) {
     mElevatorMoveSound.stop();
+    mElevatorMoveSound.setLoop(false);
+  }
 }
 
 void SoundManager::playElevatorDing() {
-  if (mElevatorDingSound.getBuffer())
+  if (mElevatorDingSound.getBuffer()) {
+    mElevatorDingSound.stop();
     mElevatorDingSound.play();
+  }
 }
 
 void SoundManager::loadCoinSound(const std::string &path) {
@@ -150,6 +206,7 @@ void SoundManager::loadCoinSound(const std::string &path) {
 
 void SoundManager::playCoinSound() {
   if (mCoinSoundCooldown <= 0.f && mCoinSound.getBuffer()) {
+    mCoinSound.stop();
     mCoinSound.play();
     mCoinSoundCooldown = 0.055f; // 55ms throttle prevents lag during rapid coin suction
   }
@@ -157,7 +214,9 @@ void SoundManager::playCoinSound() {
 
 void SoundManager::setMusicVolume(float v) {
   mBaseMusicVolume = v;
-  mLevelMusic.setVolume(mBaseMusicVolume * mCurrentDuckingFactor);
+  if (mLevelMusic.getStatus() == sf::Music::Playing) {
+    mLevelMusic.setVolume(mBaseMusicVolume * mCurrentDuckingFactor);
+  }
 }
 
 void SoundManager::setMusicDuckingFactor(float factor) {
@@ -175,18 +234,22 @@ void SoundManager::update(float dt) {
       mCoinSoundCooldown = 0.f;
   }
 
-  if (std::abs(mCurrentDuckingFactor - mTargetDuckingFactor) > 0.001f) {
-    float speed = 2.5f; // Fast and smooth fade transition (~0.4s)
-    if (mCurrentDuckingFactor < mTargetDuckingFactor) {
-      mCurrentDuckingFactor += dt * speed;
-      if (mCurrentDuckingFactor > mTargetDuckingFactor)
-        mCurrentDuckingFactor = mTargetDuckingFactor;
-    } else {
-      mCurrentDuckingFactor -= dt * speed;
-      if (mCurrentDuckingFactor < mTargetDuckingFactor)
-        mCurrentDuckingFactor = mTargetDuckingFactor;
+  if (mLevelMusic.getStatus() == sf::Music::Playing) {
+    if (std::abs(mCurrentDuckingFactor - mTargetDuckingFactor) > 0.001f) {
+      float speed = 2.5f; // Fast and smooth fade transition (~0.4s)
+      if (mCurrentDuckingFactor < mTargetDuckingFactor) {
+        mCurrentDuckingFactor += dt * speed;
+        if (mCurrentDuckingFactor > mTargetDuckingFactor)
+          mCurrentDuckingFactor = mTargetDuckingFactor;
+      } else {
+        mCurrentDuckingFactor -= dt * speed;
+        if (mCurrentDuckingFactor < mTargetDuckingFactor)
+          mCurrentDuckingFactor = mTargetDuckingFactor;
+      }
+      mLevelMusic.setVolume(mBaseMusicVolume * mCurrentDuckingFactor);
     }
-    mLevelMusic.setVolume(mBaseMusicVolume * mCurrentDuckingFactor);
+  } else {
+    mCurrentDuckingFactor = mTargetDuckingFactor;
   }
 }
 
@@ -251,22 +314,30 @@ void SoundManager::playHazardSound(int level) {
 }
 
 void SoundManager::stopHazardSounds() {
-  mDinoRoarSound.stop();
-  mLightningSound.stop();
-  mBlackHoleSound.stop();
+  if (mDinoRoarSound.getBuffer()) mDinoRoarSound.stop();
+  if (mLightningSound.getBuffer()) mLightningSound.stop();
+  if (mBlackHoleSound.getBuffer()) {
+    mBlackHoleSound.stop();
+    mBlackHoleSound.setLoop(false);
+  }
   for (int i = 0; i < 5; ++i) {
-    mHazardSounds[i].stop();
+    if (mHazardSounds[i].getBuffer()) {
+      mHazardSounds[i].stop();
+      mHazardSounds[i].setLoop(false);
+    }
   }
 }
 
 void SoundManager::playDinoRoar() {
   if (mDinoRoarSound.getBuffer()) {
+    mDinoRoarSound.stop();
     mDinoRoarSound.play();
   }
 }
 
 void SoundManager::playLightning() {
   if (mLightningSound.getBuffer()) {
+    mLightningSound.stop();
     mLightningSound.play();
   }
 }
@@ -280,7 +351,12 @@ void SoundManager::playBlackHole() {
   }
 }
 
-void SoundManager::stopBlackHole() { mBlackHoleSound.stop(); }
+void SoundManager::stopBlackHole() { 
+  if (mBlackHoleSound.getBuffer()) {
+    mBlackHoleSound.stop();
+    mBlackHoleSound.setLoop(false);
+  }
+}
 
 void SoundManager::playStampede() {
   if (mHazardSounds[0].getBuffer()) {
@@ -327,22 +403,24 @@ void SoundManager::playLaserBeam() {
 void SoundManager::stopLaserBeam() {
   if (mHazardSounds[4].getBuffer()) {
     mHazardSounds[4].stop();
+    mHazardSounds[4].setLoop(false);
   }
 }
 
 void SoundManager::setSFXVolume(float v) {
-  mDeadSound.setVolume(v);
-  mVictorySound.setVolume(v);
-  mLevelClearSound.setVolume(v);
-  mElevatorDoorSound.setVolume(v);
-  mElevatorMoveSound.setVolume(v);
-  mElevatorDingSound.setVolume(v);
-  mCoinSound.setVolume(v);
-  mDinoRoarSound.setVolume(v);
-  mLightningSound.setVolume(v);
-  mBlackHoleSound.setVolume(v);
+  if (mDeadSound.getBuffer()) mDeadSound.setVolume(v);
+  if (mVictorySound.getBuffer()) mVictorySound.setVolume(v);
+  if (mLevelClearSound.getBuffer()) mLevelClearSound.setVolume(v);
+  if (mElevatorDoorSound.getBuffer()) mElevatorDoorSound.setVolume(v);
+  if (mElevatorMoveSound.getBuffer()) mElevatorMoveSound.setVolume(v);
+  if (mElevatorDingSound.getBuffer()) mElevatorDingSound.setVolume(v);
+  if (mCoinSound.getBuffer()) mCoinSound.setVolume(v);
+  if (mDinoRoarSound.getBuffer()) mDinoRoarSound.setVolume(v);
+  if (mLightningSound.getBuffer()) mLightningSound.setVolume(v);
+  if (mBlackHoleSound.getBuffer()) mBlackHoleSound.setVolume(v);
   for (int i = 0; i < 5; ++i) {
-    mLevelDeathSounds[i].setVolume(v);
-    mHazardSounds[i].setVolume(v);
+    if (mLevelDeathSounds[i].getBuffer()) mLevelDeathSounds[i].setVolume(v);
+    if (mHazardSounds[i].getBuffer()) mHazardSounds[i].setVolume(v);
   }
 }
+

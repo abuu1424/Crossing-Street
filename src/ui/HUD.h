@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 #include "PlayerStats.h"
+#include "BotAI.h"
 
 class HUD {
 private:
@@ -22,6 +23,7 @@ private:
     sf::Texture mItemTextures[4];
     sf::Sprite  mItemSprites[4];
     sf::Text    mItemCountTexts[4];
+    sf::Text    mItemHotkeyTexts[4];
     bool        mItemPanelLoaded = false;
 
     void setupItemPanel();
@@ -55,7 +57,8 @@ public:
 
     void update(int level, int score, float timeSeconds);
     void draw(sf::RenderWindow& window);
-    void drawStats(sf::RenderWindow& window, const PlayerStats& stats);
+    void drawStats(sf::RenderWindow& window, const PlayerStats& stats, int currentCoins = 0);
+    void drawVsBotStats(sf::RenderWindow& window, const PlayerStats& playerStats, const PlayerStats& botStats, BotDifficulty diff, float playerY, float botY);
     void drawPowerUpBuffs(sf::RenderWindow& window, float magnetRem, float timeStopRem,
                           float speedRem, float scoreX2Rem, bool hasShield);
     void setEndlessMode(bool isEndless, int wave = 1) { mIsEndless = isEndless; mEndlessWave = wave; }

@@ -22,7 +22,7 @@ struct PlayerStats {
   bool isSprinting = false;
 
   // Skill Speed Burst 'E'
-  bool hasSpeedSkill = false;
+  bool hasSpeedSkill = true;
   bool skillActive = false;
   float skillTimer = 0.f; // 5.0s duration
   float skillDuration = 5.0f;
@@ -30,7 +30,7 @@ struct PlayerStats {
   float skillCooldownDuration = 10.0f;
 
   // Skill Coin Magnet Radar 'Q'
-  bool hasRadarSkill = false;
+  bool hasRadarSkill = true;
   bool radarActive = false;
   float radarTimer = 0.f; // 6.0s duration
   float radarDuration = 6.0f;
@@ -39,7 +39,7 @@ struct PlayerStats {
   float radarPulseRadius = 0.f;
 
   // Skill Time Freeze Clock 'T'
-  bool hasTimeSkill = false;
+  bool hasTimeSkill = true;
   bool timeFreezeActive = false;
   float timeFreezeTimer = 0.f; // 5.0s duration
   float timeFreezeDuration = 5.0f;

@@ -269,4 +269,14 @@ public:
         mMuteAll = mute;
         mMusic.setVolume(mute ? 0.f : mMusicSlider.value);
     }
+
+    void playMusic() {
+        if (!mMuteAll && mMusic.getStatus() != sf::Music::Playing) {
+            mMusic.setVolume(mMusicSlider.value);
+            mMusic.play();
+        }
+    }
+    void stopMusic() {
+        mMusic.stop();
+    }
 };

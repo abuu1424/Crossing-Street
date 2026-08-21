@@ -107,11 +107,12 @@ void HUD::setupItemPanel() {
         "assets/shop/item_time.png",
         "assets/shop/item_radar.png"
     };
+    const char* hotkeys[4] = { "[1]", "[2]", "[3]", "[4]" };
 
-    float startX = 12.f;  // Sát góc trên bên trái
-    float startY = 8.f;
-    float gapX   = 72.f;  // Rộng rãi dễ nhìn
-    float targetSize = 40.f; // Bounding box chuẩn 40x40px cho tất cả icon
+    float startX = 18.f;
+    float startY = 12.f;
+    float gapX   = 68.f;
+    float targetSize = 34.f;
 
     for (int i = 0; i < 4; i++) {
         if (mItemTextures[i].loadFromFile(iconPaths[i])) {
@@ -124,7 +125,6 @@ void HUD::setupItemPanel() {
                 float scale = std::min(scaleX, scaleY);
                 mItemSprites[i].setScale(scale, scale);
 
-                // Căn giữa icon trong hộp 40x40px
                 float renderW = texSize.x * scale;
                 float renderH = texSize.y * scale;
                 float offsetX = (targetSize - renderW) / 2.f;
@@ -135,12 +135,22 @@ void HUD::setupItemPanel() {
             }
         }
 
+        // Hotkey badge text (e.g. [1])
+        mItemHotkeyTexts[i].setFont(mFont);
+        mItemHotkeyTexts[i].setString(hotkeys[i]);
+        mItemHotkeyTexts[i].setCharacterSize(10);
+        mItemHotkeyTexts[i].setFillColor(sf::Color(255, 215, 80));
+        mItemHotkeyTexts[i].setOutlineColor(sf::Color::Black);
+        mItemHotkeyTexts[i].setOutlineThickness(1.2f);
+        mItemHotkeyTexts[i].setPosition(startX + i * gapX + 36.f, startY - 2.f);
+
+        // Count text (e.g. x2)
         mItemCountTexts[i].setFont(mFont);
-        mItemCountTexts[i].setCharacterSize(15);
+        mItemCountTexts[i].setCharacterSize(13);
         mItemCountTexts[i].setFillColor(sf::Color::White);
         mItemCountTexts[i].setOutlineColor(sf::Color::Black);
-        mItemCountTexts[i].setOutlineThickness(2.0f);
-        mItemCountTexts[i].setPosition(startX + i * gapX + 44.f, startY + 11.f);
+        mItemCountTexts[i].setOutlineThickness(1.5f);
+        mItemCountTexts[i].setPosition(startX + i * gapX + 36.f, startY + 14.f);
     }
     mItemPanelLoaded = true;
 }
@@ -149,6 +159,14 @@ void HUD::drawItemPanel(sf::RenderWindow& window) {
     if (!mItemPanelLoaded) {
         setupItemPanel();
     }
+
+    // Glass panel frame
+    sf::RectangleShape panelBg(sf::Vector2f(280.f, 54.f));
+    panelBg.setPosition(10.f, 6.f);
+    panelBg.setFillColor(sf::Color(10, 16, 26, 215));
+    panelBg.setOutlineColor(sf::Color(0, 190, 240, 190));
+    panelBg.setOutlineThickness(1.2f);
+    window.draw(panelBg);
 
     std::string itemIds[4] = { "shield", "speed", "time", "radar" };
 
@@ -159,12 +177,15 @@ void HUD::drawItemPanel(sf::RenderWindow& window) {
             mItemSprites[i].setColor(sf::Color(255, 255, 255, 255));
             mItemCountTexts[i].setString("x" + std::to_string(count));
             mItemCountTexts[i].setFillColor(sf::Color(120, 255, 120));
+            mItemHotkeyTexts[i].setFillColor(sf::Color(255, 225, 80));
         } else {
-            mItemSprites[i].setColor(sf::Color(140, 140, 150, 120));
+            mItemSprites[i].setColor(sf::Color(140, 140, 150, 100));
             mItemCountTexts[i].setString("x0");
-            mItemCountTexts[i].setFillColor(sf::Color(220, 220, 220));
+            mItemCountTexts[i].setFillColor(sf::Color(160, 160, 170, 160));
+            mItemHotkeyTexts[i].setFillColor(sf::Color(160, 160, 170, 140));
         }
         window.draw(mItemSprites[i]);
+        window.draw(mItemHotkeyTexts[i]);
         window.draw(mItemCountTexts[i]);
     }
 }
@@ -184,24 +205,40 @@ void HUD::draw(sf::RenderWindow& window) {
     window.draw(mTimeText);
 }
 
-void HUD::drawStats(sf::RenderWindow& window, const PlayerStats& stats) {
-    float topY = 10.f;
-    float hpSectionX = 900.f; // Safely right of central HUD bar (Pause frame ends ~870px)
+void HUD::drawStats(sf::RenderWindow& window, const PlayerStats& stats, int currentCoins) {
+    if (!mLoaded) return;
 
-    // 1. HP Hearts (Top-Right, aligned after central HUD bar)
-    if (mLoaded) {
-        sf::Text hpLabel;
-        hpLabel.setFont(mFont);
-        hpLabel.setString("HEALTH");
-        hpLabel.setCharacterSize(11);
-        hpLabel.setFillColor(sf::Color(255, 200, 210));
-        hpLabel.setPosition(hpSectionX, topY);
-        window.draw(hpLabel);
-    }
+    float cardW = 320.f;
+    float cardH = 84.f;
+    float startX = Win_W - cardW - 12.f;
+    float topY = 6.f;
+    float heartGap = 24.f;
+    float barW = 95.f;
+    float barH = 8.f;
 
-    float heartStartX = hpSectionX;
-    float heartStartY = topY + 15.f;
-    float heartGap = 26.f;
+    // Outer Glass Container Card
+    sf::RectangleShape cardBg(sf::Vector2f(cardW, cardH));
+    cardBg.setPosition(startX, topY);
+    cardBg.setFillColor(sf::Color(10, 16, 28, 220));
+    cardBg.setOutlineColor(sf::Color(0, 200, 255, 190));
+    cardBg.setOutlineThickness(1.5f);
+    window.draw(cardBg);
+
+    // ==========================================
+    // Row 1: HEALTH (Hearts) & GOLD Balance
+    // ==========================================
+    sf::Text hpLabel;
+    hpLabel.setFont(mFont);
+    hpLabel.setString("HEALTH");
+    hpLabel.setCharacterSize(11);
+    hpLabel.setFillColor(sf::Color(255, 180, 200));
+    hpLabel.setOutlineColor(sf::Color::Black);
+    hpLabel.setOutlineThickness(1.f);
+    hpLabel.setPosition(startX + 10.f, topY + 5.f);
+    window.draw(hpLabel);
+
+    float heartStartX = startX + 10.f;
+    float heartStartY = topY + 19.f;
 
     for (int i = 0; i < stats.maxHp; ++i) {
         float cx = heartStartX + i * heartGap;
@@ -209,99 +246,116 @@ void HUD::drawStats(sf::RenderWindow& window, const PlayerStats& stats) {
         bool hasHp = (i < stats.currentHp);
 
         if (mHeartLoaded) {
-            sf::Sprite* sprPtr = &mHeartEmptySprite;
-            if (hasHp) {
-                sprPtr = &mHeartSprite;
-            }
-            sf::Sprite& spr = *sprPtr;
+            sf::Sprite& spr = hasHp ? mHeartSprite : mHeartEmptySprite;
             sf::Vector2u texSize = spr.getTexture() ? spr.getTexture()->getSize() : sf::Vector2u(52, 40);
-            spr.setScale(24.f / texSize.x, 18.5f / texSize.y);
+            spr.setScale(20.f / texSize.x, 16.f / texSize.y);
             spr.setPosition(cx, cy);
             window.draw(spr);
-        } else {
-            // Procedural shape fallback
-            float heartSize = 12.f;
-            float centerOffset = cx + 12.f;
-            float cyOffset = cy + 10.f;
-            sf::Color fillCol = hasHp ? sf::Color(245, 45, 75, 240) : sf::Color(55, 35, 45, 140);
-            sf::Color outlineCol = hasHp ? sf::Color(255, 210, 225, 255) : sf::Color(90, 75, 85, 160);
-
-            sf::CircleShape leftLobe(heartSize * 0.55f);
-            leftLobe.setOrigin(heartSize * 0.55f, heartSize * 0.55f);
-            leftLobe.setPosition(centerOffset - heartSize * 0.4f, cyOffset - heartSize * 0.2f);
-            leftLobe.setFillColor(fillCol);
-            leftLobe.setOutlineColor(outlineCol);
-            leftLobe.setOutlineThickness(1.f);
-            window.draw(leftLobe);
-
-            sf::CircleShape rightLobe(heartSize * 0.55f);
-            rightLobe.setOrigin(heartSize * 0.55f, heartSize * 0.55f);
-            rightLobe.setPosition(centerOffset + heartSize * 0.4f, cyOffset - heartSize * 0.2f);
-            rightLobe.setFillColor(fillCol);
-            rightLobe.setOutlineColor(outlineCol);
-            rightLobe.setOutlineThickness(1.f);
-            window.draw(rightLobe);
-
-            sf::ConvexShape bottomPoint;
-            bottomPoint.setPointCount(3);
-            bottomPoint.setPoint(0, sf::Vector2f(centerOffset - heartSize * 0.9f, cyOffset - heartSize * 0.1f));
-            bottomPoint.setPoint(1, sf::Vector2f(centerOffset + heartSize * 0.9f, cyOffset - heartSize * 0.1f));
-            bottomPoint.setPoint(2, sf::Vector2f(centerOffset, cyOffset + heartSize * 0.9f));
-            bottomPoint.setFillColor(fillCol);
-            bottomPoint.setOutlineColor(outlineCol);
-            bottomPoint.setOutlineThickness(1.f);
-            window.draw(bottomPoint);
         }
     }
 
-    // 2. Energy Bar (Side-by-side / ngang hàng với Health Bar)
-    float hpWidth = stats.maxHp * heartGap;
-    float barX = hpSectionX + hpWidth + 16.f;
-    float barY = topY + 17.f;
-    float barW = 135.f;
-    float barH = 10.f;
+    // Gold readout (Top-Right of card)
+    int goldVal = (currentCoins > 0) ? currentCoins : ShopData::getCoins();
+    sf::Text goldText;
+    goldText.setFont(mFont);
+    goldText.setString("GOLD: " + std::to_string(goldVal) + "g");
+    goldText.setCharacterSize(12);
+    goldText.setFillColor(sf::Color(255, 225, 60));
+    goldText.setOutlineColor(sf::Color::Black);
+    goldText.setOutlineThickness(1.2f);
+    goldText.setPosition(startX + cardW - 105.f, topY + 5.f);
+    window.draw(goldText);
 
-    sf::RectangleShape bgEnergy(sf::Vector2f(barW, barH));
-    bgEnergy.setPosition(barX, barY);
-    bgEnergy.setFillColor(sf::Color(20, 25, 35, 210));
-    bgEnergy.setOutlineColor(sf::Color(0, 180, 220, 200));
-    bgEnergy.setOutlineThickness(1.2f);
-    window.draw(bgEnergy);
+    // ==========================================
+    // Row 2: ENERGY & STAMINA Bars
+    // ==========================================
+    float barsStartX = startX + stats.maxHp * heartGap + 18.f;
 
-    float energyRatio = std::clamp(stats.energy / stats.maxEnergy, 0.f, 1.f);
-    sf::RectangleShape fillEnergy(sf::Vector2f((barW - 2.f) * energyRatio, barH - 2.f));
-    fillEnergy.setPosition(barX + 1.f, barY + 1.f);
-    fillEnergy.setFillColor(energyRatio < 0.3f ? sf::Color(255, 100, 50, 240) : sf::Color(0, 220, 240, 240));
-    window.draw(fillEnergy);
+    // 1. Energy Bar (Cyan)
+    sf::Text nrgLabel;
+    nrgLabel.setFont(mFont);
+    nrgLabel.setString("ENERGY");
+    nrgLabel.setCharacterSize(10);
+    nrgLabel.setFillColor(sf::Color(180, 235, 255));
+    nrgLabel.setPosition(barsStartX, topY + 20.f);
+    window.draw(nrgLabel);
 
-    if (mLoaded) {
-        sf::Text nrgLabel;
-        nrgLabel.setFont(mFont);
-        nrgLabel.setString("ENERGY");
-        nrgLabel.setCharacterSize(11);
-        nrgLabel.setFillColor(sf::Color(200, 245, 255));
-        nrgLabel.setPosition(barX, topY);
-        window.draw(nrgLabel);
+    float bar1X = barsStartX + 52.f;
+    float bar1Y = topY + 22.f;
+    sf::RectangleShape bgNrg(sf::Vector2f(barW, barH));
+    bgNrg.setPosition(bar1X, bar1Y);
+    bgNrg.setFillColor(sf::Color(15, 22, 32, 210));
+    bgNrg.setOutlineColor(sf::Color(0, 180, 220, 180));
+    bgNrg.setOutlineThickness(1.f);
+    window.draw(bgNrg);
 
-        // 3. Realtime Speed Stat Display (px/s)
-        sf::Text spdText;
-        spdText.setFont(mFont);
-        int spdVal = static_cast<int>(stats.currentCalculatedSpeed);
-        spdText.setString("SPEED: " + std::to_string(spdVal) + " px/s");
-        spdText.setCharacterSize(13);
-        spdText.setPosition(barX, barY + 13.f);
-        spdText.setOutlineColor(sf::Color::Black);
-        spdText.setOutlineThickness(1.5f);
+    float nrgRatio = std::clamp(stats.energy / stats.maxEnergy, 0.f, 1.f);
+    sf::RectangleShape fillNrg(sf::Vector2f((barW - 2.f) * nrgRatio, barH - 2.f));
+    fillNrg.setPosition(bar1X + 1.f, bar1Y + 1.f);
+    fillNrg.setFillColor(nrgRatio < 0.3f ? sf::Color(255, 90, 50) : sf::Color(0, 225, 245));
+    window.draw(fillNrg);
 
-        if (stats.skillActive) {
-            spdText.setFillColor(sf::Color(255, 230, 50));
-        } else if (energyRatio < 0.4f) {
-            spdText.setFillColor(sf::Color(255, 140, 60));
-        } else {
-            spdText.setFillColor(sf::Color(120, 255, 160));
-        }
-        window.draw(spdText);
+    // 2. Stamina Bar (Lime Green)
+    sf::Text stmLabel;
+    stmLabel.setFont(mFont);
+    stmLabel.setString("STAMINA");
+    stmLabel.setCharacterSize(10);
+    stmLabel.setFillColor(sf::Color(180, 255, 180));
+    stmLabel.setPosition(barsStartX, topY + 36.f);
+    window.draw(stmLabel);
+
+    float bar2X = barsStartX + 52.f;
+    float bar2Y = topY + 38.f;
+    sf::RectangleShape bgStm(sf::Vector2f(barW, barH));
+    bgStm.setPosition(bar2X, bar2Y);
+    bgStm.setFillColor(sf::Color(15, 28, 20, 210));
+    bgStm.setOutlineColor(sf::Color(60, 210, 100, 180));
+    bgStm.setOutlineThickness(1.f);
+    window.draw(bgStm);
+
+    float stmRatio = std::clamp(stats.stamina / stats.maxStamina, 0.f, 1.f);
+    sf::RectangleShape fillStm(sf::Vector2f((barW - 2.f) * stmRatio, barH - 2.f));
+    fillStm.setPosition(bar2X + 1.f, bar2Y + 1.f);
+    fillStm.setFillColor(stats.isSprinting ? sf::Color(255, 230, 40) : (stmRatio < 0.25f ? sf::Color(255, 120, 50) : sf::Color(80, 240, 120)));
+    window.draw(fillStm);
+
+    // ==========================================
+    // Row 3: Realtime Speed & Skill Pill
+    // ==========================================
+    sf::Text spdText;
+    spdText.setFont(mFont);
+    int spdVal = static_cast<int>(stats.currentCalculatedSpeed);
+    spdText.setString("SPEED: " + std::to_string(spdVal) + " px/s");
+    spdText.setCharacterSize(11);
+    spdText.setPosition(startX + 10.f, topY + 60.f);
+    spdText.setOutlineColor(sf::Color::Black);
+    spdText.setOutlineThickness(1.2f);
+    spdText.setFillColor(stats.skillActive ? sf::Color(255, 235, 60) : (stats.isSprinting ? sf::Color(120, 255, 220) : sf::Color(140, 255, 160)));
+    window.draw(spdText);
+
+    // Skill Status Pill
+    sf::Text skillText;
+    skillText.setFont(mFont);
+    skillText.setCharacterSize(11);
+    skillText.setOutlineColor(sf::Color::Black);
+    skillText.setOutlineThickness(1.2f);
+
+    if (stats.skillActive) {
+        char buf[32];
+        snprintf(buf, sizeof(buf), "[SPACE] BOOST: %.1fs", stats.skillTimer);
+        skillText.setString(buf);
+        skillText.setFillColor(sf::Color(255, 220, 50));
+    } else if (stats.skillCooldownTimer > 0.f) {
+        char buf[32];
+        snprintf(buf, sizeof(buf), "[SPACE] CD: %.1fs", stats.skillCooldownTimer);
+        skillText.setString(buf);
+        skillText.setFillColor(sf::Color(255, 140, 70));
+    } else {
+        skillText.setString("[SPACE] BOOST READY");
+        skillText.setFillColor(sf::Color(80, 240, 160));
     }
+    skillText.setPosition(startX + 150.f, topY + 60.f);
+    window.draw(skillText);
 }
 
 
@@ -670,4 +724,267 @@ void HUD::drawTwoPlayerStats(sf::RenderWindow& window, const PlayerStats& p1Stat
     matchScoreText.setOrigin(msb.left + msb.width / 2.f, msb.top + msb.height / 2.f);
     matchScoreText.setPosition(Win_W / 2.f, 75.f);
     window.draw(matchScoreText);
+}
+
+void HUD::drawVsBotStats(sf::RenderWindow& window, const PlayerStats& playerStats, const PlayerStats& botStats, BotDifficulty diff, float playerY, float botY) {
+    if (!mLoaded) return;
+
+    float cardW = 310.f;
+    float cardH = 84.f;
+    float topY  = 8.f;
+    float heartGap = 24.f;
+    float barW = 120.f;
+    float barH = 9.f;
+
+    // ==========================================
+    // 1. PLAYER 1 (YOU) PANEL (Top-Left, Cyan Theme)
+    // ==========================================
+    float p1X = 12.f;
+    sf::RectangleShape p1Bg(sf::Vector2f(cardW, cardH));
+    p1Bg.setPosition(p1X, topY);
+    p1Bg.setFillColor(sf::Color(10, 18, 30, 225));
+    p1Bg.setOutlineColor(sf::Color(0, 210, 255, 210));
+    p1Bg.setOutlineThickness(1.5f);
+    window.draw(p1Bg);
+
+    // Row 1: Title & Speed
+    sf::Text p1Title;
+    p1Title.setFont(mFont);
+    p1Title.setString("PLAYER 1 (YOU)");
+    p1Title.setCharacterSize(13);
+    p1Title.setFillColor(sf::Color(60, 230, 255));
+    p1Title.setOutlineColor(sf::Color::Black);
+    p1Title.setOutlineThickness(1.5f);
+    p1Title.setPosition(p1X + 8.f, topY + 5.f);
+    window.draw(p1Title);
+
+    sf::Text p1Spd;
+    p1Spd.setFont(mFont);
+    p1Spd.setString("SPD: " + std::to_string(static_cast<int>(playerStats.currentCalculatedSpeed)) + " px/s");
+    p1Spd.setCharacterSize(11);
+    p1Spd.setFillColor(sf::Color(255, 235, 120));
+    p1Spd.setOutlineColor(sf::Color::Black);
+    p1Spd.setOutlineThickness(1.2f);
+    p1Spd.setPosition(p1X + cardW - 105.f, topY + 6.f);
+    window.draw(p1Spd);
+
+    // Row 2: Hearts & Energy Bar
+    for (int i = 0; i < playerStats.maxHp; ++i) {
+        float cx = p1X + 8.f + i * heartGap;
+        float cy = topY + 26.f;
+        bool hasHp = (i < playerStats.currentHp);
+
+        if (mHeartLoaded) {
+            sf::Sprite& spr = hasHp ? mHeartSprite : mHeartEmptySprite;
+            sf::Vector2u texSize = spr.getTexture() ? spr.getTexture()->getSize() : sf::Vector2u(52, 40);
+            spr.setScale(20.f / texSize.x, 16.f / texSize.y);
+            spr.setPosition(cx, cy);
+            window.draw(spr);
+        }
+    }
+
+    float p1BarX = p1X + playerStats.maxHp * heartGap + 12.f;
+    float p1BarY = topY + 29.f;
+
+    sf::RectangleShape bgEnergy1(sf::Vector2f(barW, barH));
+    bgEnergy1.setPosition(p1BarX, p1BarY);
+    bgEnergy1.setFillColor(sf::Color(20, 25, 35, 210));
+    bgEnergy1.setOutlineColor(sf::Color(0, 180, 220, 200));
+    bgEnergy1.setOutlineThickness(1.f);
+    window.draw(bgEnergy1);
+
+    float nrg1 = std::clamp(playerStats.energy / playerStats.maxEnergy, 0.f, 1.f);
+    sf::RectangleShape fillEnergy1(sf::Vector2f((barW - 2.f) * nrg1, barH - 2.f));
+    fillEnergy1.setPosition(p1BarX + 1.f, p1BarY + 1.f);
+    fillEnergy1.setFillColor(sf::Color(0, 230, 255, 240));
+    window.draw(fillEnergy1);
+
+    // Row 3: Gold & Mini Item Inventory Badges
+    int p1Coins = ShopData::getCoins();
+    sf::Text p1Gold;
+    p1Gold.setFont(mFont);
+    p1Gold.setString("GOLD: " + std::to_string(p1Coins) + "g");
+    p1Gold.setCharacterSize(11);
+    p1Gold.setFillColor(sf::Color(255, 225, 70));
+    p1Gold.setOutlineColor(sf::Color::Black);
+    p1Gold.setOutlineThickness(1.2f);
+    p1Gold.setPosition(p1X + 8.f, topY + 56.f);
+    window.draw(p1Gold);
+
+    std::string itemIds[4] = { "shield", "speed", "time", "radar" };
+    float itemStartX1 = p1X + 98.f;
+    float itemGap = 51.f;
+    for (int i = 0; i < 4; i++) {
+        int count1 = ShopData::getItemCount(itemIds[i]);
+        float ix = itemStartX1 + i * itemGap;
+        float iy = topY + 54.f;
+        if (mItemTextures[i].getSize().x > 0) {
+            sf::Sprite miniSpr(mItemTextures[i]);
+            float sc = 18.f / std::max(mItemTextures[i].getSize().x, mItemTextures[i].getSize().y);
+            miniSpr.setScale(sc, sc);
+            miniSpr.setPosition(ix, iy);
+            miniSpr.setColor(count1 > 0 ? sf::Color::White : sf::Color(140, 140, 150, 120));
+            window.draw(miniSpr);
+        }
+        sf::Text countText;
+        countText.setFont(mFont);
+        countText.setString("x" + std::to_string(count1));
+        countText.setCharacterSize(11);
+        countText.setFillColor(count1 > 0 ? sf::Color(120, 255, 120) : sf::Color(180, 180, 180));
+        countText.setOutlineColor(sf::Color::Black);
+        countText.setOutlineThickness(1.f);
+        countText.setPosition(ix + 20.f, iy);
+        window.draw(countText);
+    }
+
+    // ==========================================
+    // 2. OPPONENT BOT AI PANEL (Top-Right, Coral / Crimson Theme)
+    // ==========================================
+    float botX = Win_W - cardW - 12.f;
+    sf::RectangleShape botBg(sf::Vector2f(cardW, cardH));
+    botBg.setPosition(botX, topY);
+    botBg.setFillColor(sf::Color(28, 14, 18, 225));
+    botBg.setOutlineColor(sf::Color(255, 75, 90, 210));
+    botBg.setOutlineThickness(1.5f);
+    window.draw(botBg);
+
+    // Row 1: Title & Difficulty Badge
+    sf::Text botTitle;
+    botTitle.setFont(mFont);
+    botTitle.setString("OPPONENT BOT AI");
+    botTitle.setCharacterSize(13);
+    botTitle.setFillColor(sf::Color(255, 110, 120));
+    botTitle.setOutlineColor(sf::Color::Black);
+    botTitle.setOutlineThickness(1.5f);
+    botTitle.setPosition(botX + 8.f, topY + 5.f);
+    window.draw(botTitle);
+
+    sf::Text diffBadge;
+    diffBadge.setFont(mFont);
+    if (diff == BotDifficulty::EASY) {
+        diffBadge.setString("[EASY BOT]");
+        diffBadge.setFillColor(sf::Color(120, 255, 140));
+    } else if (diff == BotDifficulty::NORMAL) {
+        diffBadge.setString("[NORMAL BOT]");
+        diffBadge.setFillColor(sf::Color(255, 220, 80));
+    } else {
+        diffBadge.setString("[HARD BOT]");
+        diffBadge.setFillColor(sf::Color(255, 70, 70));
+    }
+    diffBadge.setCharacterSize(11);
+    diffBadge.setOutlineColor(sf::Color::Black);
+    diffBadge.setOutlineThickness(1.2f);
+    diffBadge.setPosition(botX + cardW - 110.f, topY + 6.f);
+    window.draw(diffBadge);
+
+    // Row 2: Bot HP (Hearts with reddish tint) & Bot Speed
+    for (int i = 0; i < botStats.maxHp; ++i) {
+        float cx = botX + 8.f + i * heartGap;
+        float cy = topY + 26.f;
+        bool hasHp = (i < botStats.currentHp);
+
+        if (mHeartLoaded) {
+            sf::Sprite spr = hasHp ? mHeartSprite : mHeartEmptySprite;
+            sf::Vector2u texSize = spr.getTexture() ? spr.getTexture()->getSize() : sf::Vector2u(52, 40);
+            spr.setScale(20.f / texSize.x, 16.f / texSize.y);
+            spr.setPosition(cx, cy);
+            if (hasHp) spr.setColor(sf::Color(255, 130, 130));
+            window.draw(spr);
+        }
+    }
+
+    sf::Text botSpd;
+    botSpd.setFont(mFont);
+    botSpd.setString("SPD: " + std::to_string(static_cast<int>(botStats.currentCalculatedSpeed)) + " px/s");
+    botSpd.setCharacterSize(11);
+    botSpd.setFillColor(sf::Color(255, 200, 160));
+    botSpd.setOutlineColor(sf::Color::Black);
+    botSpd.setOutlineThickness(1.2f);
+    botSpd.setPosition(botX + botStats.maxHp * heartGap + 16.f, topY + 28.f);
+    window.draw(botSpd);
+
+    // Row 3: Bot Status Indicator Pill
+    sf::Text botStatus;
+    botStatus.setFont(mFont);
+    botStatus.setCharacterSize(11);
+    botStatus.setOutlineColor(sf::Color::Black);
+    botStatus.setOutlineThickness(1.2f);
+
+    if (botStats.currentHp <= 0) {
+        botStatus.setString("STATUS: [ELIMINATED / CRASHED]");
+        botStatus.setFillColor(sf::Color(255, 60, 60));
+    } else if (botStats.timeFreezeActive) {
+        botStatus.setString("STATUS: [FROZEN IN TIME]");
+        botStatus.setFillColor(sf::Color(140, 210, 255));
+    } else {
+        botStatus.setString("STATUS: [RACING / SMART DODGE]");
+        botStatus.setFillColor(sf::Color(80, 240, 160));
+    }
+    botStatus.setPosition(botX + 8.f, topY + 56.f);
+    window.draw(botStatus);
+
+    // ==========================================
+    // 3. CENTER RACE PROGRESS TRACKER
+    // ==========================================
+    float trackW = 280.f;
+    float trackH = 26.f;
+    sf::RectangleShape raceTrackBox(sf::Vector2f(trackW, trackH));
+    raceTrackBox.setOrigin(trackW / 2.f, trackH / 2.f);
+    raceTrackBox.setPosition(Win_W / 2.f, 75.f);
+    raceTrackBox.setFillColor(sf::Color(12, 16, 26, 225));
+    raceTrackBox.setOutlineColor(sf::Color(255, 215, 0, 210));
+    raceTrackBox.setOutlineThickness(1.2f);
+    window.draw(raceTrackBox);
+
+    // Track baseline
+    float lineStartX = Win_W / 2.f - trackW / 2.f + 45.f;
+    float lineEndX   = Win_W / 2.f + trackW / 2.f - 45.f;
+    float lineY      = 75.f;
+
+    sf::RectangleShape trackLine(sf::Vector2f(lineEndX - lineStartX, 3.f));
+    trackLine.setPosition(lineStartX, lineY - 1.5f);
+    trackLine.setFillColor(sf::Color(70, 85, 110, 200));
+    window.draw(trackLine);
+
+    // Start / Finish Text
+    sf::Text startLabel;
+    startLabel.setFont(mFont);
+    startLabel.setString("START");
+    startLabel.setCharacterSize(9);
+    startLabel.setFillColor(sf::Color(180, 190, 210));
+    startLabel.setPosition(lineStartX - 38.f, lineY - 6.f);
+    window.draw(startLabel);
+
+    sf::Text finLabel;
+    finLabel.setFont(mFont);
+    finLabel.setString("FINISH");
+    finLabel.setCharacterSize(9);
+    finLabel.setFillColor(sf::Color(255, 215, 80));
+    finLabel.setPosition(lineEndX + 6.f, lineY - 6.f);
+    window.draw(finLabel);
+
+    // Normalized progress: from spawn (y = 560) to finish (y = 80)
+    float pProg = std::clamp((560.f - playerY) / 480.f, 0.f, 1.f);
+    float bProg = std::clamp((560.f - botY) / 480.f, 0.f, 1.f);
+
+    float pDotX = lineStartX + pProg * (lineEndX - lineStartX);
+    float bDotX = lineStartX + bProg * (lineEndX - lineStartX);
+
+    // Bot Dot Marker (Red)
+    sf::CircleShape botDot(5.f);
+    botDot.setOrigin(5.f, 5.f);
+    botDot.setPosition(bDotX, lineY);
+    botDot.setFillColor(sf::Color(255, 70, 80));
+    botDot.setOutlineColor(sf::Color::White);
+    botDot.setOutlineThickness(1.f);
+    window.draw(botDot);
+
+    // Player Dot Marker (Cyan)
+    sf::CircleShape playerDot(6.f);
+    playerDot.setOrigin(6.f, 6.f);
+    playerDot.setPosition(pDotX, lineY);
+    playerDot.setFillColor(sf::Color(0, 240, 255));
+    playerDot.setOutlineColor(sf::Color::White);
+    playerDot.setOutlineThickness(1.2f);
+    window.draw(playerDot);
 }
