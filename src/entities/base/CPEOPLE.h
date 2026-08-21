@@ -6,6 +6,13 @@
 #include "Animation.h"
 #include "PlayerStats.h"
 
+enum class PlayerControlScheme {
+    SINGLE_PLAYER_ALL, // WASD or Arrows
+    PLAYER_1_WASD,     // WASD, LShift, E, Q, T
+    PLAYER_2_ARROWS,   // Arrows, RShift/RCtrl, [ / O, ] / P, \ / L
+    BOT_CONTROLLED     // Moved programmatically by BotAI
+};
+
 class CPEOPLE {
     sf::Sprite                 mSprite;
     sf::Texture                mTexture;
@@ -59,6 +66,14 @@ public:
     void knockback(float distanceY = 160.f);
     void resetStats();
 
+    // Control scheme & Player Identification
+    void setControlScheme(PlayerControlScheme scheme) { mControlScheme = scheme; }
+    PlayerControlScheme getControlScheme() const { return mControlScheme; }
+    void setPlayerLabel(const std::string& label) { mPlayerLabel = label; }
+    const std::string& getPlayerLabel() const { return mPlayerLabel; }
+    void setShopSlot(int slot) { mShopSlot = slot; }
+    int getShopSlot() const { return mShopSlot; }
+
     // Bot AI & Visual customization
     void setBaseColor(const sf::Color& color) { mBaseColor = color; }
     sf::Color getBaseColor() const { return mBaseColor; }
@@ -74,6 +89,13 @@ private:
     bool  mEPressedLast = false;
     bool  mQPressedLast = false;
     bool  mTPressedLast = false;
+    bool  mP2Skill1PressedLast = false;
+    bool  mP2Skill2PressedLast = false;
+    bool  mP2Skill3PressedLast = false;
+
+    PlayerControlScheme mControlScheme = PlayerControlScheme::SINGLE_PLAYER_ALL;
+    std::string         mPlayerLabel   = "";
+    int                 mShopSlot      = 0;
 
     // PowerUp Active Visuals
     float mPowerUpSpeedMultiplier = 1.0f;

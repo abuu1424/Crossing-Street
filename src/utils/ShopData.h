@@ -20,6 +20,9 @@ private:
   static int sActiveSlot;
 
 public:
+  static constexpr int SLOT_P1_2P = 4;
+  static constexpr int SLOT_P2_2P = 5;
+
   static void setActiveSlot(int slot);
   static int getActiveSlot();
 

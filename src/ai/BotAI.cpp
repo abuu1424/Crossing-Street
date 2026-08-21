@@ -6,6 +6,7 @@
 #include "Utils.h"
 #include <algorithm>
 #include <cstdlib>
+#include <cmath>
 
 void BotAI::init(BotDifficulty diff, EntityManager* em, HazardManager* hm, PowerUpManager* pm) {
     mEntityManager  = em;
@@ -22,7 +23,6 @@ void BotAI::reset() {
 }
 
 GridNode BotAI::worldToGrid(sf::Vector2f pos) {
-    // Offset by center of player entity
     float cx = pos.x + Player_W / 2.f;
     float cy = pos.y + Player_H / 2.f;
     return { std::clamp((int)(cy / CELL_SIZE), 0, (int)(Win_H / CELL_SIZE)),
@@ -30,121 +30,208 @@ GridNode BotAI::worldToGrid(sf::Vector2f pos) {
 }
 
 sf::Vector2f BotAI::gridToWorld(GridNode n) {
-    // Return top-left position for CPEOPLE entity centered in cell
     float targetX = n.col * CELL_SIZE + (CELL_SIZE - Player_W) / 2.f;
     float targetY = n.row * CELL_SIZE + (CELL_SIZE - Player_H) / 2.f;
     return { targetX, targetY };
 }
 
-std::vector<GridNode> BotAI::getNeighbors(GridNode n) {
-    return {
-        { n.row - 1, n.col }, // UP
-        { n.row + 1, n.col }, // DOWN
+std::vector<GridNode> BotAI::getNeighbors(GridNode n, bool allowWait) {
+    std::vector<GridNode> neighbors = {
+        { n.row - 1, n.col }, // UP (Primary Goal)
         { n.row, n.col - 1 }, // LEFT
-        { n.row, n.col + 1 }  // RIGHT
+        { n.row, n.col + 1 }, // RIGHT
+        { n.row + 1, n.col }  // DOWN (Retreat / Dodge)
     };
+    if (allowWait) {
+        neighbors.push_back({ n.row, n.col }); // WAIT in place
+    }
+    return neighbors;
 }
 
-float BotAI::getNodeCost(GridNode n,
-                         const std::vector<sf::FloatRect>& predictedObstacles,
-                         const std::vector<sf::FloatRect>& dangerZones) const {
+float BotAI::getPredictedNodeCost(GridNode n, float futureTime,
+                                  const std::vector<sf::FloatRect>& dangerZones) const {
     float cost = 1.0f;
-    sf::FloatRect cellRect(n.col * CELL_SIZE, n.row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    sf::FloatRect cellRect(n.col * CELL_SIZE - 2.f, n.row * CELL_SIZE - 2.f, CELL_SIZE + 4.f, CELL_SIZE + 4.f);
 
-    // Dynamic vehicle / animal obstacles lookahead collision penalty
-    for (const auto& hb : predictedObstacles) {
-        if (hb.intersects(cellRect)) {
-            cost += mParams.dangerPenalty;
+    // 1. Spatio-Temporal Obstacle Trajectory Collision Check
+    if (mEntityManager) {
+        bool isTrafficRed = false;
+        if (mEntityManager->traffic() && mEntityManager->traffic()->isRed()) {
+            isTrafficRed = true;
+        }
+
+        // Vehicles
+        for (const auto& obs : mEntityManager->obstacles()) {
+            sf::FloatRect hb = obs->getHitbox();
+            // If traffic light is red in level and car is stopped, it does not move
+            float speed = (obs->isStopped() || isTrafficRed) ? 0.f : obs->getSpeed();
+            float vx = speed * obs->getDirection();
+            float shift = vx * futureTime;
+
+            sf::FloatRect predictedBox = hb;
+            predictedBox.left += shift;
+
+            // Expand predicted box slightly for safety margin
+            predictedBox.left -= 6.f;
+            predictedBox.width += 12.f;
+
+            if (predictedBox.intersects(cellRect)) {
+                cost += mParams.dangerPenalty;
+            }
+        }
+
+        // Animals
+        for (const auto& ani : mEntityManager->animals()) {
+            sf::FloatRect hb = ani->getHitbox();
+            float vx = ani->getSpeed() * ani->getDirection();
+            float shift = vx * futureTime;
+
+            sf::FloatRect predictedBox = hb;
+            predictedBox.left += shift;
+            predictedBox.left -= 6.f;
+            predictedBox.width += 12.f;
+
+            if (predictedBox.intersects(cellRect)) {
+                cost += mParams.dangerPenalty;
+            }
         }
     }
 
-    // Active hazard danger zones penalty
+    // 2. Active Hazards (Lasers, Stampede, Lightning)
     for (const auto& dz : dangerZones) {
         if (dz.intersects(cellRect)) {
-            cost += mParams.dangerPenalty * 1.8f;
+            cost += mParams.dangerPenalty * 2.0f;
         }
     }
 
-    // Power-up attraction
+    // 3. Power-Up Attraction (Detour Incentive)
     if (mPowerUpManager && mPowerUpManager->hasItemNear(cellRect)) {
-        cost -= mParams.powerUpAttractionWeight;
+        cost -= (mParams.powerUpAttractionWeight * 25.f);
     }
 
     return std::max(0.05f, cost);
 }
 
-std::vector<GridNode> BotAI::runDijkstra(GridNode start, int goalRow) const {
+std::vector<GridNode> BotAI::runSpatioTemporalAStar(GridNode start, int goalRow, float botSpeed) const {
     const int maxCols = (int)(Win_W / CELL_SIZE);
     const int maxRows = (int)(Win_H / CELL_SIZE);
 
-    // Pre-cache predicted hitboxes & hazard zones ONCE per Dijkstra execution for max performance
-    std::vector<sf::FloatRect> predictedObstacles;
-    if (mEntityManager) {
-        predictedObstacles = mEntityManager->getPredictedHitboxes(mParams.predictionHorizon);
-    }
+    float effectiveSpeed = std::max(80.f, botSpeed * mParams.speedFactor);
+    float stepTime = CELL_SIZE / effectiveSpeed;
 
     std::vector<sf::FloatRect> dangerZones;
     if (mHazardManager && (mHazardManager->isHazardActive() || mHazardManager->isWarningActive())) {
         dangerZones = mHazardManager->getDangerZones();
     }
 
-    // Min-priority queue
-    std::priority_queue<std::pair<float, GridNode>,
-                        std::vector<std::pair<float, GridNode>>,
-                        std::greater<std::pair<float, GridNode>>> pq;
+    // Min-priority queue based on fScore (gScore + heuristic)
+    typedef std::pair<float, TimeGridNode> PQElement;
+    std::priority_queue<PQElement, std::vector<PQElement>, std::greater<PQElement>> pq;
 
-    std::unordered_map<GridNode, float, GridNodeHash> dist;
-    std::unordered_map<GridNode, GridNode, GridNodeHash> prev;
+    std::unordered_map<TimeGridNode, float, TimeGridNodeHash> gScore;
+    std::unordered_map<TimeGridNode, TimeGridNode, TimeGridNodeHash> cameFrom;
 
-    dist[start] = 0.f;
-    pq.push({ 0.f, start });
-    GridNode goalNode = start;
-    bool found = false;
+    TimeGridNode startNode = { start.row, start.col, 0 };
+    gScore[startNode] = 0.f;
+
+    auto heuristic = [&](const TimeGridNode& node) -> float {
+        float rowDist = std::max(0.f, static_cast<float>(node.row - goalRow));
+        return rowDist * 1.5f;
+    };
+
+    pq.push({ heuristic(startNode), startNode });
+
+    TimeGridNode bestNode = startNode;
+    float bestFScore = 999999.f;
 
     while (!pq.empty()) {
-        auto [d, u] = pq.top();
+        auto [currentF, u] = pq.top();
         pq.pop();
 
-        if (d > dist[u]) continue;
-
-        // Reached target goal row
         if (u.row <= goalRow) {
-            goalNode = u;
-            found = true;
+            bestNode = u;
             break;
         }
 
-        for (GridNode v : getNeighbors(u)) {
-            if (v.col < 0 || v.col > maxCols || v.row < 0 || v.row > maxRows) {
+        if (currentF < bestFScore) {
+            bestFScore = currentF;
+            bestNode = u;
+        }
+
+        if (u.timeStep >= mParams.maxSearchDepth) {
+            continue;
+        }
+
+        // Neighbors include UP, LEFT, RIGHT, DOWN and optional WAIT (stay in place)
+        auto neighbors = getNeighbors({ u.row, u.col }, mParams.canWait);
+        for (GridNode vGrid : neighbors) {
+            if (vGrid.col < 0 || vGrid.col > maxCols || vGrid.row < 0 || vGrid.row > maxRows) {
                 continue;
             }
 
-            float w = getNodeCost(v, predictedObstacles, dangerZones);
-            // Slight bias towards forward movement (decreasing row)
-            if (v.row < u.row) {
-                w *= 0.95f;
-            } else if (v.row > u.row) {
-                w *= 1.15f;
+            TimeGridNode v = { vGrid.row, vGrid.col, u.timeStep + 1 };
+            float futureTime = v.timeStep * stepTime;
+
+            float penaltyCost = getPredictedNodeCost(vGrid, futureTime, dangerZones);
+
+            // Move bias
+            float moveWeight = 1.0f;
+            if (vGrid.row < u.row) {
+                moveWeight = 0.85f;  // UP (Prioritize advancing)
+            } else if (vGrid.row == u.row && vGrid.col == u.col) {
+                moveWeight = 1.15f;  // WAIT (Safe pause for car gap)
+            } else if (vGrid.row > u.row) {
+                moveWeight = 1.60f;  // DOWN (Retreat penalty)
+            } else {
+                moveWeight = 1.05f;  // LEFT/RIGHT (Lateral)
             }
 
-            float nd = dist[u] + w;
-            if (!dist.count(v) || nd < dist[v]) {
-                dist[v] = nd;
-                prev[v] = u;
-                pq.push({ nd, v });
+            float tentativeG = gScore[u] + (penaltyCost * moveWeight);
+
+            if (!gScore.count(v) || tentativeG < gScore[v]) {
+                gScore[v] = tentativeG;
+                cameFrom[v] = u;
+                float f = tentativeG + heuristic(v);
+                pq.push({ f, v });
             }
         }
     }
 
-    if (!found) return {};
-
+    // Reconstruct Path from best/goal node back to start
     std::vector<GridNode> path;
-    for (GridNode cur = goalNode; !(cur == start); cur = prev[cur]) {
-        path.push_back(cur);
+    TimeGridNode curr = bestNode;
+    while (!(curr == startNode)) {
+        path.push_back({ curr.row, curr.col });
+        if (!cameFrom.count(curr)) break;
+        curr = cameFrom[curr];
     }
-    path.push_back(start);
+    path.push_back({ startNode.row, startNode.col });
     std::reverse(path.begin(), path.end());
+
     return path;
+}
+
+sf::Vector2f BotAI::calculateMicroDodge(const sf::Vector2f& botPos) const {
+    if (!mEntityManager) return { 0.f, 0.f };
+
+    sf::Vector2f dodgeVector(0.f, 0.f);
+    sf::FloatRect threatBox(botPos.x - 30.f, botPos.y - 20.f, Player_W + 60.f, Player_H + 40.f);
+
+    for (const auto& obs : mEntityManager->obstacles()) {
+        sf::FloatRect ob = obs->getHitbox();
+        if (ob.intersects(threatBox)) {
+            float obsCenterX = ob.left + ob.width / 2.f;
+            float botCenterX = botPos.x + Player_W / 2.f;
+            // Push away laterally
+            if (botCenterX < obsCenterX) {
+                dodgeVector.x -= 140.f;
+            } else {
+                dodgeVector.x += 140.f;
+            }
+        }
+    }
+
+    return dodgeVector;
 }
 
 void BotAI::update(float dt, CPEOPLE& botEntity, int goalRow) {
@@ -153,46 +240,59 @@ void BotAI::update(float dt, CPEOPLE& botEntity, int goalRow) {
         return;
     }
 
-    // 1. Emergency Reflex Check: if an obstacle is dangerously close or about to crash into bot
+    float baseSpeed = botEntity.getSpeed();
+    float effectiveSpeed = baseSpeed * mParams.speedFactor * botEntity.getPowerUpSpeedMultiplier();
+
+    // 1. Emergency Reflex Check: if an obstacle is about to crash within 0.15s
     if (mParams.emergencyDodge && mEntityManager) {
         sf::FloatRect botBox = botEntity.getHitbox();
-        sf::FloatRect threatBox(botBox.left - 10.f, botBox.top - 4.f, botBox.width + 20.f, botBox.height + 8.f);
-        auto immediateObstacles = mEntityManager->getPredictedHitboxes(0.15f);
+        sf::FloatRect threatBox(botBox.left - 14.f, botBox.top - 6.f, botBox.width + 28.f, botBox.height + 12.f);
+        auto immediateObstacles = mEntityManager->getPredictedHitboxes(0.18f);
         for (const auto& obs : immediateObstacles) {
             if (obs.intersects(threatBox)) {
-                mReplanTimer = 0.f; // Force immediate replan to dodge away
+                mReplanTimer = 0.f; // Force immediate Spatio-Temporal A* replanning
                 break;
             }
         }
     }
 
-    // 2. Periodic Dijkstra Path Replanning
+    // 2. Periodic Spatio-Temporal A* Path Replanning
     mReplanTimer -= dt;
     if (mReplanTimer <= 0.f) {
         mReplanTimer = mParams.replanInterval;
         GridNode start = worldToGrid(botEntity.getPosition());
-        mCurrentPath = runDijkstra(start, goalRow);
-        mPathIndex = 1; // Step 0 is current cell, move to step 1
+        mCurrentPath = runSpatioTemporalAStar(start, goalRow, effectiveSpeed);
+        mPathIndex = 1; // Step 0 is current cell, step 1 is next target
 
-        // Mistake chance: low difficulty bot occasionally chooses an alternate safe step
+        // Mistake chance on EASY/NORMAL difficulty
         if (mCurrentPath.size() > 1 && mParams.mistakeChance > 0.f &&
             (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) < mParams.mistakeChance)) {
-            auto neighbors = getNeighbors(start);
+            auto neighbors = getNeighbors(start, false);
             if (!neighbors.empty()) {
                 GridNode altStep = neighbors[rand() % neighbors.size()];
-                std::vector<sf::FloatRect> obs = mEntityManager ? mEntityManager->getPredictedHitboxes(0.1f) : std::vector<sf::FloatRect>{};
-                std::vector<sf::FloatRect> dz  = (mHazardManager && (mHazardManager->isHazardActive() || mHazardManager->isWarningActive())) ? mHazardManager->getDangerZones() : std::vector<sf::FloatRect>{};
-                // Only take alternate step if it is safe (< penalty threshold)
-                if (getNodeCost(altStep, obs, dz) < mParams.dangerPenalty * 0.5f) {
+                std::vector<sf::FloatRect> dz = (mHazardManager && (mHazardManager->isHazardActive() || mHazardManager->isWarningActive()))
+                                             ? mHazardManager->getDangerZones() : std::vector<sf::FloatRect>{};
+                if (getPredictedNodeCost(altStep, 0.2f, dz) < mParams.dangerPenalty * 0.5f) {
                     mCurrentPath[1] = altStep;
                 }
             }
         }
     }
 
-    // 3. Movement Execution with Speed Factor & Walk Direction Animation
+    // 3. Movement Execution & Micro-Dodging
     if (mPathIndex < mCurrentPath.size()) {
-        sf::Vector2f target = gridToWorld(mCurrentPath[mPathIndex]);
+        GridNode targetNode = mCurrentPath[mPathIndex];
+        GridNode currentNode = worldToGrid(botEntity.getPosition());
+
+        // Check if the next action is a "WAIT" action in the current cell
+        if (targetNode == currentNode) {
+            // Intelligent pause / waiting for traffic gap
+            botEntity.setMoving(false);
+            botEntity.setFacingRow(3); // Face UP towards crossing direction
+            return;
+        }
+
+        sf::Vector2f target = gridToWorld(targetNode);
         sf::Vector2f cur = botEntity.getPosition();
         sf::Vector2f dir = target - cur;
         float dist = std::sqrt(dir.x * dir.x + dir.y * dir.y);
@@ -204,9 +304,15 @@ void BotAI::update(float dt, CPEOPLE& botEntity, int goalRow) {
             }
         } else {
             dir /= dist;
-            float baseSpeed = botEntity.getSpeed();
-            float effectiveSpeed = baseSpeed * mParams.speedFactor * botEntity.getPowerUpSpeedMultiplier();
-            botEntity.setPosition(cur.x + dir.x * effectiveSpeed * dt, cur.y + dir.y * effectiveSpeed * dt);
+            sf::Vector2f moveVelocity = dir * effectiveSpeed;
+
+            // Apply reactive micro-dodge repulsion if enabled
+            if (mParams.emergencyDodge) {
+                sf::Vector2f dodge = calculateMicroDodge(cur);
+                moveVelocity += dodge;
+            }
+
+            botEntity.setPosition(cur.x + moveVelocity.x * dt, cur.y + moveVelocity.y * dt);
             botEntity.setMoving(true);
 
             // Update walk animation facing direction

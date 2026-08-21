@@ -61,17 +61,33 @@ void CoinManager::spawnForLevel(int level) {
   }
 }
 
-void CoinManager::update(float dt, const sf::FloatRect &playerHitbox,
-                         SoundManager *sound, bool magnetActive,
-                         const sf::Vector2f& playerPos, int scoreMultiplier) {
+void CoinManager::update(float dt, const sf::FloatRect &p1Hitbox,
+                         SoundManager *sound, bool p1Magnet,
+                         const sf::Vector2f& p1Pos, int p1ScoreMultiplier, int p1Slot,
+                         bool is2P, const sf::FloatRect &p2Hitbox,
+                         bool p2Magnet, const sf::Vector2f& p2Pos,
+                         int p2ScoreMultiplier, int p2Slot) {
   for (auto &coin : mCoins) {
     if (coin.collected)
       continue;
 
-    // Magnet Effect: Hút coin về phía Player (Coin Magnet Radar)
-    if (magnetActive) {
-      float dx = playerPos.x - coin.position.x;
-      float dy = playerPos.y - coin.position.y;
+    // Magnet Effect: Hút coin về phía Player 1
+    if (p1Magnet) {
+      float dx = p1Pos.x - coin.position.x;
+      float dy = p1Pos.y - coin.position.y;
+      float distSq = dx * dx + dy * dy;
+      if (distSq <= 700.f * 700.f && distSq > 4.f) {
+        float dist = std::sqrt(distSq);
+        float pullSpeed = 560.f * dt;
+        coin.position.x += (dx / dist) * pullSpeed;
+        coin.position.y += (dy / dist) * pullSpeed;
+      }
+    }
+
+    // Magnet Effect: Hút coin về phía Player 2
+    if (is2P && p2Magnet) {
+      float dx = p2Pos.x - coin.position.x;
+      float dy = p2Pos.y - coin.position.y;
       float distSq = dx * dx + dy * dy;
       if (distSq <= 700.f * 700.f && distSq > 4.f) {
         float dist = std::sqrt(distSq);
@@ -91,28 +107,53 @@ void CoinManager::update(float dt, const sf::FloatRect &playerHitbox,
     // Floating bobbing motion
     coin.bobbingTimer += dt * 3.5f;
 
-    // Collision check with player
+    // Collision check
     float bobY = std::sin(coin.bobbingTimer) * 3.5f;
     sf::FloatRect coinHitbox(coin.position.x - 14.f,
                              coin.position.y + bobY - 14.f, 28.f, 28.f);
 
-    if (playerHitbox.intersects(coinHitbox)) {
+    // 1. Kiểm tra nhặt xu của Player 1
+    if (p1Hitbox.intersects(coinHitbox)) {
       coin.collected = true;
+      int earnedGold = 25 * p1ScoreMultiplier;
+      ShopData::addCoins(earnedGold, p1Slot);
 
-      // Award +25 Gold to player slot balance (multiplied by scoreMultiplier)
-      int earnedGold = 25 * scoreMultiplier;
-      ShopData::addCoins(earnedGold);
-
-      // Add floating feedback text
       FloatingCoinText ft;
-      ft.text = (scoreMultiplier > 1) ? ("+" + std::to_string(earnedGold) + " Gold (2X!)")
-                                      : ("+" + std::to_string(earnedGold) + " Gold");
+      if (is2P) {
+        ft.text = (p1ScoreMultiplier > 1) ? ("+" + std::to_string(earnedGold) + "g (P1 2X!)")
+                                          : ("+" + std::to_string(earnedGold) + "g (P1)");
+        ft.color = sf::Color(0, 230, 255); // Neon Cyan
+      } else {
+        ft.text = (p1ScoreMultiplier > 1) ? ("+" + std::to_string(earnedGold) + " Gold (2X!)")
+                                          : ("+" + std::to_string(earnedGold) + " Gold");
+        ft.color = sf::Color(255, 215, 0); // Gold
+      }
       ft.position = sf::Vector2f(coin.position.x, coin.position.y - 10.f);
       ft.alpha = 255.f;
       ft.lifetime = 0.85f;
       mFloatingTexts.push_back(ft);
 
-      // Play pickup sound chime if available
+      if (sound) {
+        sound->playCoinSound();
+      }
+      continue;
+    }
+
+    // 2. Kiểm tra nhặt xu của Player 2
+    if (is2P && p2Hitbox.intersects(coinHitbox)) {
+      coin.collected = true;
+      int earnedGold = 25 * p2ScoreMultiplier;
+      ShopData::addCoins(earnedGold, p2Slot);
+
+      FloatingCoinText ft;
+      ft.text = (p2ScoreMultiplier > 1) ? ("+" + std::to_string(earnedGold) + "g (P2 2X!)")
+                                        : ("+" + std::to_string(earnedGold) + "g (P2)");
+      ft.color = sf::Color(255, 160, 255); // Neon Pink
+      ft.position = sf::Vector2f(coin.position.x, coin.position.y - 10.f);
+      ft.alpha = 255.f;
+      ft.lifetime = 0.85f;
+      mFloatingTexts.push_back(ft);
+
       if (sound) {
         sound->playCoinSound();
       }
@@ -167,7 +208,9 @@ void CoinManager::draw(sf::RenderWindow &window) {
     for (const auto &ft : mFloatingTexts) {
       text.setString(ft.text);
       sf::Uint8 a = static_cast<sf::Uint8>(std::max(0.f, std::min(255.f, ft.alpha)));
-      text.setFillColor(sf::Color(255, 215, 0, a));
+      sf::Color col = ft.color;
+      col.a = a;
+      text.setFillColor(col);
       text.setOutlineColor(sf::Color(0, 0, 0, a));
       text.setOutlineThickness(1.5f);
 

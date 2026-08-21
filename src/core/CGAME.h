@@ -32,6 +32,15 @@ class CGAME {
   // Player
   CPEOPLE mPlayer;
 
+  // 2-Player Mode State
+  bool mIsTwoPlayerMode = false;
+  CPEOPLE mPlayer2;
+  int mP1Wins = 0;
+  int mP2Wins = 0;
+  int mScore2 = 0;
+
+  void startTwoPlayerGame();
+
   // VS BOT Mode State
   bool mIsVsBotMode = false;
   BotDifficulty mSelectedBotDifficulty = BotDifficulty::NORMAL;
@@ -106,6 +115,7 @@ class CGAME {
   sf::Text mVictoryScore;
   sf::Text mVictoryHighScore;
   MenuButton mBtnVictoryPlayAgain;
+  MenuButton mBtnVictoryShop;
   MenuButton mBtnVictoryMenu;
 
   // Bảng nhập tên file save

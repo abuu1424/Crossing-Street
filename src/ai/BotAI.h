@@ -14,49 +14,57 @@ class CPEOPLE;
 enum class BotDifficulty { EASY, NORMAL, HARD };
 
 struct BotDifficultyParams {
-    float replanInterval;          // seconds between Dijkstra recalculations
-    float predictionHorizon;       // seconds to project dynamic obstacle hitboxes
+    float replanInterval;          // seconds between Spatio-Temporal A* recalculations
+    float predictionHorizon;       // seconds to project dynamic obstacle trajectories
     float dangerPenalty;           // weight penalty for hazardous cells
     float speedFactor;             // speed multiplier relative to player base speed
     float mistakeChance;           // 0..1 probability of taking a non-optimal safe step
     bool  emergencyDodge;          // instant reaction reflex on imminent threat
+    bool  canWait;                 // ability to intelligently pause/wait for traffic gaps
     float powerUpAttractionWeight; // incentive to route toward power-ups
+    int   maxSearchDepth;          // max time steps in Spatio-Temporal A*
 };
 
 inline BotDifficultyParams getBotParams(BotDifficulty d) {
     switch (d) {
         case BotDifficulty::EASY:
             return {
-                /*replanInterval*/          0.38f,
-                /*predictionHorizon*/       0.20f,
-                /*dangerPenalty*/           900.f,
-                /*speedFactor*/             0.84f,  // -16% speed, forgiving for beginner players
-                /*mistakeChance*/           0.20f,  // occasional hesitation / alternate safe route
+                /*replanInterval*/          0.32f,
+                /*predictionHorizon*/       0.35f,
+                /*dangerPenalty*/           1200.f,
+                /*speedFactor*/             0.85f,  // -15% speed, beginner-friendly
+                /*mistakeChance*/           0.15f,  // occasional hesitation / slight misdirection
                 /*emergencyDodge*/          false,
-                /*powerUpAttractionWeight*/ 0.3f
+                /*canWait*/                 true,
+                /*powerUpAttractionWeight*/ 0.35f,
+                /*maxSearchDepth*/          14
             };
         case BotDifficulty::NORMAL:
             return {
-                /*replanInterval*/          0.18f,
-                /*predictionHorizon*/       0.45f,
-                /*dangerPenalty*/           3000.f,
+                /*replanInterval*/          0.14f,
+                /*predictionHorizon*/       0.60f,
+                /*dangerPenalty*/           4500.f,
                 /*speedFactor*/             1.00f,  // 100% equal speed to player
-                /*mistakeChance*/           0.04f,
+                /*mistakeChance*/           0.02f,
                 /*emergencyDodge*/          true,   // dodges oncoming close-range cars
-                /*powerUpAttractionWeight*/ 0.85f   // collects nearby powerups
+                /*canWait*/                 true,   // waits for safe traffic gaps
+                /*powerUpAttractionWeight*/ 0.90f,  // collects nearby powerups
+                /*maxSearchDepth*/          22
             };
         case BotDifficulty::HARD:
             return {
-                /*replanInterval*/          0.08f,  // 12.5 Hz fast Dijkstra replanning
-                /*predictionHorizon*/       0.70f,  // long lookahead with swept danger boxes
-                /*dangerPenalty*/           8000.f, // strict hazard avoidance
-                /*speedFactor*/             1.10f,  // +10% speed, swift & highly competitive
-                /*mistakeChance*/           0.00f,  // 0% mistakes, optimal path execution
-                /*emergencyDodge*/          true,   // instant reflex evasion
-                /*powerUpAttractionWeight*/ 1.40f   // actively seeks Speed Boost / Shield
+                /*replanInterval*/          0.06f,  // 16.6 Hz real-time Spatio-Temporal A* replanning
+                /*predictionHorizon*/       0.90f,  // deep trajectory lookahead with lane traffic sync
+                /*dangerPenalty*/           9500.f, // strict hazard avoidance
+                /*speedFactor*/             1.10f,  // +10% speed, highly competitive
+                /*mistakeChance*/           0.00f,  // 0% mistakes, flawless execution
+                /*emergencyDodge*/          true,   // instant reflex micro-dodging
+                /*canWait*/                 true,   // masterfully times lane crossings & waits
+                /*powerUpAttractionWeight*/ 1.50f,  // actively steals Speed Boost / Shield
+                /*maxSearchDepth*/          30
             };
     }
-    return { 0.18f, 0.45f, 3000.f, 1.0f, 0.04f, true, 0.85f };
+    return { 0.14f, 0.60f, 4500.f, 1.0f, 0.02f, true, true, 0.90f, 22 };
 }
 
 struct GridNode {
@@ -74,6 +82,30 @@ struct GridNodeHash {
     }
 };
 
+struct TimeGridNode {
+    int row;
+    int col;
+    int timeStep;
+    bool operator==(const TimeGridNode& o) const {
+        return row == o.row && col == o.col && timeStep == o.timeStep;
+    }
+    bool operator!=(const TimeGridNode& o) const { return !(*this == o); }
+    bool operator<(const TimeGridNode& o) const {
+        if (row != o.row) return row < o.row;
+        if (col != o.col) return col < o.col;
+        return timeStep < o.timeStep;
+    }
+};
+
+struct TimeGridNodeHash {
+    size_t operator()(const TimeGridNode& n) const {
+        size_t h1 = std::hash<int>()(n.row);
+        size_t h2 = std::hash<int>()(n.col);
+        size_t h3 = std::hash<int>()(n.timeStep);
+        return h1 ^ (h2 << 1) ^ (h3 << 2);
+    }
+};
+
 class BotAI {
 public:
     void init(BotDifficulty diff, EntityManager* em, HazardManager* hm, PowerUpManager* pm);
@@ -85,9 +117,9 @@ public:
     // Node & Path utility functions
     static GridNode worldToGrid(sf::Vector2f pos);
     static sf::Vector2f gridToWorld(GridNode n);
-    static std::vector<GridNode> getNeighbors(GridNode n);
+    static std::vector<GridNode> getNeighbors(GridNode n, bool allowWait = false);
 
-    std::vector<GridNode> runDijkstra(GridNode start, int goalRow) const;
+    std::vector<GridNode> runSpatioTemporalAStar(GridNode start, int goalRow, float botSpeed) const;
 
 private:
     EntityManager*  mEntityManager  = nullptr;
@@ -103,7 +135,8 @@ private:
 
     static constexpr float CELL_SIZE = 48.f;
 
-    float getNodeCost(GridNode n,
-                      const std::vector<sf::FloatRect>& predictedObstacles,
-                      const std::vector<sf::FloatRect>& dangerZones) const;
+    float getPredictedNodeCost(GridNode n, float futureTime,
+                               const std::vector<sf::FloatRect>& dangerZones) const;
+
+    sf::Vector2f calculateMicroDodge(const sf::Vector2f& botPos) const;
 };

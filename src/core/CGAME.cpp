@@ -171,12 +171,16 @@ void CGAME::setupUI() {
   // Hai nút nằm ngang cùng kích thước, cùng thiết kế chữ nhật crimson red pixel
   // art
   mBtnVictoryPlayAgain.setup("assets/ui/menu/btn_yes.png", "PLAY AGAIN", mFont,
-                             Win_W / 2.f - 135.f, Win_H / 2.f + 130.f,
-                             "assets/ui/menu/btn_yes_hover.png", 18);
+                             Win_W / 2.f - 180.f, Win_H / 2.f + 130.f,
+                             "assets/ui/menu/btn_yes_hover.png", 17);
+
+  mBtnVictoryShop.setup("assets/ui/menu/btn_yes.png", "SHOP [S]", mFont,
+                        Win_W / 2.f, Win_H / 2.f + 130.f,
+                        "assets/ui/menu/btn_yes_hover.png", 17);
 
   mBtnVictoryMenu.setup("assets/ui/menu/btn_yes.png", "MAIN MENU", mFont,
-                        Win_W / 2.f + 135.f, Win_H / 2.f + 130.f,
-                        "assets/ui/menu/btn_yes_hover.png", 18);
+                        Win_W / 2.f + 180.f, Win_H / 2.f + 130.f,
+                        "assets/ui/menu/btn_yes_hover.png", 17);
 
   // Bảng nhập tên save
   float sboxW = 450.f, sboxH = 180.f;
@@ -328,29 +332,29 @@ void CGAME::setupUI() {
   mPauseSFXVal.setFillColor(sf::Color(200, 200, 200));
 
   // Bảng Level Clear
-  float lcW = 500.f, lcH = 300.f;
+  float lcW = 560.f, lcH = 440.f;
   mLevelClearBox.setSize(sf::Vector2f(lcW, lcH));
-  mLevelClearBox.setFillColor(sf::Color(20, 20, 30, 230));
+  mLevelClearBox.setFillColor(sf::Color(20, 20, 30, 235));
   mLevelClearBox.setOutlineColor(sf::Color(255, 215, 0));
   mLevelClearBox.setOutlineThickness(3.f);
   mLevelClearBox.setOrigin(lcW / 2.f, lcH / 2.f);
   mLevelClearBox.setPosition(Win_W / 2.f, Win_H / 2.f);
 
   mLevelClearTitle.setFont(mFont);
-  mLevelClearTitle.setCharacterSize(32);
+  mLevelClearTitle.setCharacterSize(30);
   mLevelClearTitle.setFillColor(sf::Color(255, 215, 0));
   {
     sf::FloatRect b = mLevelClearTitle.getLocalBounds();
     mLevelClearTitle.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
-    mLevelClearTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 110.f);
+    mLevelClearTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 145.f);
   }
 
   mLevelClearScore.setFont(mFont);
-  mLevelClearScore.setCharacterSize(20);
+  mLevelClearScore.setCharacterSize(18);
   mLevelClearScore.setFillColor(sf::Color::White);
-  mLevelClearScore.setPosition(Win_W / 2.f, Win_H / 2.f - 65.f);
+  mLevelClearScore.setPosition(Win_W / 2.f, Win_H / 2.f - 95.f);
 
-  // 4 lựa chọn
+  // Options
   auto setupOpt = [&](sf::Text &t, const std::string &str, float y) {
     t.setFont(mFont);
     t.setString(str);
@@ -361,11 +365,11 @@ void CGAME::setupUI() {
     t.setPosition(Win_W / 2.f, y);
   };
 
-  setupOpt(mOpt1Text, "[1]  Next Level", Win_H / 2.f - 25.f);
-  setupOpt(mOpt2Text, "[2]  Save", Win_H / 2.f + 20.f);
-  setupOpt(mOpt3Text, "[3]  Save & Exit", Win_H / 2.f + 65.f);
-  setupOpt(mOpt4Text, "[4]  Exit", Win_H / 2.f + 110.f);
-  setupOpt(mOptShopText, "[S]  ITEM SHOP", Win_H / 2.f + 155.f);
+  setupOpt(mOpt1Text, "[1]  Next Level", Win_H / 2.f - 40.f);
+  setupOpt(mOpt2Text, "[2]  Save", Win_H / 2.f + 5.f);
+  setupOpt(mOpt3Text, "[3]  Save & Exit", Win_H / 2.f + 50.f);
+  setupOpt(mOpt4Text, "[4]  Exit", Win_H / 2.f + 95.f);
+  setupOpt(mOptShopText, "[S]  ITEM SHOP", Win_H / 2.f + 140.f);
 
   // Tải các bảng Popup từ assets/ui/hud/
   if (mTexturePopupLevelClear.loadFromFile(
@@ -409,7 +413,17 @@ void CGAME::centerText(sf::Text &text) {
 }
 
 void CGAME::setupLevelClearOptions() {
-  if (mIsVsBotMode) {
+  if (mIsTwoPlayerMode) {
+    if (mCurrentLevel == 5) {
+      mOpt1Text.setString("[1]  Championship Summary");
+    } else {
+      mOpt1Text.setString("[1]  Next Level (2P Race)");
+    }
+    mOpt2Text.setString("[R]  Rematch Round");
+    mOpt3Text.setString("[M]  Main Menu");
+    mOpt4Text.setString("[4]  Exit Game");
+    mOptShopText.setString("[S]  ITEM SHOP (P1 & P2)");
+  } else if (mIsVsBotMode) {
     if (mCurrentLevel == 5) {
       mOpt1Text.setString("[1]  See Victory Screen");
     } else {
@@ -418,7 +432,7 @@ void CGAME::setupLevelClearOptions() {
     mOpt2Text.setString("[R]  Restart Race");
     mOpt3Text.setString("[M]  Main Menu");
     mOpt4Text.setString("[4]  Exit Game");
-    mOptShopText.setString("");
+    mOptShopText.setString("[S]  ITEM SHOP");
   } else {
     if (mCurrentLevel == 5) {
       mOpt1Text.setString("[1]  See Victory Screen");
@@ -432,16 +446,32 @@ void CGAME::setupLevelClearOptions() {
     mOptShopText.setString("[S]  ITEM SHOP");
   }
 
+  centerText(mLevelClearTitle);
+  mLevelClearTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 145.f);
+
+  centerText(mLevelClearScore);
+  mLevelClearScore.setPosition(Win_W / 2.f, Win_H / 2.f - 95.f);
+
   centerText(mOpt1Text);
+  mOpt1Text.setPosition(Win_W / 2.f, Win_H / 2.f - 40.f);
+
   centerText(mOpt2Text);
+  mOpt2Text.setPosition(Win_W / 2.f, Win_H / 2.f + 5.f);
+
   centerText(mOpt3Text);
+  mOpt3Text.setPosition(Win_W / 2.f, Win_H / 2.f + 50.f);
+
   centerText(mOpt4Text);
+  mOpt4Text.setPosition(Win_W / 2.f, Win_H / 2.f + 95.f);
+
   centerText(mOptShopText);
+  mOptShopText.setPosition(Win_W / 2.f, Win_H / 2.f + 140.f);
 }
 
 void CGAME::setupSaveSlotOptions() {
   mLevelClearTitle.setString("SELECT SAVE SLOT");
   centerText(mLevelClearTitle);
+  mLevelClearTitle.setPosition(Win_W / 2.f, Win_H / 2.f - 120.f);
 
   mOpt1Text.setString("[1]  Slot 1");
   mOpt2Text.setString("[2]  Slot 2");
@@ -449,9 +479,16 @@ void CGAME::setupSaveSlotOptions() {
   mOpt4Text.setString("[ESC]  Back");
 
   centerText(mOpt1Text);
+  mOpt1Text.setPosition(Win_W / 2.f, Win_H / 2.f - 40.f);
+
   centerText(mOpt2Text);
+  mOpt2Text.setPosition(Win_W / 2.f, Win_H / 2.f + 15.f);
+
   centerText(mOpt3Text);
+  mOpt3Text.setPosition(Win_W / 2.f, Win_H / 2.f + 70.f);
+
   centerText(mOpt4Text);
+  mOpt4Text.setPosition(Win_W / 2.f, Win_H / 2.f + 125.f);
 }
 
 sf::FloatRect shrinkBoxPercent(sf::FloatRect r, float percentX,
@@ -494,19 +531,45 @@ void CGAME::loadLevel(int level) {
 
   mSound.playLevelMusic(cfg.musicPath, 40.f);
 
-  // Player - Speed tuned per level + Speed Boots upgrade (+15% speed if
-  // purchased)
+  // Player - Speed tuned per level + Speed Boots upgrade (+15% speed if purchased)
+  int p1Slot = mIsTwoPlayerMode ? ShopData::SLOT_P1_2P : mActiveSlot;
   float levelPlayerSpeed = std::max(120.f, 155.f - (cfg.level - 1) * 7.f);
-  if (ShopData::isItemPurchased("speed")) {
-    levelPlayerSpeed *= 1.15f;
+  float p1Speed = levelPlayerSpeed;
+  if (ShopData::isItemPurchased("speed", p1Slot)) {
+    p1Speed *= 1.15f;
   }
   mPlayer.reloadSprite(cfg.playerSpritePath);
-  mPlayer.setSpeed(levelPlayerSpeed);
+  mPlayer.setSpeed(p1Speed);
+  mPlayer.setShopSlot(p1Slot);
   mPlayer.setDead(false);
   mPlayer.setFinish(false);
-  mPlayer.setPosition(mIsVsBotMode ? (SPAWN_X - 40.f) : SPAWN_X, SPAWN_Y);
 
-  if (mIsVsBotMode) {
+  if (mIsTwoPlayerMode) {
+    mPlayer.setControlScheme(PlayerControlScheme::PLAYER_1_WASD);
+    mPlayer.setPlayerLabel("P1");
+    mPlayer.setBaseColor(sf::Color::White);
+    mPlayer.setPosition(SPAWN_X - 60.f, SPAWN_Y);
+
+    int p2Slot = ShopData::SLOT_P2_2P;
+    float p2Speed = levelPlayerSpeed;
+    if (ShopData::isItemPurchased("speed", p2Slot)) {
+      p2Speed *= 1.15f;
+    }
+    mPlayer2.reloadSprite(cfg.playerSpritePath);
+    mPlayer2.setControlScheme(PlayerControlScheme::PLAYER_2_ARROWS);
+    mPlayer2.setPlayerLabel("P2");
+    mPlayer2.setSpeed(p2Speed);
+    mPlayer2.setShopSlot(p2Slot);
+    mPlayer2.setDead(false);
+    mPlayer2.setFinish(false);
+    mPlayer2.setBot(false);
+    mPlayer2.setBaseColor(sf::Color(255, 170, 255));
+    mPlayer2.setPosition(SPAWN_X + 60.f, SPAWN_Y);
+  } else if (mIsVsBotMode) {
+    mPlayer.setControlScheme(PlayerControlScheme::SINGLE_PLAYER_ALL);
+    mPlayer.setPlayerLabel("P1");
+    mPlayer.setPosition(SPAWN_X - 40.f, SPAWN_Y);
+
     mBotPlayer.reloadSprite(cfg.playerSpritePath);
     mBotPlayer.setSpeed(levelPlayerSpeed);
     mBotPlayer.setDead(false);
@@ -516,11 +579,20 @@ void CGAME::loadLevel(int level) {
     mBotPlayer.setPosition(SPAWN_X + 60.f, SPAWN_Y);
     mBotAI.init(mSelectedBotDifficulty, &mEntities, &mHazardManager, &mPowerUpManager);
     mBotAI.reset();
+  } else {
+    mPlayer.setControlScheme(PlayerControlScheme::SINGLE_PLAYER_ALL);
+    mPlayer.setPlayerLabel("");
+    mPlayer.setPosition(SPAWN_X, SPAWN_Y);
   }
 
   // HUD
   mHUD.reloadHudBar(cfg.hudBarPath);
-  mHUD.update(mCurrentLevel, mScore, mlevelTime);
+  if (mIsTwoPlayerMode) {
+    mHUD.setTwoPlayerMode(true, mP1Wins, mP2Wins);
+  } else {
+    mHUD.setTwoPlayerMode(false);
+    mHUD.update(mCurrentLevel, mScore, mlevelTime);
+  }
 
   // Spawn obstacle/animal/traffic light — xem EntityManager::spawnFromLevel
   mEntities.spawnFromLevel(cfg);
@@ -530,7 +602,9 @@ void CGAME::loadLevel(int level) {
 }
 
 void CGAME::restartCurrentMode() {
-  if (mIsVsBotMode) {
+  if (mIsTwoPlayerMode) {
+    restartLevel();
+  } else if (mIsVsBotMode) {
     startVsBotGame(mSelectedBotDifficulty);
   } else if (mIsEndlessMode) {
     startEndlessGame();
@@ -542,11 +616,13 @@ void CGAME::restartCurrentMode() {
 void CGAME::reset() {
   mSound.stopAllEffects();
   mSound.stopMusic();
+  mSound.stopLevelClear();
 
   mDeathCutscene.reset();
   mPowerUpManager.reset();
   mEffects.clear();
   mScore = 0;
+  mScore2 = 0;
   mLevelStartScore = 0;
   mlevelTime = 0.f;
   mIsDying = false;
@@ -557,7 +633,9 @@ void CGAME::reset() {
   mEnteringSaveName = false;
   mIsEndlessMode = false;
   mIsVsBotMode = false;
+  mIsTwoPlayerMode = false;
   mHUD.setEndlessMode(false);
+  mHUD.setTwoPlayerMode(false);
 
   mDeadText.setString("GAME OVER");
   mDeadSubText.setString("Failed to cross the street!");
@@ -571,7 +649,13 @@ void CGAME::reset() {
   mPlayer.resetStats();
   mPlayer.setDead(false);
   mPlayer.setFinish(false);
+  mPlayer.setControlScheme(PlayerControlScheme::SINGLE_PLAYER_ALL);
+  mPlayer.setPlayerLabel("");
   mPlayer.setPosition(SPAWN_X, SPAWN_Y);
+
+  mPlayer2.resetStats();
+  mPlayer2.setDead(false);
+  mPlayer2.setFinish(false);
 
   mBotPlayer.setDead(false);
   mBotPlayer.setFinish(false);
@@ -603,9 +687,16 @@ void CGAME::restartLevel() {
   mPlayer.resetStats();
   mPlayer.setDead(false);
   mPlayer.setFinish(false);
-  mPlayer.setPosition(mIsVsBotMode ? (SPAWN_X - 40.f) : SPAWN_X, SPAWN_Y);
 
-  if (mIsVsBotMode) {
+  if (mIsTwoPlayerMode) {
+    mPlayer.setPosition(SPAWN_X - 60.f, SPAWN_Y);
+    mPlayer2.resetStats();
+    mPlayer2.setDead(false);
+    mPlayer2.setFinish(false);
+    mPlayer2.setPosition(SPAWN_X + 60.f, SPAWN_Y);
+    mHUD.setTwoPlayerMode(true, mP1Wins, mP2Wins);
+  } else if (mIsVsBotMode) {
+    mPlayer.setPosition(SPAWN_X - 40.f, SPAWN_Y);
     mBotPlayer.resetStats();
     mBotPlayer.setDead(false);
     mBotPlayer.setFinish(false);
@@ -614,21 +705,77 @@ void CGAME::restartLevel() {
     mBotPlayer.setPosition(SPAWN_X + 60.f, SPAWN_Y);
     mBotAI.init(mSelectedBotDifficulty, &mEntities, &mHazardManager, &mPowerUpManager);
     mBotAI.reset();
+  } else {
+    mPlayer.setPosition(SPAWN_X, SPAWN_Y);
   }
 
   if (mIsEndlessMode) {
     mHUD.setEndlessMode(true, mEndlessWave);
-  } else {
+  } else if (!mIsTwoPlayerMode) {
     mScore = mLevelStartScore;
     mHUD.setEndlessMode(false);
   }
 
   loadLevel(mCurrentLevel);
-  mHUD.update(mCurrentLevel, mScore, mlevelTime);
+  if (!mIsTwoPlayerMode) {
+    mHUD.update(mCurrentLevel, mScore, mlevelTime);
+  }
+}
+
+void CGAME::startTwoPlayerGame() {
+  mIsTwoPlayerMode = true;
+  mIsVsBotMode = false;
+  mIsEndlessMode = false;
+  mP1Wins = 0;
+  mP2Wins = 0;
+  mScore = 0;
+  mScore2 = 0;
+  mLevelStartScore = 0;
+  mCurrentLevel = 1;
+  mInMenu = false;
+  mPaused = false;
+  mShowMenuConfirm = false;
+  mShowQuitConfirm = false;
+  mShowLevelClear = false;
+  mSelectingSaveSlot = false;
+  mEnteringSaveName = false;
+
+  mDeadText.setString("ROUND OVER");
+  mDeadSubText.setString("A player crashed!");
+  sf::FloatRect db = mDeadText.getLocalBounds();
+  mDeadText.setOrigin(db.left + db.width / 2.f, db.top + db.height / 2.f);
+  mDeadText.setPosition(Win_W / 2.f, Win_H / 2.f - 105.f);
+
+  mHUD.setEndlessMode(false);
+  mHUD.setTwoPlayerMode(true, mP1Wins, mP2Wins);
+  mSound.stopAllEffects();
+  mSound.stopMusic();
+  mSound.stopLevelClear();
+
+  mPlayer.setControlScheme(PlayerControlScheme::PLAYER_1_WASD);
+  mPlayer.setPlayerLabel("P1");
+  mPlayer.resetStats();
+  mPlayer.setDead(false);
+  mPlayer.setFinish(false);
+  mPlayer.setPosition(SPAWN_X - 60.f, SPAWN_Y);
+
+  mPlayer2.setControlScheme(PlayerControlScheme::PLAYER_2_ARROWS);
+  mPlayer2.setPlayerLabel("P2");
+  mPlayer2.resetStats();
+  mPlayer2.setDead(false);
+  mPlayer2.setFinish(false);
+  mPlayer2.setBot(false);
+  mPlayer2.setBaseColor(sf::Color(255, 170, 255));
+  mPlayer2.setPosition(SPAWN_X + 60.f, SPAWN_Y);
+
+  mPowerUpManager.reset();
+  loadLevel(1);
+  printf(">>> STARTING 2-PLAYER LOCAL VERSUS MODE! <<<\n");
 }
 
 void CGAME::startVsBotGame(BotDifficulty diff) {
   mIsVsBotMode = true;
+  mIsTwoPlayerMode = false;
   mIsEndlessMode = false;
   mSelectedBotDifficulty = diff;
   mScore = 0;
@@ -652,8 +799,10 @@ void CGAME::startVsBotGame(BotDifficulty diff) {
   mDeadSubText.setPosition(Win_W / 2.f, Win_H / 2.f - 55.f);
 
   mHUD.setEndlessMode(false);
+  mHUD.setTwoPlayerMode(false);
   mSound.stopAllEffects();
   mSound.stopMusic();
+  mSound.stopLevelClear();
 
   mPlayer.resetStats();
   mPlayer.setDead(false);
@@ -692,6 +841,7 @@ void CGAME::startEndlessGame() {
   mHUD.setEndlessMode(true, 1);
   mSound.stopAllEffects();
   mSound.stopMusic();
+  mSound.stopLevelClear();
 
   mPlayer.resetStats();
   mPlayer.setDead(false);
@@ -749,6 +899,7 @@ void CGAME::handleEvents() {
 
     if (mShowShopInGame) {
       mMenu.setScreen(MenuScreen::SHOP);
+      mMenu.setTwoPlayerShop(mIsTwoPlayerMode);
       MenuResult res = MenuResult::NONE;
       mMenu.handleShopEvent(event, mWindow, res, &mPlayer.getStats().currentHp, mPlayer.getStats().maxHp);
       if (mMenu.getScreen() != MenuScreen::SHOP) {
@@ -875,11 +1026,14 @@ void CGAME::handleEvents() {
             mSound.playLevelMusic(getLevel(mCurrentLevel).musicPath, 40.f);
             printf("REVIVED PLAYER with 1 Heart for 2500 Coins!\n");
           }
+        } else if (event.key.code == sf::Keyboard::S) {
+          mShowShopInGame = true;
         } else if (event.key.code == sf::Keyboard::M) {
           mSound.stopAllEffects();
           mSound.stopMusic();
           mPaused = false;
           mIsVsBotMode = false;
+          mIsTwoPlayerMode = false;
           mIsEndlessMode = false;
           mInMenu = true;
         } else if (event.key.code == sf::Keyboard::Escape) {
@@ -930,11 +1084,14 @@ void CGAME::handleEvents() {
             mResetCooldownClock.restart();
             restartCurrentMode();
           }
+        } else if (event.key.code == sf::Keyboard::S) {
+          mShowShopInGame = true;
         } else if (event.key.code == sf::Keyboard::M) {
           mSound.stopAllEffects();
           mSound.stopMusic();
           mPaused = false;
           mIsVsBotMode = false;
+          mIsTwoPlayerMode = false;
           mIsEndlessMode = false;
           mInMenu = true;
         } else if (event.key.code == sf::Keyboard::Escape) {
@@ -949,11 +1106,14 @@ void CGAME::handleEvents() {
             mResetCooldownClock.restart();
             restartCurrentMode();
           }
+        } else if (mBtnVictoryShop.contains(mouse)) {
+          mShowShopInGame = true;
         } else if (mBtnVictoryMenu.contains(mouse)) {
           mSound.stopAllEffects();
           mSound.stopMusic();
           mPaused = false;
           mIsVsBotMode = false;
+          mIsTwoPlayerMode = false;
           mIsEndlessMode = false;
           mInMenu = true;
         }
@@ -1115,11 +1275,12 @@ void CGAME::handleEvents() {
     // Level Clear
     if (mShowLevelClear) {
       if (event.type == sf::Event::KeyPressed) {
-        if (mIsVsBotMode) {
+        if (mIsVsBotMode || mIsTwoPlayerMode) {
           if (event.key.code == sf::Keyboard::Num1 || event.key.code == sf::Keyboard::Enter || event.key.code == sf::Keyboard::Space) {
             mShowLevelClear = false;
             mSound.stopLevelClear();
             mPlayer.setFinish(false);
+            mPlayer2.setFinish(false);
             mBotPlayer.setFinish(false);
 
             if (mCurrentLevel < Max_Level) {
@@ -1141,10 +1302,13 @@ void CGAME::handleEvents() {
             mSound.stopMusic();
             mPaused = false;
             mIsVsBotMode = false;
+            mIsTwoPlayerMode = false;
             mIsEndlessMode = false;
             mInMenu = true;
           } else if (event.key.code == sf::Keyboard::Num4 || event.key.code == sf::Keyboard::Escape) {
             mWindow.close();
+          } else if (event.key.code == sf::Keyboard::S) {
+            mShowShopInGame = true;
           }
           continue;
         }
@@ -1195,11 +1359,12 @@ void CGAME::handleEvents() {
         sf::Vector2f mouse = mWindow.mapPixelToCoords(
             sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 
-        if (mIsVsBotMode) {
+        if (mIsVsBotMode || mIsTwoPlayerMode) {
           if (mOpt1Text.getGlobalBounds().contains(mouse)) {
             mShowLevelClear = false;
             mSound.stopLevelClear();
             mPlayer.setFinish(false);
+            mPlayer2.setFinish(false);
             mBotPlayer.setFinish(false);
 
             if (mCurrentLevel < Max_Level) {
@@ -1221,10 +1386,13 @@ void CGAME::handleEvents() {
             mSound.stopMusic();
             mPaused = false;
             mIsVsBotMode = false;
+            mIsTwoPlayerMode = false;
             mIsEndlessMode = false;
             mInMenu = true;
           } else if (mOpt4Text.getGlobalBounds().contains(mouse)) {
             mWindow.close();
+          } else if (mOptShopText.getGlobalBounds().contains(mouse)) {
+            mShowShopInGame = true;
           }
           continue;
         }
@@ -1394,11 +1562,10 @@ void CGAME::handleCollision() {
     if (mPlayer.isInvulnerable()) {
       return;
     }
-    if (ShopData::consumeItem("shield")) {
+    int p1Slot = mIsTwoPlayerMode ? ShopData::SLOT_P1_2P : mActiveSlot;
+    if (ShopData::consumeItem("shield", p1Slot)) {
       mPlayer.triggerInvulnerability(1.5f);
       mPlayer.knockback(160.f);
-      printf("Energy Shield absorbed hit at (%.1f, %.1f) (Shields left: %d)!\n",
-             hitPos.x, hitPos.y, ShopData::getItemCount("shield"));
       mEffects.push_back(std::make_unique<CollisionEffect>(hitPos));
       return;
     }
@@ -1434,6 +1601,51 @@ void CGAME::handleCollision() {
       sf::Vector2f hitPos(pb.left + pb.width / 2.f, pb.top + pb.height / 2.f);
       triggerHit(hitPos);
       break;
+    }
+  }
+
+  // Handle Player 2 collisions in 2-Player mode
+  if (mIsTwoPlayerMode && !mPlayer2.isDead() && !mPlayer2.isInvulnerable()) {
+    sf::FloatRect p2b = mPlayer2.getHitbox();
+    bool p2Hit = false;
+    for (const auto &obs : mEntities.obstacles()) {
+      if (p2b.intersects(obs->getHitbox())) {
+        p2Hit = true;
+        break;
+      }
+    }
+    if (!p2Hit) {
+      for (const auto &ani : mEntities.animals()) {
+        if (p2b.intersects(ani->getHitbox())) {
+          p2Hit = true;
+          break;
+        }
+      }
+    }
+    if (p2Hit) {
+      sf::Vector2f p2HitPos(p2b.left + p2b.width / 2.f, p2b.top + p2b.height / 2.f);
+
+      if (mPlayer2.hasPowerUpShield()) {
+        mPlayer2.setPowerUpShield(false);
+        mPlayer2.triggerInvulnerability(1.5f);
+        mPlayer2.knockback(160.f);
+        mEffects.push_back(std::make_unique<CollisionEffect>(p2HitPos));
+      } else if (ShopData::consumeItem("shield", ShopData::SLOT_P2_2P)) {
+        mPlayer2.triggerInvulnerability(1.5f);
+        mPlayer2.knockback(160.f);
+        mEffects.push_back(std::make_unique<CollisionEffect>(p2HitPos));
+      } else {
+        bool p2Fatal = mPlayer2.takeDamage(1);
+        mEffects.push_back(std::make_unique<CollisionEffect>(mCollisionSpritePath, p2HitPos));
+        mSound.playLevelDeathSound(mCurrentLevel);
+
+        if (p2Fatal || mPlayer2.getStats().currentHp <= 0) {
+          mPlayer2.setDead(true);
+        } else {
+          mPlayer2.triggerInvulnerability(1.5f);
+          mPlayer2.knockback(160.f);
+        }
+      }
     }
   }
 
@@ -1485,8 +1697,137 @@ void CGAME::handleCollision() {
 }
 
 void CGAME::checkFinish() {
-  if (mPlayer.isDead() || mPlayer.isFinish() || mLevelCleared)
+  if (mPlayer.isDead() && !mIsTwoPlayerMode)
     return;
+  if (mPlayer.isFinish() || mLevelCleared)
+    return;
+
+  // 2-PLAYER Mode Outcomes
+  if (mIsTwoPlayerMode) {
+    // 1. Both crashed -> Mutual Crash / Draw
+    if (mPlayer.isDead() && mPlayer2.isDead() && !mShowLevelClear) {
+      mSound.stopMusic();
+      mSound.stopHazardSounds();
+      mHazardManager.reset();
+      mSound.playDead();
+
+      mDeadText.setString("MUTUAL CRASH - DRAW!");
+      mDeadSubText.setString("Both players eliminated!");
+      mDeadScore.setString("MATCH SCORE: P1 " + std::to_string(mP1Wins) + " - " + std::to_string(mP2Wins) + " P2");
+
+      sf::FloatRect dtb = mDeadText.getLocalBounds();
+      mDeadText.setOrigin(dtb.left + dtb.width / 2.f, dtb.top + dtb.height / 2.f);
+      mDeadText.setPosition(Win_W / 2.f, Win_H / 2.f - 105.f);
+
+      sf::FloatRect dsb = mDeadSubText.getLocalBounds();
+      mDeadSubText.setOrigin(dsb.left + dsb.width / 2.f, dsb.top + dsb.height / 2.f);
+      mDeadSubText.setPosition(Win_W / 2.f, Win_H / 2.f - 55.f);
+
+      mPlayer.setDead(true);
+      return;
+    }
+
+    // 2. P1 died, P2 alive -> P2 wins round
+    if (mPlayer.isDead() && !mPlayer2.isDead() && !mLevelCleared) {
+      mLevelCleared = true;
+      mPlayer2.setFinish(true);
+      mP2Wins++;
+      mHUD.setTwoPlayerMode(true, mP1Wins, mP2Wins);
+      mSound.stopMusic();
+      mSound.stopHazardSounds();
+      mHazardManager.reset();
+      mSound.playVictory();
+
+      mLevelClearTitle.setString("PLAYER 2 WINS THE ROUND!");
+      sf::FloatRect b = mLevelClearTitle.getLocalBounds();
+      mLevelClearTitle.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
+
+      mLevelClearScore.setString("Player 1 crashed! Match Score: P1 [ " + std::to_string(mP1Wins) + " ] - [ " + std::to_string(mP2Wins) + " ] P2");
+      sf::FloatRect sb = mLevelClearScore.getLocalBounds();
+      mLevelClearScore.setOrigin(sb.left + sb.width / 2.f, sb.top + sb.height / 2.f);
+      mLevelClearScore.setPosition(Win_W / 2.f, Win_H / 2.f - 65.f);
+
+      setupLevelClearOptions();
+      mShowLevelClear = true;
+      return;
+    }
+
+    // 3. P2 died, P1 alive -> P1 wins round
+    if (mPlayer2.isDead() && !mPlayer.isDead() && !mLevelCleared) {
+      mLevelCleared = true;
+      mPlayer.setFinish(true);
+      mP1Wins++;
+      mHUD.setTwoPlayerMode(true, mP1Wins, mP2Wins);
+      mSound.stopMusic();
+      mSound.stopHazardSounds();
+      mHazardManager.reset();
+      mSound.playVictory();
+
+      mLevelClearTitle.setString("PLAYER 1 WINS THE ROUND!");
+      sf::FloatRect b = mLevelClearTitle.getLocalBounds();
+      mLevelClearTitle.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
+
+      mLevelClearScore.setString("Player 2 crashed! Match Score: P1 [ " + std::to_string(mP1Wins) + " ] - [ " + std::to_string(mP2Wins) + " ] P2");
+      sf::FloatRect sb = mLevelClearScore.getLocalBounds();
+      mLevelClearScore.setOrigin(sb.left + sb.width / 2.f, sb.top + sb.height / 2.f);
+      mLevelClearScore.setPosition(Win_W / 2.f, Win_H / 2.f - 65.f);
+
+      setupLevelClearOptions();
+      mShowLevelClear = true;
+      return;
+    }
+
+    // 4. P1 reached elevator first
+    if (mPlayer.getPosition().y < 80.f && !mPlayer.isFinish() && !mLevelCleared) {
+      mLevelCleared = true;
+      mPlayer.setFinish(true);
+      mP1Wins++;
+      mHUD.setTwoPlayerMode(true, mP1Wins, mP2Wins);
+      mSound.stopMusic();
+      mSound.stopHazardSounds();
+      mHazardManager.reset();
+      mSound.playVictory();
+
+      mLevelClearTitle.setString("PLAYER 1 WINS THE RACE!");
+      sf::FloatRect b = mLevelClearTitle.getLocalBounds();
+      mLevelClearTitle.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
+
+      mLevelClearScore.setString("Player 1 reached the elevator first! Match Score: P1 [ " + std::to_string(mP1Wins) + " ] - [ " + std::to_string(mP2Wins) + " ] P2");
+      sf::FloatRect sb = mLevelClearScore.getLocalBounds();
+      mLevelClearScore.setOrigin(sb.left + sb.width / 2.f, sb.top + sb.height / 2.f);
+      mLevelClearScore.setPosition(Win_W / 2.f, Win_H / 2.f - 65.f);
+
+      setupLevelClearOptions();
+      mShowLevelClear = true;
+      return;
+    }
+
+    // 5. P2 reached elevator first
+    if (mPlayer2.getPosition().y < 80.f && !mPlayer2.isFinish() && !mLevelCleared) {
+      mLevelCleared = true;
+      mPlayer2.setFinish(true);
+      mP2Wins++;
+      mHUD.setTwoPlayerMode(true, mP1Wins, mP2Wins);
+      mSound.stopMusic();
+      mSound.stopHazardSounds();
+      mHazardManager.reset();
+      mSound.playVictory();
+
+      mLevelClearTitle.setString("PLAYER 2 WINS THE RACE!");
+      sf::FloatRect b = mLevelClearTitle.getLocalBounds();
+      mLevelClearTitle.setOrigin(b.left + b.width / 2.f, b.top + b.height / 2.f);
+
+      mLevelClearScore.setString("Player 2 reached the elevator first! Match Score: P1 [ " + std::to_string(mP1Wins) + " ] - [ " + std::to_string(mP2Wins) + " ] P2");
+      sf::FloatRect sb = mLevelClearScore.getLocalBounds();
+      mLevelClearScore.setOrigin(sb.left + sb.width / 2.f, sb.top + sb.height / 2.f);
+      mLevelClearScore.setPosition(Win_W / 2.f, Win_H / 2.f - 65.f);
+
+      setupLevelClearOptions();
+      mShowLevelClear = true;
+      return;
+    }
+    return;
+  }
 
   // VS BOT Mode Race Outcomes
   if (mIsVsBotMode) {
@@ -1577,10 +1918,11 @@ void CGAME::checkFinish() {
       mEndlessWave++;
       mCurrentLevel = ((mEndlessWave - 1) % Max_Level) + 1;
       mHUD.setEndlessMode(true, mEndlessWave);
+      mSound.stopLevelClear();
       loadLevel(mCurrentLevel);
       mPlayer.setPosition(SPAWN_X, SPAWN_Y);
       mPlayer.triggerInvulnerability(1.5f);
-      mSound.playLevelClear();
+      mSound.playElevatorDing();
       mPowerUpManager.spawnForLevel(mCurrentLevel, true);
       saveEndlessHighScore();
       printf(">>> ENDLESS WAVE %d CLEARED! +%d Points. Entering Wave %d (Era %d) <<<\n",
@@ -1731,6 +2073,14 @@ void CGAME::update(float dt) {
   }
 
   if (mShowShopInGame) {
+    mMenu.update(dt, mWindow);
+    return;
+  }
+
+  if (mPlayer.isFinish() && mCurrentLevel == Max_Level && !mShowLevelClear) {
+    mBtnVictoryPlayAgain.update(mousePos, dt);
+    mBtnVictoryShop.update(mousePos, dt);
+    mBtnVictoryMenu.update(mousePos, dt);
     return;
   }
 
@@ -1760,8 +2110,8 @@ void CGAME::update(float dt) {
         mPlayer.setDead(false);
         mPlayer.setFinish(false);
         mPlayer.setPosition(SPAWN_X, SPAWN_Y);
-        loadLevel(mCurrentLevel);
-        mHUD.update(mCurrentLevel, mScore, mlevelTime);
+        mPlayer.triggerInvulnerability(1.5f);
+        mSound.playLevelMusic(getLevel(mCurrentLevel).musicPath, 40.f);
       } else {
         // Hết máu thì từ đầu
         mIsDying = true;
@@ -1772,7 +2122,8 @@ void CGAME::update(float dt) {
     return;
   }
 
-  if (!mPlayer.isDead() && !mPlayer.isFinish() && !mIsDying &&
+  // Cập nhật gameplay khi không pause, không cutscene, không chết
+  if (!mPaused && !mShowLevelClear && !mInCutscene && !mIsDying &&
       !mDeathCutscene.isActive()) {
     if (!mPlayer.getStats().timeFreezeActive) {
       mlevelTime += dt;
@@ -1793,7 +2144,10 @@ void CGAME::update(float dt) {
       mDeathCutscene.start(hitPos, mCurrentLevel);
       printf("You ran out of time! Deducted 1 HP.\n");
     }
-    bool isTimeFrozen = mPlayer.getStats().timeFreezeActive || mPowerUpManager.isTimeStopActive();
+    bool isTimeFrozen = mPlayer.getStats().timeFreezeActive ||
+                        (mIsTwoPlayerMode && mPlayer2.getStats().timeFreezeActive) ||
+                        mPowerUpManager.isTimeStopActive() ||
+                        (mIsTwoPlayerMode && mPowerUpManager.isTimeStopActiveP2());
     bool hasHazard =
         mHazardManager.isHazardActive() || mHazardManager.isWarningActive();
 
@@ -1809,10 +2163,17 @@ void CGAME::update(float dt) {
     std::vector<std::pair<sf::FloatRect, float>> extraHazardBoxes;
     mHazardManager.update(hazardDt, mPlayer.getPosition(), extraHazardBoxes, mScore);
     mPowerUpManager.update(dt, mPlayer.getHitbox(), &mSound);
+    int p1Slot = mIsTwoPlayerMode ? ShopData::SLOT_P1_2P : mActiveSlot;
+    int p2Slot = ShopData::SLOT_P2_2P;
+    bool p1Magnet = mPowerUpManager.isMagnetActive() || mPlayer.getStats().radarActive;
+    bool p2Magnet = mPowerUpManager.isMagnetActiveP2() || mPlayer2.getStats().radarActive;
+    int p1ScoreMult = mPowerUpManager.isScoreX2Active() ? 2 : 1;
+    int p2ScoreMult = mPowerUpManager.isScoreX2ActiveP2() ? 2 : 1;
+
     mCoinManager.update(dt, mPlayer.getHitbox(), &mSound,
-                        mPowerUpManager.isMagnetActive() || mPlayer.getStats().radarActive,
-                        mPlayer.getPosition(),
-                        mPowerUpManager.isScoreX2Active() ? 2 : 1);
+                        p1Magnet, mPlayer.getPosition(), p1ScoreMult, p1Slot,
+                        mIsTwoPlayerMode, mPlayer2.getHitbox(),
+                        p2Magnet, mPlayer2.getPosition(), p2ScoreMult, p2Slot);
     mSound.update(dt);
 
     // Apply wind drift during Sandstorm (only if time is not frozen)
@@ -1825,7 +2186,7 @@ void CGAME::update(float dt) {
     }
 
     float speedMult = mHazardManager.getSpeedMultiplier();
-    int radarCount = ShopData::getItemCount("radar");
+    int radarCount = ShopData::getItemCount("radar", p1Slot);
     if (radarCount > 0 && !isTimeFrozen) {
       // Passive Hazard Radar obstacle slow (-15% per radar count, max 45% slow)
       float passiveRadarSlow = std::max(0.55f, 1.0f - 0.15f * radarCount);
@@ -1837,12 +2198,12 @@ void CGAME::update(float dt) {
       speedMult *= (1.0f + 0.06f * (mEndlessWave - 1));
     }
 
-    if (mPlayer.getStats().timeFreezeActive) {
+    if (mPlayer.getStats().timeFreezeActive || (mIsTwoPlayerMode && mPlayer2.getStats().timeFreezeActive)) {
       speedMult = 0.0f; // 100% Freeze when Time Clock skill is active!
-    } else if (mPowerUpManager.isTimeStopActive()) {
+    } else if (mPowerUpManager.isTimeStopActive() || (mIsTwoPlayerMode && mPowerUpManager.isTimeStopActiveP2())) {
       speedMult *= 0.15f; // 85% slowdown when Chrono Hourglass powerup is active!
-    } else if (mPlayer.getStats().radarActive) {
-      speedMult *= 0.30f; // 70% slow-down when EMP Radar Pulse skill 'Q' is activated!
+    } else if (mPlayer.getStats().radarActive || (mIsTwoPlayerMode && mPlayer2.getStats().radarActive)) {
+      speedMult *= 0.30f; // 70% slow-down when EMP Radar Pulse skill is activated!
     }
     mEntities.update(dt, speedMult);
 
@@ -1854,11 +2215,16 @@ void CGAME::update(float dt) {
           break;
         }
         sf::Vector2f hitPos(pb.left + pb.width / 2.f, pb.top + pb.height / 2.f);
-        if (ShopData::consumeItem("shield")) {
+        if (mPlayer.hasPowerUpShield()) {
+          mPlayer.setPowerUpShield(false);
           mPlayer.triggerInvulnerability(1.5f);
           mPlayer.knockback(160.f);
-          printf("Energy Shield absorbed hazard hit at (%.1f, %.1f) (Shields left: %d)!\n",
-                 hitPos.x, hitPos.y, ShopData::getItemCount("shield"));
+          mEffects.push_back(std::make_unique<CollisionEffect>(hitPos));
+          break;
+        }
+        if (ShopData::consumeItem("shield", p1Slot)) {
+          mPlayer.triggerInvulnerability(1.5f);
+          mPlayer.knockback(160.f);
           mEffects.push_back(std::make_unique<CollisionEffect>(hitPos));
           break;
         }
@@ -1876,6 +2242,55 @@ void CGAME::update(float dt) {
           mSound.playLevelDeathSound(mCurrentLevel);
         }
         break;
+      }
+    }
+
+    // Player 2 update in 2-Player mode
+    if (mIsTwoPlayerMode && !mPlayer2.isDead()) {
+      mPlayer2.setPowerUpSpeedMultiplier(mPowerUpManager.isP2SpeedBoostActive() ? 1.6f : 1.0f);
+      mPowerUpManager.checkPlayerPickup(mPlayer2.getHitbox(), mPlayer2, &mSound, "P2");
+
+      mPlayer2.Move(dt, mScore2, hasHazard);
+      mPlayer2.update(dt);
+
+      if (!isTimeFrozen) {
+        sf::Vector2f drift = mHazardManager.getPlayerWindDrift();
+        if (drift.x != 0.f || drift.y != 0.f) {
+          mPlayer2.setPosition(mPlayer2.getPosition().x + drift.x,
+                               mPlayer2.getPosition().y + drift.y);
+        }
+      }
+
+      // Check P2 collision with extra hazards
+      if (!mPlayer2.isDead() && !mPlayer2.isInvulnerable()) {
+        sf::FloatRect p2b = mPlayer2.getHitbox();
+        for (const auto &hb : extraHazardBoxes) {
+          if (p2b.intersects(hb.first)) {
+            sf::Vector2f p2HitPos(p2b.left + p2b.width / 2.f, p2b.top + p2b.height / 2.f);
+
+            if (mPlayer2.hasPowerUpShield()) {
+              mPlayer2.setPowerUpShield(false);
+              mPlayer2.triggerInvulnerability(1.5f);
+              mPlayer2.knockback(160.f);
+              mEffects.push_back(std::make_unique<CollisionEffect>(p2HitPos));
+            } else if (ShopData::consumeItem("shield", ShopData::SLOT_P2_2P)) {
+              mPlayer2.triggerInvulnerability(1.5f);
+              mPlayer2.knockback(160.f);
+              mEffects.push_back(std::make_unique<CollisionEffect>(p2HitPos));
+            } else {
+              bool p2Fatal = mPlayer2.takeDamage(1);
+              mEffects.push_back(std::make_unique<CollisionEffect>(mCollisionSpritePath, p2HitPos));
+              mSound.playLevelDeathSound(mCurrentLevel);
+              if (p2Fatal || mPlayer2.getStats().currentHp <= 0) {
+                mPlayer2.setDead(true);
+              } else {
+                mPlayer2.triggerInvulnerability(1.5f);
+                mPlayer2.knockback(160.f);
+              }
+            }
+            break;
+          }
+        }
       }
     }
 
@@ -2005,6 +2420,9 @@ void CGAME::render() {
   if (mIsVsBotMode) {
     mBotPlayer.Draw(mWindow);
   }
+  if (mIsTwoPlayerMode) {
+    mPlayer2.Draw(mWindow);
+  }
   mPlayer.Draw(mWindow);
 
   for (const auto &effect : mEffects) {
@@ -2032,6 +2450,9 @@ void CGAME::render() {
     };
 
     drawRect(mPlayer.getHitbox(), sf::Color::Green);
+    if (mIsTwoPlayerMode) {
+      drawRect(mPlayer2.getHitbox(), sf::Color::Magenta);
+    }
     for (const auto &obs : mEntities.obstacles())
       drawRect(obs->getHitbox(), sf::Color::Red);
     for (const auto &ani : mEntities.animals())
@@ -2039,7 +2460,11 @@ void CGAME::render() {
   }
 
   mHUD.draw(mWindow);
-  mHUD.drawStats(mWindow, mPlayer.getStats());
+  if (mIsTwoPlayerMode) {
+    mHUD.drawTwoPlayerStats(mWindow, mPlayer.getStats(), mPlayer2.getStats(), mScore, mScore2);
+  } else {
+    mHUD.drawStats(mWindow, mPlayer.getStats());
+  }
   mHUD.drawPowerUpBuffs(mWindow,
                         mPowerUpManager.getMagnetRemaining(),
                         mPowerUpManager.getTimeStopRemaining(),
@@ -2054,7 +2479,7 @@ void CGAME::render() {
     mWindow.draw(mDeadText);
     mWindow.draw(mDeadSubText);
 
-    if (!mIsVsBotMode) {
+    if (!mIsVsBotMode && !mIsTwoPlayerMode) {
       mDeadScore.setString("SCORE: " + std::to_string(mScore));
     }
     sf::FloatRect ds = mDeadScore.getLocalBounds();
@@ -2062,7 +2487,7 @@ void CGAME::render() {
     mDeadScore.setPosition(Win_W / 2.f, Win_H / 2.f - 20.f);
     mWindow.draw(mDeadScore);
 
-    if (mIsVsBotMode) {
+    if (mIsVsBotMode || mIsTwoPlayerMode) {
       mBtnDeadRestart.sprite.setPosition(Win_W / 2.f - 110.f, Win_H / 2.f + 65.f);
       mBtnDeadRestart.label.setPosition(Win_W / 2.f - 110.f, Win_H / 2.f + 65.f);
       mBtnDeadMenu.sprite.setPosition(Win_W / 2.f + 110.f, Win_H / 2.f + 65.f);
@@ -2184,6 +2609,7 @@ void CGAME::render() {
     mWindow.draw(mVictoryHighScore);
 
     mBtnVictoryPlayAgain.draw(mWindow);
+    mBtnVictoryShop.draw(mWindow);
     mBtnVictoryMenu.draw(mWindow);
   }
 
@@ -2193,6 +2619,13 @@ void CGAME::render() {
     mWindow.draw(mSaveBox);
     mWindow.draw(mSaveTitle);
     mWindow.draw(mSaveInput);
+  }
+
+  if (mShowQuitConfirm || mShowMenuConfirm || mPaused || mSelectingSaveSlot || mShowLevelClear) {
+    sf::RectangleShape modalBackdrop(
+        sf::Vector2f(static_cast<float>(Win_W), static_cast<float>(Win_H)));
+    modalBackdrop.setFillColor(sf::Color(0, 0, 0, 160));
+    mWindow.draw(modalBackdrop);
   }
 
   if (mShowQuitConfirm) {
@@ -2331,19 +2764,23 @@ void CGAME::run() {
 
         menuResult = MenuResult::NONE;
 
-      } else if (menuResult == MenuResult::ENDLESS_GAME) {
+      } else if (menuResult == MenuResult::CHALLENGE_TWO_PLAYERS) {
+        mInMenu = false;
+        startTwoPlayerGame();
+        menuResult = MenuResult::NONE;
+      } else if (menuResult == MenuResult::CHALLENGE_ENDLESS) {
         mInMenu = false;
         startEndlessGame();
         menuResult = MenuResult::NONE;
-      } else if (menuResult == MenuResult::VS_BOT_EASY) {
+      } else if (menuResult == MenuResult::CHALLENGE_VS_BOT_EASY) {
         mInMenu = false;
         startVsBotGame(BotDifficulty::EASY);
         menuResult = MenuResult::NONE;
-      } else if (menuResult == MenuResult::VS_BOT_NORMAL) {
+      } else if (menuResult == MenuResult::CHALLENGE_VS_BOT_NORMAL) {
         mInMenu = false;
         startVsBotGame(BotDifficulty::NORMAL);
         menuResult = MenuResult::NONE;
-      } else if (menuResult == MenuResult::VS_BOT_HARD) {
+      } else if (menuResult == MenuResult::CHALLENGE_VS_BOT_HARD) {
         mInMenu = false;
         startVsBotGame(BotDifficulty::HARD);
         menuResult = MenuResult::NONE;

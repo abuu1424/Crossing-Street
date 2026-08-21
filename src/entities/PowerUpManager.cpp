@@ -35,6 +35,10 @@ void PowerUpManager::reset() {
     mSpeedBoostTimer = 0.f;
     mScoreX2Timer = 0.f;
     mBotSpeedBoostTimer = 0.f;
+    mP2SpeedBoostTimer = 0.f;
+    mP2MagnetTimer = 0.f;
+    mP2TimeStopTimer = 0.f;
+    mP2ScoreX2Timer = 0.f;
     mHasShield = false;
 }
 
@@ -87,6 +91,22 @@ void PowerUpManager::update(float dt, const sf::FloatRect& playerHitbox, SoundMa
         mBotSpeedBoostTimer -= dt;
         if (mBotSpeedBoostTimer < 0.f) mBotSpeedBoostTimer = 0.f;
     }
+    if (mP2SpeedBoostTimer > 0.f) {
+        mP2SpeedBoostTimer -= dt;
+        if (mP2SpeedBoostTimer < 0.f) mP2SpeedBoostTimer = 0.f;
+    }
+    if (mP2MagnetTimer > 0.f) {
+        mP2MagnetTimer -= dt;
+        if (mP2MagnetTimer < 0.f) mP2MagnetTimer = 0.f;
+    }
+    if (mP2TimeStopTimer > 0.f) {
+        mP2TimeStopTimer -= dt;
+        if (mP2TimeStopTimer < 0.f) mP2TimeStopTimer = 0.f;
+    }
+    if (mP2ScoreX2Timer > 0.f) {
+        mP2ScoreX2Timer -= dt;
+        if (mP2ScoreX2Timer < 0.f) mP2ScoreX2Timer = 0.f;
+    }
 
     // 2. Check Item Collisions with Player
     for (auto& item : mItems) {
@@ -112,6 +132,61 @@ void PowerUpManager::update(float dt, const sf::FloatRect& playerHitbox, SoundMa
             it = mFloatingTexts.erase(it);
         } else {
             ++it;
+        }
+    }
+}
+
+void PowerUpManager::checkPlayerPickup(const sf::FloatRect& hitbox, CPEOPLE& player, SoundManager* sound, const std::string& playerPrefix) {
+    if (player.isDead()) return;
+
+    for (auto& item : mItems) {
+        if (item.collected) continue;
+
+        sf::FloatRect itemBox(item.position.x - 22.f, item.position.y - 22.f, 44.f, 44.f);
+        if (hitbox.intersects(itemBox)) {
+            item.collected = true;
+            if (sound) {
+                sound->playCoinSound();
+            }
+
+            FloatingPowerUpText ft;
+            ft.position = item.position;
+            std::string prefix = playerPrefix.empty() ? "" : (playerPrefix + " ");
+            bool isP2 = (playerPrefix == "P2");
+
+            switch (item.type) {
+                case PowerUpType::MAGNET:
+                    if (isP2) mP2MagnetTimer = getMagnetDuration();
+                    else mMagnetTimer = getMagnetDuration();
+                    ft.text = "+" + prefix + "MAGNET!";
+                    ft.color = sf::Color(0, 240, 255);
+                    break;
+                case PowerUpType::TIME_STOP:
+                    if (isP2) mP2TimeStopTimer = getTimeStopDuration();
+                    else mTimeStopTimer = getTimeStopDuration();
+                    ft.text = "+" + prefix + "TIME STOP!";
+                    ft.color = sf::Color(140, 180, 255);
+                    break;
+                case PowerUpType::SPEED_BOOST:
+                    if (isP2) mP2SpeedBoostTimer = getSpeedBoostDuration();
+                    else mSpeedBoostTimer = getSpeedBoostDuration();
+                    player.setPowerUpSpeedMultiplier(1.6f);
+                    ft.text = "+" + prefix + "SPEED SURGE (+60%)!";
+                    ft.color = sf::Color(255, 100, 50);
+                    break;
+                case PowerUpType::SHIELD:
+                    player.setPowerUpShield(true);
+                    ft.text = "+" + prefix + "ENERGY SHIELD!";
+                    ft.color = sf::Color(255, 225, 60);
+                    break;
+                case PowerUpType::SCORE_X2:
+                    if (isP2) mP2ScoreX2Timer = getScoreX2Duration();
+                    else mScoreX2Timer = getScoreX2Duration();
+                    ft.text = "+" + prefix + "2X BOOST!";
+                    ft.color = sf::Color(255, 215, 0);
+                    break;
+            }
+            mFloatingTexts.push_back(ft);
         }
     }
 }

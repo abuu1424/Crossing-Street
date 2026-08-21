@@ -170,7 +170,9 @@ void HUD::drawItemPanel(sf::RenderWindow& window) {
 }
 
 void HUD::draw(sf::RenderWindow& window) {
-    drawItemPanel(window);
+    if (!mIsTwoPlayer) {
+        drawItemPanel(window);
+    }
 
     if (!mHudBarLoaded) return;
     window.draw(mHudSprite);
@@ -434,4 +436,238 @@ void HUD::drawPowerUpBuffs(sf::RenderWindow& window, float magnetRem, float time
         txt.setPosition(startX + 8.f, y + 3.f);
         window.draw(txt);
     }
+}
+
+void HUD::drawTwoPlayerStats(sf::RenderWindow& window, const PlayerStats& p1Stats, const PlayerStats& p2Stats, int p1Score, int p2Score) {
+    if (!mLoaded) return;
+
+    float cardW = 310.f;
+    float cardH = 84.f;
+    float topY  = 8.f;
+    float heartGap = 24.f;
+    float barW = 125.f;
+    float barH = 9.f;
+    std::string itemIds[4] = { "shield", "speed", "time", "radar" };
+
+    // ==========================================
+    // 1. PLAYER 1 PANEL (Top-Left, Cyan Theme)
+    // ==========================================
+    float p1X = 12.f;
+    sf::RectangleShape p1Bg(sf::Vector2f(cardW, cardH));
+    p1Bg.setPosition(p1X, topY);
+    p1Bg.setFillColor(sf::Color(10, 16, 28, 225));
+    p1Bg.setOutlineColor(sf::Color(0, 200, 255, 210));
+    p1Bg.setOutlineThickness(1.5f);
+    window.draw(p1Bg);
+
+    // Row 1: Title & Speed
+    sf::Text p1Title;
+    p1Title.setFont(mFont);
+    p1Title.setString("PLAYER 1 (WASD)");
+    p1Title.setCharacterSize(13);
+    p1Title.setFillColor(sf::Color(70, 220, 255));
+    p1Title.setOutlineColor(sf::Color::Black);
+    p1Title.setOutlineThickness(1.5f);
+    p1Title.setPosition(p1X + 8.f, topY + 5.f);
+    window.draw(p1Title);
+
+    sf::Text p1Spd;
+    p1Spd.setFont(mFont);
+    p1Spd.setString("SPD: " + std::to_string(static_cast<int>(p1Stats.currentCalculatedSpeed)) + " px/s");
+    p1Spd.setCharacterSize(11);
+    p1Spd.setFillColor(sf::Color(255, 235, 120));
+    p1Spd.setOutlineColor(sf::Color::Black);
+    p1Spd.setOutlineThickness(1.2f);
+    p1Spd.setPosition(p1X + cardW - 105.f, topY + 6.f);
+    window.draw(p1Spd);
+
+    // Row 2: Hearts & Energy Bar
+    for (int i = 0; i < p1Stats.maxHp; ++i) {
+        float cx = p1X + 8.f + i * heartGap;
+        float cy = topY + 26.f;
+        bool hasHp = (i < p1Stats.currentHp);
+
+        if (mHeartLoaded) {
+            sf::Sprite& spr = hasHp ? mHeartSprite : mHeartEmptySprite;
+            sf::Vector2u texSize = spr.getTexture() ? spr.getTexture()->getSize() : sf::Vector2u(52, 40);
+            spr.setScale(20.f / texSize.x, 16.f / texSize.y);
+            spr.setPosition(cx, cy);
+            window.draw(spr);
+        }
+    }
+
+    float p1BarX = p1X + p1Stats.maxHp * heartGap + 12.f;
+    float p1BarY = topY + 29.f;
+
+    sf::RectangleShape bgEnergy1(sf::Vector2f(barW, barH));
+    bgEnergy1.setPosition(p1BarX, p1BarY);
+    bgEnergy1.setFillColor(sf::Color(20, 25, 35, 210));
+    bgEnergy1.setOutlineColor(sf::Color(0, 180, 220, 200));
+    bgEnergy1.setOutlineThickness(1.f);
+    window.draw(bgEnergy1);
+
+    float nrg1 = std::clamp(p1Stats.energy / p1Stats.maxEnergy, 0.f, 1.f);
+    sf::RectangleShape fillEnergy1(sf::Vector2f((barW - 2.f) * nrg1, barH - 2.f));
+    fillEnergy1.setPosition(p1BarX + 1.f, p1BarY + 1.f);
+    fillEnergy1.setFillColor(sf::Color(0, 230, 255, 240));
+    window.draw(fillEnergy1);
+
+    // Row 3: Gold & Mini Item Inventory Badges
+    int p1Coins = ShopData::getCoins(ShopData::SLOT_P1_2P);
+    sf::Text p1Gold;
+    p1Gold.setFont(mFont);
+    p1Gold.setString("GOLD: " + std::to_string(p1Coins) + "g");
+    p1Gold.setCharacterSize(11);
+    p1Gold.setFillColor(sf::Color(255, 225, 70));
+    p1Gold.setOutlineColor(sf::Color::Black);
+    p1Gold.setOutlineThickness(1.2f);
+    p1Gold.setPosition(p1X + 8.f, topY + 56.f);
+    window.draw(p1Gold);
+
+    float itemStartX1 = p1X + 98.f;
+    float itemGap = 51.f;
+    for (int i = 0; i < 4; i++) {
+        int count1 = ShopData::getItemCount(itemIds[i], ShopData::SLOT_P1_2P);
+        float ix = itemStartX1 + i * itemGap;
+        float iy = topY + 54.f;
+        if (mItemTextures[i].getSize().x > 0) {
+            sf::Sprite miniSpr(mItemTextures[i]);
+            float sc = 18.f / std::max(mItemTextures[i].getSize().x, mItemTextures[i].getSize().y);
+            miniSpr.setScale(sc, sc);
+            miniSpr.setPosition(ix, iy);
+            miniSpr.setColor(count1 > 0 ? sf::Color::White : sf::Color(140, 140, 150, 120));
+            window.draw(miniSpr);
+        }
+        sf::Text countText;
+        countText.setFont(mFont);
+        countText.setString("x" + std::to_string(count1));
+        countText.setCharacterSize(11);
+        countText.setFillColor(count1 > 0 ? sf::Color(120, 255, 120) : sf::Color(180, 180, 180));
+        countText.setOutlineColor(sf::Color::Black);
+        countText.setOutlineThickness(1.f);
+        countText.setPosition(ix + 20.f, iy);
+        window.draw(countText);
+    }
+
+    // ==========================================
+    // 2. PLAYER 2 PANEL (Top-Right, Magenta Theme)
+    // ==========================================
+    float p2X = Win_W - cardW - 12.f;
+    sf::RectangleShape p2Bg(sf::Vector2f(cardW, cardH));
+    p2Bg.setPosition(p2X, topY);
+    p2Bg.setFillColor(sf::Color(28, 12, 28, 225));
+    p2Bg.setOutlineColor(sf::Color(255, 90, 220, 210));
+    p2Bg.setOutlineThickness(1.5f);
+    window.draw(p2Bg);
+
+    // Row 1: Title & Speed
+    sf::Text p2Title;
+    p2Title.setFont(mFont);
+    p2Title.setString("PLAYER 2 (ARROWS)");
+    p2Title.setCharacterSize(13);
+    p2Title.setFillColor(sf::Color(255, 110, 255));
+    p2Title.setOutlineColor(sf::Color::Black);
+    p2Title.setOutlineThickness(1.5f);
+    p2Title.setPosition(p2X + 8.f, topY + 5.f);
+    window.draw(p2Title);
+
+    sf::Text p2Spd;
+    p2Spd.setFont(mFont);
+    p2Spd.setString("SPD: " + std::to_string(static_cast<int>(p2Stats.currentCalculatedSpeed)) + " px/s");
+    p2Spd.setCharacterSize(11);
+    p2Spd.setFillColor(sf::Color(255, 235, 120));
+    p2Spd.setOutlineColor(sf::Color::Black);
+    p2Spd.setOutlineThickness(1.2f);
+    p2Spd.setPosition(p2X + cardW - 105.f, topY + 6.f);
+    window.draw(p2Spd);
+
+    // Row 2: Hearts & Energy Bar
+    for (int i = 0; i < p2Stats.maxHp; ++i) {
+        float cx = p2X + 8.f + i * heartGap;
+        float cy = topY + 26.f;
+        bool hasHp = (i < p2Stats.currentHp);
+
+        if (mHeartLoaded) {
+            sf::Sprite& spr = hasHp ? mHeartSprite : mHeartEmptySprite;
+            sf::Vector2u texSize = spr.getTexture() ? spr.getTexture()->getSize() : sf::Vector2u(52, 40);
+            spr.setScale(20.f / texSize.x, 16.f / texSize.y);
+            spr.setPosition(cx, cy);
+            window.draw(spr);
+        }
+    }
+
+    float p2BarX = p2X + p2Stats.maxHp * heartGap + 12.f;
+    float p2BarY = topY + 29.f;
+
+    sf::RectangleShape bgEnergy2(sf::Vector2f(barW, barH));
+    bgEnergy2.setPosition(p2BarX, p2BarY);
+    bgEnergy2.setFillColor(sf::Color(35, 20, 35, 210));
+    bgEnergy2.setOutlineColor(sf::Color(220, 80, 220, 200));
+    bgEnergy2.setOutlineThickness(1.f);
+    window.draw(bgEnergy2);
+
+    float nrg2 = std::clamp(p2Stats.energy / p2Stats.maxEnergy, 0.f, 1.f);
+    sf::RectangleShape fillEnergy2(sf::Vector2f((barW - 2.f) * nrg2, barH - 2.f));
+    fillEnergy2.setPosition(p2BarX + 1.f, p2BarY + 1.f);
+    fillEnergy2.setFillColor(sf::Color(255, 90, 240, 240));
+    window.draw(fillEnergy2);
+
+    // Row 3: Gold & Mini Item Inventory Badges
+    int p2Coins = ShopData::getCoins(ShopData::SLOT_P2_2P);
+    sf::Text p2Gold;
+    p2Gold.setFont(mFont);
+    p2Gold.setString("GOLD: " + std::to_string(p2Coins) + "g");
+    p2Gold.setCharacterSize(11);
+    p2Gold.setFillColor(sf::Color(255, 200, 255));
+    p2Gold.setOutlineColor(sf::Color::Black);
+    p2Gold.setOutlineThickness(1.2f);
+    p2Gold.setPosition(p2X + 8.f, topY + 56.f);
+    window.draw(p2Gold);
+
+    float itemStartX2 = p2X + 98.f;
+    for (int i = 0; i < 4; i++) {
+        int count2 = ShopData::getItemCount(itemIds[i], ShopData::SLOT_P2_2P);
+        float ix = itemStartX2 + i * itemGap;
+        float iy = topY + 54.f;
+        if (mItemTextures[i].getSize().x > 0) {
+            sf::Sprite miniSpr(mItemTextures[i]);
+            float sc = 18.f / std::max(mItemTextures[i].getSize().x, mItemTextures[i].getSize().y);
+            miniSpr.setScale(sc, sc);
+            miniSpr.setPosition(ix, iy);
+            miniSpr.setColor(count2 > 0 ? sf::Color::White : sf::Color(140, 140, 150, 120));
+            window.draw(miniSpr);
+        }
+        sf::Text countText;
+        countText.setFont(mFont);
+        countText.setString("x" + std::to_string(count2));
+        countText.setCharacterSize(11);
+        countText.setFillColor(count2 > 0 ? sf::Color(120, 255, 120) : sf::Color(180, 180, 180));
+        countText.setOutlineColor(sf::Color::Black);
+        countText.setOutlineThickness(1.f);
+        countText.setPosition(ix + 20.f, iy);
+        window.draw(countText);
+    }
+
+    // ==========================================
+    // 3. CENTER MATCH SCORE INDICATOR
+    // ==========================================
+    sf::RectangleShape matchScoreBox(sf::Vector2f(230.f, 26.f));
+    matchScoreBox.setOrigin(115.f, 13.f);
+    matchScoreBox.setPosition(Win_W / 2.f, 75.f);
+    matchScoreBox.setFillColor(sf::Color(15, 18, 28, 220));
+    matchScoreBox.setOutlineColor(sf::Color(255, 215, 0, 200));
+    matchScoreBox.setOutlineThickness(1.2f);
+    window.draw(matchScoreBox);
+
+    sf::Text matchScoreText;
+    matchScoreText.setFont(mFont);
+    matchScoreText.setString("P1 [ " + std::to_string(mP1Wins) + " ]  VS  [ " + std::to_string(mP2Wins) + " ] P2");
+    matchScoreText.setCharacterSize(14);
+    matchScoreText.setFillColor(sf::Color(255, 225, 60));
+    matchScoreText.setOutlineColor(sf::Color::Black);
+    matchScoreText.setOutlineThickness(1.5f);
+    sf::FloatRect msb = matchScoreText.getLocalBounds();
+    matchScoreText.setOrigin(msb.left + msb.width / 2.f, msb.top + msb.height / 2.f);
+    matchScoreText.setPosition(Win_W / 2.f, 75.f);
+    window.draw(matchScoreText);
 }

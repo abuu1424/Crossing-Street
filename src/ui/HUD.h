@@ -60,9 +60,21 @@ public:
                           float speedRem, float scoreX2Rem, bool hasShield);
     void setEndlessMode(bool isEndless, int wave = 1) { mIsEndless = isEndless; mEndlessWave = wave; }
     bool isEndlessMode() const { return mIsEndless; }
+
+    void setTwoPlayerMode(bool is2P, int p1Wins = 0, int p2Wins = 0) {
+        mIsTwoPlayer = is2P;
+        mP1Wins = p1Wins;
+        mP2Wins = p2Wins;
+    }
+    bool isTwoPlayerMode() const { return mIsTwoPlayer; }
+    void drawTwoPlayerStats(sf::RenderWindow& window, const PlayerStats& p1Stats, const PlayerStats& p2Stats, int p1Score = 0, int p2Score = 0);
+
     void reloadHudBar(const std::string& hudPath);
     sf::FloatRect getPauseIconBounds() const;
 private:
     bool mIsEndless = false;
     int  mEndlessWave = 1;
+    bool mIsTwoPlayer = false;
+    int  mP1Wins = 0;
+    int  mP2Wins = 0;
 };

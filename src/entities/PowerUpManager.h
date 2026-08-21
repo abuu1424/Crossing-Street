@@ -62,9 +62,14 @@ public:
     float getSpeedBoostDuration() const { return 6.0f; }
     float getScoreX2Duration() const { return 10.0f; }
 
-    // Bot PowerUp pickup handling
+    // PowerUp pickup handling for P1, P2, Bot
+    void checkPlayerPickup(const sf::FloatRect& hitbox, CPEOPLE& player, SoundManager* sound = nullptr, const std::string& playerPrefix = "");
     void checkBotPickup(const sf::FloatRect& botHitbox, CPEOPLE& botPlayer, SoundManager* sound = nullptr);
     bool isBotSpeedBoostActive() const { return mBotSpeedBoostTimer > 0.f; }
+    bool isP2SpeedBoostActive() const { return mP2SpeedBoostTimer > 0.f; }
+    bool isMagnetActiveP2() const { return mP2MagnetTimer > 0.f; }
+    bool isTimeStopActiveP2() const { return mP2TimeStopTimer > 0.f; }
+    bool isScoreX2ActiveP2() const { return mP2ScoreX2Timer > 0.f; }
 
     bool hasItemNear(const sf::FloatRect& cellRect) const {
         for (const auto& item : mItems) {
@@ -95,6 +100,10 @@ private:
     float mSpeedBoostTimer = 0.f;
     float mScoreX2Timer = 0.f;
     float mBotSpeedBoostTimer = 0.f;
+    float mP2SpeedBoostTimer = 0.f;
+    float mP2MagnetTimer = 0.f;
+    float mP2TimeStopTimer = 0.f;
+    float mP2ScoreX2Timer = 0.f;
     bool mHasShield = false;
 
     // Visual aura & particles

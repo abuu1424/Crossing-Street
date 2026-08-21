@@ -33,21 +33,19 @@ Menu::Menu() {
                                   true   // Loop
       );
 
-  // Buttons
-  float btnY = 220.f;
-  float gap = 58.f;
+  // Main Buttons (Clean 5-button layout)
+  float btnY = 225.f;
+  float gap = 62.f;
   setupButton(mBtnNew, "assets/ui/menu/btn_newgame.png", "CAMPAIGN",
               Win_W / 2.f, btnY);
-  setupButton(mBtnEndless, "assets/ui/menu/btn_newgame.png", "ENDLESS MODE",
+  setupButton(mBtnChallenges, "assets/ui/menu/btn_newgame.png", "CHALLENGES",
               Win_W / 2.f, btnY + gap);
-  setupButton(mBtnVsBot, "assets/ui/menu/btn_newgame.png", "VS BOT AI",
-              Win_W / 2.f, btnY + gap * 2);
   setupButton(mBtnLoad, "assets/ui/menu/btn_loadgame.png", "LOAD GAME",
-              Win_W / 2.f, btnY + gap * 3);
+              Win_W / 2.f, btnY + gap * 2);
   setupButton(mBtnSetting, "assets/ui/menu/btn_setting.png", "SETTINGS",
-              Win_W / 2.f, btnY + gap * 4);
+              Win_W / 2.f, btnY + gap * 3);
   setupButton(mBtnQuit, "assets/ui/menu/btn_quit.png", "QUIT", Win_W / 2.f,
-              btnY + gap * 5);
+              btnY + gap * 4);
 
   // Icon ? button (Info/Help) ở góc trên bên phải — dùng texture gỗ chuẩn
   setupButton(mBtnInfo, "assets/ui/menu/btn_info.png", "?", Win_W - 65.f, 65.f,
@@ -62,6 +60,7 @@ Menu::Menu() {
   setupNewGameNamePopup();
   setupInfoMenu();
   setupShopMenu();
+  setupChallengeMenu();
   setupDifficultyMenu();
 
   // Nhạc nền
@@ -260,6 +259,10 @@ void Menu::handleEvent(const sf::Event &event, sf::RenderWindow &window,
     handleShopEvent(event, window, result);
     return;
   }
+  if (mScreen == MenuScreen::CHALLENGES) {
+    handleChallengeEvent(event, window, result);
+    return;
+  }
   if (mScreen == MenuScreen::BOT_DIFFICULTY) {
     handleDifficultyEvent(event, window, result);
     return;
@@ -278,11 +281,8 @@ void Menu::handleEvent(const sf::Event &event, sf::RenderWindow &window,
       mPendingNewGameSlot = -1;
       mNewGameName.clear();
       mScreen = MenuScreen::NEW_GAME_SELECT;
-    } else if (mBtnEndless.sprite.getGlobalBounds().contains(mouse)) {
-      result = MenuResult::ENDLESS_GAME;
-      mMusic.stop();
-    } else if (mBtnVsBot.sprite.getGlobalBounds().contains(mouse)) {
-      mScreen = MenuScreen::BOT_DIFFICULTY;
+    } else if (mBtnChallenges.sprite.getGlobalBounds().contains(mouse)) {
+      mScreen = MenuScreen::CHALLENGES;
     } else if (mBtnLoad.sprite.getGlobalBounds().contains(mouse)) {
       refreshSaveSlots();
       mScreen = MenuScreen::LOAD;
@@ -399,6 +399,13 @@ void Menu::update(float dt, sf::RenderWindow &window) {
     }
     return;
   }
+  if (mScreen == MenuScreen::CHALLENGES) {
+    updateButton(mBtnChallenge2P, mouse, dt);
+    updateButton(mBtnChallengeBot, mouse, dt);
+    updateButton(mBtnChallengeEndless, mouse, dt);
+    updateButton(mBtnChallengeBack, mouse, dt);
+    return;
+  }
 
   if (mScreen == MenuScreen::BOT_DIFFICULTY) {
     updateButton(mBtnDifficultyEasy, mouse, dt);
@@ -411,8 +418,7 @@ void Menu::update(float dt, sf::RenderWindow &window) {
   if (mTitleAnim)
     mTitleAnim->update(dt);
   updateButton(mBtnNew, mouse, dt);
-  updateButton(mBtnEndless, mouse, dt);
-  updateButton(mBtnVsBot, mouse, dt);
+  updateButton(mBtnChallenges, mouse, dt);
   updateButton(mBtnLoad, mouse, dt);
   updateButton(mBtnSetting, mouse, dt);
   updateButton(mBtnQuit, mouse, dt);
@@ -493,6 +499,10 @@ void Menu::draw(sf::RenderWindow &window) {
     drawShopMenu(window);
     return;
   }
+  if (mScreen == MenuScreen::CHALLENGES) {
+    drawChallengeMenu(window);
+    return;
+  }
   if (mScreen == MenuScreen::BOT_DIFFICULTY) {
     drawDifficultyMenu(window);
     return;
@@ -503,8 +513,7 @@ void Menu::draw(sf::RenderWindow &window) {
   else
     window.draw(mTitle);
   drawButton(window, mBtnNew);
-  drawButton(window, mBtnEndless);
-  drawButton(window, mBtnVsBot);
+  drawButton(window, mBtnChallenges);
   drawButton(window, mBtnLoad);
   drawButton(window, mBtnSetting);
   drawButton(window, mBtnQuit);
@@ -778,19 +787,19 @@ void Menu::setupInfoMenu() {
 
   // Tab 0: Controls & Combat Skills
   std::string tab0LeftLines[] = {
-      "W / A / S / D  or  Arrows : Move Player",
-      "Shift (Hold) : Sprint (+50% Speed)",
-      "P : Pause Game | M : Main Menu",
-      "F1 - F3 : Quick Save | F4 - F6 : Load",
-      "F11 / Alt+Enter : Fullscreen | V : Debug",
-      "R : Restart Level | Space : Skip Scene"};
+      "P1 Controls: W/A/S/D | LShift: Sprint",
+      "P1 Skills: E (Speed), Q (Radar), T (Freeze)",
+      "P2 Controls: Arrow Keys | RShift: Sprint",
+      "P2 Skills: [ / O (Speed), ] / K (Radar), \\ / L (Freeze)",
+      "P: Pause Game | M: Menu | R: Restart",
+      "F11 / Alt+Enter: Fullscreen | V: Hitbox"};
   std::string tab0RightLines[] = {
-      "E Key : Speed Surge (+50% Spd, 5s)",
-      "Q Key : Coin Magnet (Pulls Coins, 6s)",
-      "T Key : Time Freeze (Stop 100%, 5s)",
-      "Stamina : Drains on sprint, auto-regens",
-      "Energy : Drains on move (Score scaling)",
-      "Skills unlock when bought in Shop"};
+      "Skill 1: Speed Surge (+50% Spd, 5.0s)",
+      "Skill 2: Coin Magnet (Pulls Coins, 6.0s)",
+      "Skill 3: Time Freeze (Freeze All, 5.0s)",
+      "Stamina: Drains on sprint, auto-regens",
+      "Energy: Drains on move (Score scaling)",
+      "2P Mode: Contest Power-Ups across 5 Eras!"};
   setupRows(mInfoTab0Left, tab0LeftLines, 6, Win_W / 2.f - 318.f, 306.f, 25.5f, 13);
   setupRows(mInfoTab0Right, tab0RightLines, 6, Win_W / 2.f + 22.f, 306.f, 25.5f, 13);
 
@@ -1049,56 +1058,98 @@ void Menu::drawShopMenu(sf::RenderWindow &window, int currentHp, int maxHp) {
   window.draw(mPanelSprite);
   window.draw(mShopTitle);
 
-  // Render Slot Selector Tabs (SLOT 1 | SLOT 2 | SLOT 3)
   int activeSlot = ShopData::getActiveSlot();
-  float tabStartX = Win_W / 2.f - 180.f;
-  float tabGap = 180.f;
 
-  for (int slot = 1; slot <= 3; slot++) {
-    float tx = tabStartX + (slot - 1) * tabGap;
-    float ty = 188.f;
+  if (mIsTwoPlayerShop) {
+    // 2-Player Tabs: PLAYER 1 (WASD) - Slot 4 | PLAYER 2 (ARROWS) - Slot 5
+    float tabStartX = Win_W / 2.f - 140.f;
+    float tabGap = 280.f;
+    int pSlots[2] = {ShopData::SLOT_P1_2P, ShopData::SLOT_P2_2P};
+    std::string pNames[2] = {"PLAYER 1 (WASD)", "PLAYER 2 (ARROWS)"};
+    sf::Color pColors[2] = {sf::Color(0, 210, 255), sf::Color(255, 130, 255)};
 
-    bool isSelected = (slot == activeSlot);
+    for (int i = 0; i < 2; i++) {
+      float tx = tabStartX + i * tabGap;
+      float ty = 188.f;
+      bool isSelected = (pSlots[i] == activeSlot);
 
-    sf::RectangleShape tabBox(sf::Vector2f(120.f, 28.f));
-    tabBox.setOrigin(60.f, 14.f);
-    tabBox.setPosition(tx, ty);
+      sf::RectangleShape tabBox(sf::Vector2f(230.f, 30.f));
+      tabBox.setOrigin(115.f, 15.f);
+      tabBox.setPosition(tx, ty);
 
-    if (isSelected) {
-      tabBox.setFillColor(sf::Color(0, 160, 220, 110));
-      tabBox.setOutlineColor(sf::Color(0, 230, 255, 240));
-      tabBox.setOutlineThickness(2.0f);
-    } else {
-      tabBox.setFillColor(sf::Color(20, 25, 35, 140));
-      tabBox.setOutlineColor(sf::Color(80, 90, 100, 160));
-      tabBox.setOutlineThickness(1.2f);
-    }
-    window.draw(tabBox);
+      if (isSelected) {
+        tabBox.setFillColor(sf::Color(pColors[i].r, pColors[i].g, pColors[i].b, 90));
+        tabBox.setOutlineColor(pColors[i]);
+        tabBox.setOutlineThickness(2.2f);
+      } else {
+        tabBox.setFillColor(sf::Color(20, 25, 35, 150));
+        tabBox.setOutlineColor(sf::Color(80, 90, 100, 160));
+        tabBox.setOutlineThickness(1.2f);
+      }
+      window.draw(tabBox);
 
-    sf::Text tabText;
-    tabText.setFont(mFont);
-    tabText.setString("SLOT " + std::to_string(slot));
-    tabText.setCharacterSize(16);
-
-    if (isSelected) {
-      tabText.setFillColor(sf::Color(255, 220, 80));
+      sf::Text tabText;
+      tabText.setFont(mFont);
+      tabText.setString(pNames[i]);
+      tabText.setCharacterSize(15);
+      tabText.setFillColor(isSelected ? sf::Color(255, 255, 255) : sf::Color(170, 180, 190));
       tabText.setOutlineColor(sf::Color::Black);
-      tabText.setOutlineThickness(2.f);
-    } else {
-      tabText.setFillColor(sf::Color(170, 180, 190));
-      tabText.setOutlineColor(sf::Color::Black);
-      tabText.setOutlineThickness(1.2f);
+      tabText.setOutlineThickness(1.5f);
+
+      sf::FloatRect tb = tabText.getLocalBounds();
+      tabText.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
+      tabText.setPosition(tx, ty - 1.f);
+      window.draw(tabText);
     }
 
-    sf::FloatRect tb = tabText.getLocalBounds();
-    tabText.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
-    tabText.setPosition(tx, ty - 1.f);
-    window.draw(tabText);
+    int coins = ShopData::getCoins(activeSlot);
+    std::string pLabel = (activeSlot == ShopData::SLOT_P1_2P) ? "PLAYER 1 (WASD)" : "PLAYER 2 (ARROWS)";
+    mShopCoinsText.setString("COINS: " + std::to_string(coins) + "  GOLD  [" + pLabel + "]");
+    mShopCoinsText.setFillColor((activeSlot == ShopData::SLOT_P1_2P) ? sf::Color(100, 230, 255) : sf::Color(255, 170, 255));
+  } else {
+    // Campaign 3 Slots (SLOT 1 | SLOT 2 | SLOT 3)
+    float tabStartX = Win_W / 2.f - 180.f;
+    float tabGap = 180.f;
+
+    for (int slot = 1; slot <= 3; slot++) {
+      float tx = tabStartX + (slot - 1) * tabGap;
+      float ty = 188.f;
+      bool isSelected = (slot == activeSlot);
+
+      sf::RectangleShape tabBox(sf::Vector2f(120.f, 28.f));
+      tabBox.setOrigin(60.f, 14.f);
+      tabBox.setPosition(tx, ty);
+
+      if (isSelected) {
+        tabBox.setFillColor(sf::Color(0, 160, 220, 110));
+        tabBox.setOutlineColor(sf::Color(0, 230, 255, 240));
+        tabBox.setOutlineThickness(2.0f);
+      } else {
+        tabBox.setFillColor(sf::Color(20, 25, 35, 140));
+        tabBox.setOutlineColor(sf::Color(80, 90, 100, 160));
+        tabBox.setOutlineThickness(1.2f);
+      }
+      window.draw(tabBox);
+
+      sf::Text tabText;
+      tabText.setFont(mFont);
+      tabText.setString("SLOT " + std::to_string(slot));
+      tabText.setCharacterSize(16);
+      tabText.setFillColor(isSelected ? sf::Color(255, 220, 80) : sf::Color(170, 180, 190));
+      tabText.setOutlineColor(sf::Color::Black);
+      tabText.setOutlineThickness(1.5f);
+
+      sf::FloatRect tb = tabText.getLocalBounds();
+      tabText.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
+      tabText.setPosition(tx, ty - 1.f);
+      window.draw(tabText);
+    }
+
+    int coins = ShopData::getCoins(activeSlot);
+    mShopCoinsText.setString("COINS: " + std::to_string(coins) + "  GOLD  (SLOT " + std::to_string(activeSlot) + ")");
+    mShopCoinsText.setFillColor(sf::Color(255, 215, 0));
   }
 
-  int coins = ShopData::getCoins();
-  mShopCoinsText.setString("COINS: " + std::to_string(coins) +
-                           "  GOLD  (SLOT " + std::to_string(activeSlot) + ")");
   sf::FloatRect cb = mShopCoinsText.getLocalBounds();
   mShopCoinsText.setOrigin(cb.left + cb.width / 2.f, cb.top + cb.height / 2.f);
   mShopCoinsText.setPosition(Win_W / 2.f, 218.f);
@@ -1129,7 +1180,7 @@ void Menu::drawShopMenu(sf::RenderWindow &window, int currentHp, int maxHp) {
     bool isHeart = (itemIds[i] == "heart");
     bool isFullHp = (isHeart && currentHp >= maxHp);
 
-    int count = ShopData::getItemCount(itemIds[i]);
+    int count = ShopData::getItemCount(itemIds[i], activeSlot);
     std::string titleStr = titles[i];
     if (isHeart) {
       titleStr += " (" + std::to_string(currentHp) + "/" + std::to_string(maxHp) + " HP)";
@@ -1145,10 +1196,11 @@ void Menu::drawShopMenu(sf::RenderWindow &window, int currentHp, int maxHp) {
     mItemPriceTexts[i].setString(std::to_string(prices[i]) + " Gold");
     mItemPriceTexts[i].setFillColor(sf::Color(255, 215, 0));
 
+    int currentCoins = ShopData::getCoins(activeSlot);
     if (isFullHp) {
       mItemBuyButtons[i].label.setString("FULL HP");
       mItemBuyButtons[i].label.setFillColor(sf::Color(140, 255, 140));
-    } else if (coins < prices[i]) {
+    } else if (currentCoins < prices[i]) {
       mItemBuyButtons[i].label.setString("NO GOLD");
       mItemBuyButtons[i].label.setFillColor(sf::Color(255, 100, 100));
     } else {
@@ -1176,8 +1228,20 @@ void Menu::drawShopMenu(sf::RenderWindow &window, int currentHp, int maxHp) {
 
 void Menu::handleShopEvent(const sf::Event &event, sf::RenderWindow &window,
                            MenuResult &result, int* currentHpPtr, int maxHp) {
+  if (event.type == sf::Event::KeyPressed &&
+      (event.key.code == sf::Keyboard::Escape || event.key.code == sf::Keyboard::S)) {
+    mScreen = MenuScreen::MAIN;
+    return;
+  }
+
   if (event.type == sf::Event::MouseButtonPressed &&
       event.mouseButton.button == sf::Mouse::Left) {
+    static sf::Clock buyCooldownClock;
+    if (buyCooldownClock.getElapsedTime().asSeconds() < 0.22f) {
+      return;
+    }
+    buyCooldownClock.restart();
+
     sf::Vector2f mouse = window.mapPixelToCoords(
         sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 
@@ -1186,19 +1250,36 @@ void Menu::handleShopEvent(const sf::Event &event, sf::RenderWindow &window,
       return;
     }
 
-    // Check Slot Selector Tabs (SLOT 1 | SLOT 2 | SLOT 3)
-    float tabStartX = Win_W / 2.f - 180.f;
-    float tabGap = 180.f;
-    for (int slot = 1; slot <= 3; slot++) {
-      float tx = tabStartX + (slot - 1) * tabGap;
-      sf::FloatRect tabBounds(tx - 60.f, 172.f, 120.f, 30.f);
-      if (tabBounds.contains(mouse)) {
-        ShopData::setActiveSlot(slot);
-        printf("Switched Active Shop Slot to Slot %d\n", slot);
-        return;
+    int activeSlot = ShopData::getActiveSlot();
+
+    if (mIsTwoPlayerShop) {
+      // 2P Tabs
+      float tabStartX = Win_W / 2.f - 140.f;
+      float tabGap = 280.f;
+      int pSlots[2] = {ShopData::SLOT_P1_2P, ShopData::SLOT_P2_2P};
+      for (int i = 0; i < 2; i++) {
+        float tx = tabStartX + i * tabGap;
+        sf::FloatRect tabBounds(tx - 115.f, 173.f, 230.f, 30.f);
+        if (tabBounds.contains(mouse)) {
+          ShopData::setActiveSlot(pSlots[i]);
+          return;
+        }
+      }
+    } else {
+      // Campaign 3 Slots
+      float tabStartX = Win_W / 2.f - 180.f;
+      float tabGap = 180.f;
+      for (int slot = 1; slot <= 3; slot++) {
+        float tx = tabStartX + (slot - 1) * tabGap;
+        sf::FloatRect tabBounds(tx - 60.f, 172.f, 120.f, 30.f);
+        if (tabBounds.contains(mouse)) {
+          ShopData::setActiveSlot(slot);
+          return;
+        }
       }
     }
 
+    activeSlot = ShopData::getActiveSlot();
     std::string itemIds[5] = {"shield", "speed", "time", "radar", "heart"};
     int prices[5] = {250, 400, 350, 500, 1500};
 
@@ -1207,26 +1288,18 @@ void Menu::handleShopEvent(const sf::Event &event, sf::RenderWindow &window,
         if (itemIds[i] == "heart") {
           int curHp = (currentHpPtr ? *currentHpPtr : 3);
           if (curHp >= maxHp) {
-            printf("Player is already at full health (%d/%d HP)!\n", curHp, maxHp);
             return;
           }
-          if (ShopData::getCoins() >= prices[i]) {
-            if (ShopData::spendCoins(prices[i])) {
+          if (ShopData::getCoins(activeSlot) >= prices[i]) {
+            if (ShopData::spendCoins(prices[i], activeSlot)) {
               if (currentHpPtr) {
                 (*currentHpPtr)++;
                 if (*currentHpPtr > maxHp) *currentHpPtr = maxHp;
               }
-              printf("Restored 1 Heart! Health now: %d/%d HP for Slot %d\n",
-                     (currentHpPtr ? *currentHpPtr : 3), maxHp,
-                     ShopData::getActiveSlot());
             }
           }
         } else {
-          if (ShopData::buyItem(itemIds[i], prices[i])) {
-            printf("Purchased shop item '%s' (Count now: %d) for Slot %d\n",
-                   itemIds[i].c_str(), ShopData::getItemCount(itemIds[i]),
-                   ShopData::getActiveSlot());
-          }
+          ShopData::buyItem(itemIds[i], prices[i], activeSlot);
         }
         return;
       }
@@ -1235,6 +1308,68 @@ void Menu::handleShopEvent(const sf::Event &event, sf::RenderWindow &window,
 
   if (event.type == sf::Event::KeyPressed) {
     if (event.key.code == sf::Keyboard::Escape) {
+      mScreen = MenuScreen::MAIN;
+    }
+  }
+}
+
+void Menu::setupChallengeMenu() {
+  // Title
+  mChallengeTitle.setFont(mFont);
+  mChallengeTitle.setString("SPECIAL CHALLENGES");
+  mChallengeTitle.setCharacterSize(38);
+  mChallengeTitle.setFillColor(sf::Color(255, 215, 0));
+  mChallengeTitle.setOutlineColor(sf::Color::Black);
+  mChallengeTitle.setOutlineThickness(3.f);
+  sf::FloatRect tb = mChallengeTitle.getLocalBounds();
+  mChallengeTitle.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
+  mChallengeTitle.setPosition(Win_W / 2.f, 215.f);
+
+  // 3 Challenge Buttons (Clean, evenly spaced layout)
+  float startY = 275.f;
+  float cardGap = 72.f;
+
+  setupButton(mBtnChallenge2P, "assets/ui/menu/btn_newgame.png", "2 PLAYERS VERSUS",
+              Win_W / 2.f, startY, "", 23);
+  setupButton(mBtnChallengeBot, "assets/ui/menu/btn_newgame.png", "VS BOT AI",
+              Win_W / 2.f, startY + cardGap, "", 23);
+  setupButton(mBtnChallengeEndless, "assets/ui/menu/btn_newgame.png", "ENDLESS MODE",
+              Win_W / 2.f, startY + cardGap * 2, "", 23);
+  setupButton(mBtnChallengeBack, "assets/ui/menu/btn_back.png", "BACK",
+              Win_W / 2.f, 505.f, "assets/ui/menu/btn_back_hover.png", 22);
+}
+
+void Menu::drawChallengeMenu(sf::RenderWindow &window) {
+  window.draw(mBgSprite);
+  window.draw(mPanelSprite);
+  window.draw(mChallengeTitle);
+
+  drawButton(window, mBtnChallenge2P);
+  drawButton(window, mBtnChallengeBot);
+  drawButton(window, mBtnChallengeEndless);
+  drawButton(window, mBtnChallengeBack);
+}
+
+void Menu::handleChallengeEvent(const sf::Event &event, sf::RenderWindow &window,
+                                MenuResult &result) {
+  if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+    mScreen = MenuScreen::MAIN;
+    return;
+  }
+
+  if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+    sf::Vector2f mouse = window.mapPixelToCoords(
+        sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+
+    if (mBtnChallenge2P.sprite.getGlobalBounds().contains(mouse)) {
+      result = MenuResult::CHALLENGE_TWO_PLAYERS;
+      mMusic.stop();
+    } else if (mBtnChallengeBot.sprite.getGlobalBounds().contains(mouse)) {
+      mScreen = MenuScreen::BOT_DIFFICULTY;
+    } else if (mBtnChallengeEndless.sprite.getGlobalBounds().contains(mouse)) {
+      result = MenuResult::CHALLENGE_ENDLESS;
+      mMusic.stop();
+    } else if (mBtnChallengeBack.sprite.getGlobalBounds().contains(mouse)) {
       mScreen = MenuScreen::MAIN;
     }
   }
@@ -1268,7 +1403,7 @@ void Menu::setupDifficultyMenu() {
   const char *descs[3] = {
       "Slow reactions & occasional missteps",
       "Smart pathfinding, dodges most hazards",
-      "Near-flawless Dijkstra with instant reflexes"};
+      "Spatio-Temporal A* with instant micro-dodging reflexes"};
   sf::Color colors[3] = {sf::Color(120, 255, 140), sf::Color(255, 220, 80),
                          sf::Color(255, 90, 90)};
 
@@ -1340,22 +1475,22 @@ void Menu::handleDifficultyEvent(const sf::Event &event,
     sf::FloatRect hardRect(Win_W / 2.f - 280.f, 430.f - 32.f, 560.f, 64.f);
 
     if (mBtnDifficultyEasy.contains(mouse) || easyRect.contains(mouse)) {
-      result = MenuResult::VS_BOT_EASY;
+      result = MenuResult::CHALLENGE_VS_BOT_EASY;
       mMusic.stop();
     } else if (mBtnDifficultyNormal.contains(mouse) || normalRect.contains(mouse)) {
-      result = MenuResult::VS_BOT_NORMAL;
+      result = MenuResult::CHALLENGE_VS_BOT_NORMAL;
       mMusic.stop();
     } else if (mBtnDifficultyHard.contains(mouse) || hardRect.contains(mouse)) {
-      result = MenuResult::VS_BOT_HARD;
+      result = MenuResult::CHALLENGE_VS_BOT_HARD;
       mMusic.stop();
     } else if (mBtnDifficultyBack.contains(mouse)) {
-      mScreen = MenuScreen::MAIN;
+      mScreen = MenuScreen::CHALLENGES;
     }
   }
 
   if (event.type == sf::Event::KeyPressed) {
     if (event.key.code == sf::Keyboard::Escape) {
-      mScreen = MenuScreen::MAIN;
+      mScreen = MenuScreen::CHALLENGES;
     }
   }
 }

@@ -10,7 +10,7 @@
 int ShopData::sActiveSlot = 1;
 
 void ShopData::setActiveSlot(int slot) {
-  if (slot >= 1 && slot <= 3) {
+  if (slot >= 1 && slot <= 5) {
     sActiveSlot = slot;
   }
 }
@@ -20,8 +20,15 @@ int ShopData::getActiveSlot() {
 }
 
 std::string ShopData::getFilePath(int slot) {
-  int targetSlot = (slot >= 1 && slot <= 3) ? slot : sActiveSlot;
-  if (targetSlot < 1 || targetSlot > 3) targetSlot = 1;
+  int targetSlot = (slot >= 1 && slot <= 5) ? slot : sActiveSlot;
+  if (targetSlot < 1 || targetSlot > 5) targetSlot = 1;
+
+  if (targetSlot == SLOT_P1_2P) {
+    return "saves/shopdata_2p_p1.txt";
+  }
+  if (targetSlot == SLOT_P2_2P) {
+    return "saves/shopdata_2p_p2.txt";
+  }
 
   std::string path = "saves/shopdata_slot" + std::to_string(targetSlot) + ".txt";
 
@@ -42,14 +49,14 @@ std::string trimStr(const std::string& str) {
     return str.substr(first, (last - first + 1));
 }
 
-// In-memory slot caching to avoid disk read/write storms during gameplay
-ShopState sSlotCache[4];
-bool sSlotCacheValid[4] = {false, false, false, false};
+// In-memory slot caching to avoid disk read/write storms during gameplay (slots 1 to 5)
+ShopState sSlotCache[6];
+bool sSlotCacheValid[6] = {false, false, false, false, false, false};
 }
 
 ShopState ShopData::load(int slot) {
-  int targetSlot = (slot >= 1 && slot <= 3) ? slot : sActiveSlot;
-  if (targetSlot < 1 || targetSlot > 3) targetSlot = 1;
+  int targetSlot = (slot >= 1 && slot <= 5) ? slot : sActiveSlot;
+  if (targetSlot < 1 || targetSlot > 5) targetSlot = 1;
 
   if (sSlotCacheValid[targetSlot]) {
     return sSlotCache[targetSlot];
@@ -120,8 +127,8 @@ ShopState ShopData::load(int slot) {
 }
 
 void ShopData::save(const ShopState &state, int slot) {
-  int targetSlot = (slot >= 1 && slot <= 3) ? slot : sActiveSlot;
-  if (targetSlot < 1 || targetSlot > 3) targetSlot = 1;
+  int targetSlot = (slot >= 1 && slot <= 5) ? slot : sActiveSlot;
+  if (targetSlot < 1 || targetSlot > 5) targetSlot = 1;
 
   sSlotCache[targetSlot] = state;
   sSlotCacheValid[targetSlot] = true;
@@ -145,8 +152,8 @@ void ShopData::save(const ShopState &state, int slot) {
 }
 
 void ShopData::resetSlot(int slot) {
-  int targetSlot = (slot >= 1 && slot <= 3) ? slot : sActiveSlot;
-  if (targetSlot < 1 || targetSlot > 3) targetSlot = 1;
+  int targetSlot = (slot >= 1 && slot <= 5) ? slot : sActiveSlot;
+  if (targetSlot < 1 || targetSlot > 5) targetSlot = 1;
 
   sSlotCacheValid[targetSlot] = false;
 

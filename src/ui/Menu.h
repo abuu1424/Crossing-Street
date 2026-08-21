@@ -9,6 +9,13 @@
 #include "TextureManager.h"
 #include "MenuButton.h"
 
+enum class ChallengeMode {
+    NONE,
+    TWO_PLAYERS,
+    VS_BOT,
+    ENDLESS
+};
+
 enum class MenuResult {
     NONE,
     NEW_GAME,
@@ -20,10 +27,11 @@ enum class MenuResult {
     LOAD_SLOT_3,
     QUIT,
     SETTING,
-    ENDLESS_GAME,
-    VS_BOT_EASY,
-    VS_BOT_NORMAL,
-    VS_BOT_HARD
+    CHALLENGE_TWO_PLAYERS,
+    CHALLENGE_VS_BOT_EASY,
+    CHALLENGE_VS_BOT_NORMAL,
+    CHALLENGE_VS_BOT_HARD,
+    CHALLENGE_ENDLESS
 };
 
 enum class MenuScreen {
@@ -33,6 +41,7 @@ enum class MenuScreen {
     SETTINGS,
     INFO,
     SHOP,
+    CHALLENGES,
     BOT_DIFFICULTY
 };
 
@@ -50,14 +59,26 @@ class Menu
     std::unique_ptr<Animation> mTitleAnim;
 
 
-    // Buttons
+    // Main Buttons (Clean 5-button layout)
     MenuButton mBtnNew;
-    MenuButton mBtnEndless;
-    MenuButton mBtnVsBot;
+    MenuButton mBtnChallenges;
     MenuButton mBtnLoad;
-    MenuButton mBtnQuit;
     MenuButton mBtnSetting;
+    MenuButton mBtnQuit;
     MenuButton mBtnBack;
+
+    // Challenges Menu
+    MenuButton mBtnChallenge2P;
+    MenuButton mBtnChallengeBot;
+    MenuButton mBtnChallengeEndless;
+    MenuButton mBtnChallengeBack;
+    sf::Text   mChallengeTitle;
+
+    void setupChallengeMenu();
+    void drawChallengeMenu(sf::RenderWindow& window);
+    void handleChallengeEvent(const sf::Event& event,
+                              sf::RenderWindow& window,
+                              MenuResult& result);
 
     // Bot Difficulty Menu
     MenuButton mBtnDifficultyEasy;
@@ -223,6 +244,13 @@ public:
                          MenuResult& result,
                          int* currentHpPtr = nullptr,
                          int maxHp = 3);
+
+    void setTwoPlayerShop(bool is2P) { mIsTwoPlayerShop = is2P; }
+    bool isTwoPlayerShop() const { return mIsTwoPlayerShop; }
+
+private:
+    bool mIsTwoPlayerShop = false;
+public:
 
 
     float getMusicVolume() const { return mMuteAll ? 0.f : mMusicSlider.value; }
