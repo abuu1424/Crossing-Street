@@ -1,7 +1,7 @@
 # 🎮 CROSSING STREET: TIME ODYSSEY ⏳
 
-> **Đồ Án Môn Học: Lập Trình Hướng Đối Tượng (Object-Oriented Programming - OOP)**  
-> **Khoa Công Nghệ Thông Tin — Trường Đại Học Khoa Học Tự Nhiên, ĐHQG-HCM (HCMUS)**
+> **Course Project: Object-Oriented Programming (OOP)**  
+> **Faculty of Information Technology — Ho Chi Minh City University of Science, VNU-HCM (HCMUS)**
 
 <div align="center">
 
@@ -15,266 +15,266 @@
 
 ---
 
-## 📖 1. Giới Thiệu Dự Án (Overview)
+## 📖 1. Project Overview
 
-**Crossing Street: Time Odyssey** là tựa game arcade 2D vượt đường kết hợp du hành thời gian được phát triển bằng **C++17** và thư viện đồ họa **SFML 2.6.2 / 2.5**. 
+**Crossing Street: Time Odyssey** is a feature-rich 2D time-crossing arcade game developed in **C++17** and **SFML 2.6.2 / 2.5**.
 
-Người chơi sẽ điều khiển nhân vật băng qua các làn đường giao thông nguy hiểm, xuyên không qua **5 kỷ nguyên lịch sử** từ thời Tiền sử hoang dã đến Tương lai Cyberpunk. Dự án được thiết kế hoàn chỉnh với kiến trúc hướng đối tượng (OOP) mẫu mực, tích hợp nhiều chế độ chơi đột phá: chiến dịch cốt truyện, đối kháng 2 người cục bộ, đua tốc độ với Bot AI thông minh (thuật toán Spatio-Temporal A*), kỹ năng chủ động, cửa hàng bổ trợ, thảm họa môi trường động và hệ thống cutscene điện ảnh mượt mà.
+Players guide their character across dangerous, multi-lane traffic while traveling across **5 distinct historical eras**, from the prehistoric wilderness to a cybernetic future. Engineered around clean Object-Oriented Architecture and SOLID principles, the game offers a diverse set of gameplay modes including a cinematic Story Campaign, split-keyboard Local 2-Player Versus, a smart adversary powered by a **Spatio-Temporal A\*** AI algorithm, active cooldown-based skills, in-lane collectible power-ups, an item shop economy, dynamic environment hazards, and custom animated death cutscenes.
 
 ---
 
-## 👥 2. Đội Ngũ Phát Triển (Development Team)
+## 👥 2. Executive Development Team
 
-| Thành Viên | Vai Trò Chuyên Trách | Phụ Trách Module & Đóng Góp Kỹ Thuật |
+| Team Member | Engineering Role | Core Modules & Technical Contributions |
 | :--- | :--- | :--- |
-| **Phan Gia Huy** | **Lead Architect & AI Engineer** | • **Core Modules:** `CGAME`, `BotAI` (Spatio-Temporal A*), `SaveData`, `LevelConfig`, `ElevatorCutscene`, `DeathCutscene`<br>• Thiết kế kiến trúc tổng thể, vòng lặp game đa trạng thái (State Machine), thuật toán tìm đường AI né tránh 16.6Hz, chuyển cảnh thang máy điện ảnh, hệ thống lưu/tải dữ liệu đa slot và tối ưu hóa bộ nhớ. |
-| **Nguyễn Văn Hải** | **Audio & Entity Simulation Engineer** | • **Core Modules:** `CANIMAL` (Base & Derived), `SoundManager`, Dynamic Audio Ducking<br>• Động cơ âm thanh thích ứng đa kênh với hiệu ứng Dynamic Ducking, hành vi di chuyển động vật và vật thể bay trên không (20+ entities), tái hiện không gian âm thanh cho từng thời kỳ. |
-| **Phan Đình Quốc** | **UI/UX Director & Systems Designer** | • **Core Modules:** `Menu` Systems, `HUD` Telemetry, `ShopData`, Item Shop, High Scores, Movie Roll Credits<br>• Giao diện Menu tương tác đa màn hình, thanh đo chỉ số HUD song song thời gian thực, kinh tế cửa hàng vật phẩm, bảng xếp hạng kỷ lục và hệ thống cuộn Credits phong cách điện ảnh. |
-| **Nguyễn Hoàng Nhật** | **World Artist & Gameplay Programmer** | • **Core Modules:** `CPEOPLE`, Obstacles & Traffic (`CVEHICLE`, `CTRAFFICLIGHT`), `HazardManager`, `CollisionEffect`<br>• Vật lý nhân vật và bộ kỹ năng chủ động (Tốc biến, Nam châm, Đóng băng thời gian), cơ chế thảm họa thiên tai động, hiệu ứng hạt va chạm VFX và 5 chuỗi hoạt ảnh chết đặc trưng cho từng màn chơi. |
+| **Phan Gia Huy** | **Lead Architect & AI Engineer** | • **Core Modules:** `CGAME`, `BotAI` (Spatio-Temporal A*), `SaveData`, `LevelConfig`, `ElevatorCutscene`, `DeathCutscene`<br>• Designed the engine architecture, multi-state game loop (State Machine), 16.6Hz real-time obstacle avoidance bot pathfinding, cinematic elevator transitions, multi-slot save serialization, and memory management. |
+| **Nguyễn Văn Hải** | **Audio & Entity Simulation Engineer** | • **Core Modules:** `CANIMAL` (Base & Derived), `SoundManager`, Dynamic Audio Ducking<br>• Implemented the adaptive multi-channel sound engine with real-time dynamic ducking, animal AI movement patterns, flying projectiles (20+ entities), and historical era ambient soundscapes. |
+| **Phan Đình Quốc** | **UI/UX Director & Systems Designer** | • **Core Modules:** `Menu` Systems, `HUD` Telemetry, `ShopData`, Item Shop, High Scores, Movie Roll Credits<br>• Created multi-screen stateful menu navigation, real-time dual telemetry HUD, persistent multi-slot save system, shop economy modal dialogs, and the movie-roll cinematic credits system. |
+| **Nguyễn Hoàng Nhật** | **World Artist & Gameplay Programmer** | • **Core Modules:** `CPEOPLE`, Obstacles & Traffic (`CVEHICLE`, `CTRAFFICLIGHT`), `HazardManager`, `CollisionEffect`<br>• Developed player physics and active skill mechanics (Sprint, Speed Surge, Magnet Radar, Time Freeze), dynamic cataclysm hazard systems, particle collision VFX, and 5 era-tailored death cutscenes. |
 
 ---
 
-## 🕹️ 3. Các Chế Độ Chơi (Game Modes)
+## 🕹️ 3. Game Modes
 
-### 🏛️ 1. Story Campaign (Chế Độ Cốt Truyện 5 Kỷ Nguyên)
-- Du hành xuyên qua **5 màn chơi** với bối cảnh, âm thanh, chướng ngại vật và giới hạn thời gian riêng biệt.
-- Chuyển tiếp giữa các thời kỳ bằng **Elevator Cutscene** (Thang máy thời gian chuyển động cơ học).
-- Hoạt ảnh tử vong (Death Cutscene) riêng biệt cho từng kỷ nguyên khi người chơi thất bại.
+### 🏛️ 1. Story Campaign (5 Historical Eras)
+- Journey through **5 distinct chronological eras**, each featuring custom backgrounds, obstacles, speeds, ambient audio, and level timers.
+- Smooth mechanical **Elevator Cutscenes** seamlessly transition players between timelines.
+- Custom animated **Death Cutscenes** tailored to the unique theme of each era upon player elimination.
 
-### ⚔️ 2. Local 2-Player Versus (Đối Kháng 1v1 Cùng Bàn Phím)
-- Chia đôi quyền điều khiển trên cùng một bàn phím (`WASD` vs `Phím Mũi Tên`).
-- Thanh máu (HP), thể lực (Stamina), kỹ năng và bộ đếm hiệp thắng độc lập (`P1` vs `P2`).
-- Tranh giành các vật phẩm Power-Up xuất hiện ngẫu nhiên trên đường và hỗ trợ chơi lại tức thì (`R`).
+### ⚔️ 2. Local 2-Player Versus (1v1 Split Keyboard)
+- Shared keyboard split-screen competition (`WASD` for Player 1 vs `Arrow Keys` for Player 2).
+- Independent health bars (HP), stamina meters, skill cooldowns, and round win counters (`P1` vs `P2`).
+- Real-time power-up contest in traffic lanes with instant rematch capability (`R`).
 
-### 🤖 3. VS Bot AI (Đua Tốc Độ Với Trí Tuệ Nhân Tạo)
-- Thi đấu với đối thủ Bot tự động vận hành bởi thuật toán **Spatio-Temporal A\*** (tìm đường không-thời gian dự đoán va chạm):
-  - **Easy:** Tốc độ di chuyển vừa phải, thong thả qua đường, thích hợp cho người mới làm quen.
-  - **Normal:** Tốc độ tương đương người chơi, biết tính toán nhịp đèn giao thông và chủ động nhặt buff.
-  - **Hard:** Cập nhật quỹ đạo liên tục ở tần số 16.6Hz, né tránh siêu chuẩn xác (micro-dodging), không phạm sai lầm.
-- Bảng điều khiển HUD hiển thị song song trạng thái Bot (`RACING`, `FROZEN`, `ELIMINATED`), lượng máu và tiến độ về đích.
+### 🤖 3. VS Bot AI (Smart Adversary)
+- Race against an autonomous AI opponent powered by **Spatio-Temporal A\*** (space-time search with forward trajectory prediction):
+  - **Easy:** Relaxed pace, safe crossings, beginner-friendly.
+  - **Normal:** Matches player speed, performs lane-gap timing, and actively collects power-ups.
+  - **Hard:** 16.6Hz lookahead updates, micro-dodging, zero mistakes, and aggressive path optimization.
+- Real-time dual telemetry HUD tracking bot status (`RACING`, `FROZEN`, `ELIMINATED`), health, and progress.
 
-### ♾️ 4. Endless Chrono Mode (Chế Độ Sinh Tồn Vô Tận)
-- Vượt ải vô hạn qua các dòng thời gian với cấp số nhân điểm thưởng.
-- Tốc độ di chuyển của vật cản và tần suất xuất hiện thảm họa gia tăng lũy tiến theo từng Wave.
-- Tự động lưu trữ điểm kỷ lục cao nhất (High Score Persistence) cùng huy hiệu Wave đã đạt.
+### ♾️ 4. Endless Chrono Mode
+- Infinite wave progression across eras with escalating score multipliers.
+- Dynamic hazards and obstacle speeds scale exponentially as waves progress.
+- High score persistence with highest wave reached saved to disk.
 
 ---
 
-## ⚡ 4. Kỹ Năng Chủ Động & Vật Phẩm (Skills & Items)
+## ⚡ 4. Active Skills & Items
 
-### 🔮 Bộ Kỹ Năng Chủ Động (Active Skills)
-| Kỹ Năng | Phím P1 | Phím P2 | Thời Gian | Hồi Chiêu | Hiệu Ứng Chi Tiết |
+### 🔮 Active Character Skills
+| Skill | P1 Key | P2 Key | Duration | Cooldown | Effect Details |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Sprint** | `LShift` | `RShift` / `RCtrl` | Khi giữ | Hồi tự động | Tăng +50% tốc độ di chuyển, tiêu hao thanh Thể lực (Stamina). |
-| **Speed Surge** | `E` / `Space` | `I` / `[` | 5.0 giây | 10.0 giây | Tăng +50% tốc độ chạy kèm hào quang sấm sét xung quanh nhân vật. |
-| **Coin Magnet Radar** | `Q` | `K` / `]` / `O` | 6.0 giây | 10.0 giây | Phát sóng radar hút toàn bộ xu trong bán kính 700px và làm chậm vật cản xung quanh. |
-| **Time Freeze Clock** | `T` | `L` / `\` | 5.0 giây | 12.0 giây | Ngưng đọng thời gian, làm tê liệt toàn bộ xe cộ, sinh vật và thảm họa trên bản đồ. |
+| **Sprint** | `LShift` | `RShift` / `RCtrl` | Hold key | Auto-recharge | +50% movement speed consuming Stamina. Recharges when walking or idle. |
+| **Speed Surge** | `E` / `Space` | `I` / `[` | 5.0s | 10.0s | +50% speed boost with lightning aura and trail VFX. |
+| **Coin Magnet Radar** | `Q` | `K` / `]` / `O` | 6.0s | 10.0s | Emits a radar pulse that pulls all coins within 700px and slows nearby hazards. |
+| **Time Freeze Clock** | `T` | `L` / `\` | 5.0s | 12.0s | Freezes time, paralyzing all vehicles, animals, and hazards across the map. |
 
-### 🎁 Vật Phẩm Nhặt Trên Làn Đường (In-Lane Power-Ups)
-- 🧲 **Magnet Orb (Xanh lam):** Hút toàn bộ đồng xu trên màn hình về phía người chơi trong 8s.
-- ⏱️ **Time Stop (Đồng hồ cát):** Làm chậm 85% tốc độ của toàn bộ xe cộ và chướng ngại vật trong 4s.
-- 🔥 **Speed Boost (Ngọn lửa):** Gia tăng 60% tốc độ di chuyển kèm vệt lửa lướt gió trong 6s.
-- 🛡️ **Bubble Shield (Bong bóng năng lượng):** Miễn nhiễm hoàn toàn 1 lần va chạm chí mạng và chống hiệu ứng giật lùi.
-- ⭐ **2X Multiplier (Huy chương vàng):** Nhân đôi toàn bộ số vàng và điểm số ghi được trong 10s.
+### 🎁 In-Lane Floating Collectibles
+- 🧲 **Magnet Orb (Blue):** Pulls all coins on the map toward the player for 8s.
+- ⏱️ **Time Stop (Clock):** Slows down 85% of traffic, animals, and hazards for 4s.
+- 🔥 **Speed Boost (Flame):** +60% movement speed with an energetic flame trail for 6s.
+- 🛡️ **Bubble Shield (Orb):** Grants complete immunity against 1 fatal collision + knockback protection.
+- ⭐ **2X Multiplier (Medal):** Doubles all gold and score points earned for 10s.
 
-### 🛒 Cửa Hàng Trang Bị (Item Shop)
-- **Energy Shield (250 Coins):** Khiên năng lượng sử dụng 1 lần, cứu mạng khi xảy ra tai nạn.
-- **Speed Boots (400 Coins):** Tăng vĩnh viễn +15% tốc độ cơ bản và mở khóa kỹ năng Speed Surge (`E`).
-- **Time Extender (350 Coins):** Cộng thêm +8 giây giới hạn thời gian mỗi màn và mở khóa kỹ năng Time Freeze (`T`).
-- **Coin Magnet Radar (500 Coins):** Giảm 15% tốc độ nguy hiểm xung quanh và mở khóa kỹ năng Radar (`Q`).
-- **Extra Heart (1500 Coins):** Mua thêm 1 tim tối đa và hồi đầy toàn bộ thanh máu.
+### 🛒 Item Shop (Main Menu & Level Clear)
+- **Energy Shield (250 Coins):** Single-use consumable energy shield absorbing 1 fatal collision.
+- **Speed Boots (400 Coins):** Permanent +15% base movement speed & unlocks the Speed Surge skill (`E`).
+- **Time Extender (350 Coins):** +8s level time limit bonus & unlocks the Time Freeze skill (`T`).
+- **Coin Magnet Radar (500 Coins):** -15% passive hazard speed slowdown & unlocks the Radar skill (`Q`).
+- **Extra Heart (1500 Coins):** Expands maximum HP capacity and fully restores player health.
 
 ---
 
-## 🌪️ 5. Thảm Họa Thiên Tai Động (Dynamic Level Hazards)
+## 🌪️ 5. Historical Eras & Dynamic Level Hazards
 
-| Cấp Độ | Kỷ Nguyên | Vật Cản Mặt Đất | Vật Thể Trên Không | Thảm Họa Thiên Tai Đặc Trưng | Hoạt Ảnh Tử Vong (Death VFX) |
+| Level | Era | Ground Obstacles | Flying Objects | Catastrophic Hazard | Death Cutscene (VFX) |
 | :---: | :--- | :--- | :--- | :--- | :--- |
-| **Level 1** | **Thời Tiền Sử** *(Prehistoric)* | Khủng long bạo chúa, Voi ma mút | Chim cổ đại Pterodactyl | **Dino Stampede Surge**<br>Đàn khủng long tràn qua các làn đường kèm rung chấn dữ dội. | Quái vật đầm lầy trồi lên cắn xé *(Swamp Monster Chomp)* |
-| **Level 2** | **Ai Cập Cổ Đại** *(Ancient Egypt)* | Lạc đà sa mạc, Tượng Nhân sư | Chim ưng Horus, Kền kền Ai Cập | **Sandstorm Wind Drift**<br>Bão cát cuồng phong làm mờ màn hình và tạo lực gió đẩy trôi người chơi. | Lún chìm vào cát lún sa mạc *(Quicksand Sink)* |
-| **Level 3** | **Thời Trung Cổ** *(Medieval Kingdom)* | Xe ngựa chiến, Xe kéo, Khúc gỗ lăn | Mũi tên xạ thủ, Đàn quạ đen | **Flaming Arrow Rain**<br>Mưa tên lửa rực cháy trút xuống ngẫu nhiên từ bầu trời theo tâm cảnh báo. | Cuốn bay trong lốc xoáy lá phong *(Leaf Whirlwind)* |
-| **Level 4** | **Hiện Đại** *(Modern Metropolis)* | Xe hơi thể thao, Xe buýt, Xe máy | Máy bay phản lực, Tên lửa tầm nhiệt | **Rush Hour & Thunderstorm**<br>Giờ cao điểm xe tăng tốc đột biến kết hợp sấm sét giáng thẳng xuống làn. | Tan biến thành làn khói đen *(Smoke Dissolve)* |
-| **Level 5** | **Tương Lai** *(Cyber Future)* | Xe điện thông minh, Tàu Hyperloop | Đĩa bay UFO, Drone chiến đấu, Xe bay | **Singularity Black Hole & Lasers**<br>Lỗ đen vũ trụ hút mọi vật thể cùng các chùm tia laser tử thần quét ngang. | Bị phân rã thành hạt Plasma *(Plasma Disintegration)* |
+| **Level 1** | **Prehistoric Jungle** | Tyrannosaurus Rex, Mammoths | Ancient Pterodactyls | **Dino Stampede Surge**<br>Herds stampede across lanes with screen-shaking seismic rumbles. | Devoured by Swamp Monster *(Swamp Monster Chomp)* |
+| **Level 2** | **Ancient Egyptian Empire** | Desert Camels, Sphinx Statues | Horus Eagles, Vultures | **Sandstorm Wind Drift**<br>Violent sandstorms obscure vision and generate wind forces that drift the player. | Swallowed by Quicksand *(Quicksand Sink)* |
+| **Level 3** | **Medieval Kingdom** | Warhorses, Wooden Logs, Rickshaws | Arrow Volleys, Raven Flocks | **Flaming Arrow Rain**<br>Flaming arrows rain down from above targeting red warning reticles. | Swept away in autumn leaves *(Leaf Whirlwind)* |
+| **Level 4** | **Modern Metropolis** | Supercars, Transit Buses, Motorbikes | Jetliners, Guided Missiles | **Rush Hour & Thunderstorm**<br>Sudden traffic surges coupled with lethal vertical lightning strikes. | Dissolved into dark smoke *(Smoke Dissolve)* |
+| **Level 5** | **Cybernetic Future** | Smart Electric Cars, Hyperloop Trains | Alien UFOs, Combat Drones, Flying Cars | **Singularity Black Hole & Lasers**<br>Gravitational singularity pulls entities while lethal laser beams sweep across lanes. | Disintegrated by Plasma *(Plasma Disintegration)* |
 
 ---
 
-## ⌨️ 6. Bảng Phím Điều Khiển (Controls Guide)
+## ⌨️ 6. Controls Guide
 
-### Điều Khiển Người Chơi (Gameplay Controls)
-| Phím Nhấn | Thao Tác / Chức Năng |
+### Gameplay Controls
+| Key | Action / Function |
 | :--- | :--- |
-| **`W` `A` `S` `D`** | Player 1 / Chế độ Đơn: Di chuyển Lên / Trái / Xuống / Phải |
-| **`LShift`** | Player 1: Tăng tốc chạy nhanh (Sprint - tiêu hao Thể lực) |
-| **`E` / `Space`** | Player 1: Kích hoạt kỹ năng Tăng Tốc (Speed Surge) |
-| **`Q`** | Player 1: Kích hoạt kỹ năng Sóng Radar Hút Xu (Magnet Radar) |
-| **`T`** | Player 1: Kích hoạt kỹ năng Đóng Băng Thời Gian (Time Freeze Clock) |
-| **`1` `2` `3` `4`** | Phím tắt sử dụng nhanh trang bị trong túi đồ (Khiên, Giày, Đồng hồ, Radar) |
-| **`↑` `←` `↓` `→`** | Player 2 (Chế độ 2 Người): Di chuyển Lên / Trái / Xuống / Phải |
-| **`RShift` / `RCtrl` / `Num 0`** | Player 2: Tăng tốc chạy nhanh (Sprint) |
-| **`I` / `[`** | Player 2: Kỹ năng Tăng Tốc (Speed Surge) |
-| **`K` / `]` / `O`** | Player 2: Kỹ năng Sóng Radar Hút Xu |
-| **`L` / `\`** | Player 2: Kỹ năng Đóng Băng Thời Gian |
+| **`W` `A` `S` `D`** | Player 1 / Single Player Movement (Up / Left / Down / Right) |
+| **`LShift`** | Player 1: Sprint (Consumes Stamina) |
+| **`E` / `Space`** | Player 1: Speed Surge Skill |
+| **`Q`** | Player 1: Coin Magnet Radar Skill |
+| **`T`** | Player 1: Time Freeze Clock Skill |
+| **`1` `2` `3` `4`** | Inventory Quick Use (Shield, Boots, Time Extender, Radar) |
+| **`↑` `←` `↓` `→`** | Player 2 Movement (2-Player Mode) |
+| **`RShift` / `RCtrl` / `Num 0`** | Player 2: Sprint (2-Player Mode) |
+| **`I` / `[`** | Player 2: Speed Surge Skill |
+| **`K` / `]` / `O`** | Player 2: Coin Magnet Radar Skill |
+| **`L` / `\`** | Player 2: Time Freeze Clock Skill |
 
-### Phím Chức Năng Hệ Thống (System & Utility Hotkeys)
-| Phím Nhấn | Thao Tác / Chức Năng |
+### System & Utility Hotkeys
+| Key | Action / Function |
 | :--- | :--- |
-| **`P`** | Tạm dừng trò chơi (Pause) / Bảng điều chỉnh âm lượng BGM & SFX |
-| **`R`** | Chơi lại màn chơi hiện tại (Quick Restart / Rematch) |
-| **`S`** | Mở Cửa Hàng Vật Phẩm tại màn hình chiến thắng hoặc xóa màn |
-| **`M`** | Mở bảng xác nhận quay về Menu chính |
-| **`ESC`** | Trở về trang trước / Mở bảng xác nhận thoát game |
-| **`Enter` / `Space`** | Bỏ qua nhanh đoạn phim chuyển cảnh (Skip Cutscene) |
-| **`F1` — `F3`** | Lưu game nhanh vào Ô Lưu Trữ (Slot 1 — Slot 3) |
-| **`F4` — `F6`** | Tải game nhanh từ Ô Lưu Trữ (Slot 1 — Slot 3) |
-| **`F11` / `Alt + Enter`** | Bật / Tắt chế độ Toàn màn hình (Fullscreen Toggle) |
-| **`V`** | Bật / Tắt hiển thị khung va chạm (Debug Hitboxes) |
+| **`P`** | Pause Game / Audio Settings (BGM & SFX Sliders) |
+| **`R`** | Quick Restart / Rematch Current Level |
+| **`S`** | Open Item Shop (Level Clear / Victory Screen) |
+| **`M`** | Open Return to Main Menu Confirmation |
+| **`ESC`** | Back / Open Quit Confirmation Dialog |
+| **`Enter` / `Space`** | Skip Cutscene |
+| **`F1` — `F3`** | Quick Save to Slot 1 — Slot 3 |
+| **`F4` — `F6`** | Quick Load from Slot 1 — Slot 3 |
+| **`F11` / `Alt + Enter`** | Toggle Fullscreen Mode |
+| **`V`** | Toggle Hitbox Debug Overlay |
 
 ---
 
-## 🛠️ 7. Bảng Lệnh Nhà Phát Triển (Developer Console & Cheats)
+## 🛠️ 7. Developer Console & Cheat Codes
 
-> Nhấn phím **`~`** (hoặc `` ` ``, `F8`, `F9`, `F12`, `Tab`, `]`, `/`) trong khi chơi để mở thanh nhập lệnh Developer Console.
+> Press **`~`** (or `` ` ``, `F8`, `F9`, `F12`, `Tab`, `]`, `/`) during gameplay to toggle the interactive Developer Command Console.
 
-| Cú Pháp Lệnh | Chức Năng & Kết Quả Thực Thi |
+| Command | Description & Execution Result |
 | :--- | :--- |
-| `god` / `invuln` | Bật / Tắt chế độ Bất Tử *(God Mode - Infinite Invulnerability)* |
-| `coins <Số_Lượng>` | Thêm ngay số tiền vàng mong muốn (Ví dụ: `coins 5000`) |
-| `hp <Số_Tim>` | Đặt lượng máu tối đa của người chơi từ 1 đến 10 tim (Ví dụ: `hp 5`) |
-| `heal` | Hồi phục 100% HP và đầy đủ thanh năng lượng Thể lực |
-| `level <1-5>` / `lvl <1-5>` | Dịch chuyển tức thời đến Màn chơi chỉ định (Ví dụ: `level 5`) |
-| `skill all` / `buy all` | Mở khóa toàn bộ vật phẩm trong Shop và mở full kỹ năng |
-| `nrg` / `energy` | Hồi phục tức thì 100% thanh Thể lực (Stamina) |
-| `score <Số_Điểm>` | Cộng trực tiếp điểm số vào điểm hiện tại (Ví dụ: `score 1000`) |
-| `help` | Hiển thị danh sách tóm tắt toàn bộ câu lệnh console |
+| `god` / `invuln` | Toggle God Mode *(Infinite Invulnerability)* |
+| `coins <Amount>` | Add coins to the active profile (e.g. `coins 5000`) |
+| `hp <Amount>` | Set player maximum HP between 1 and 10 hearts (e.g. `hp 5`) |
+| `heal` | Fully restore player HP and Stamina energy |
+| `level <1-5>` / `lvl <1-5>` | Teleport immediately to the specified level (e.g. `level 5`) |
+| `skill all` / `buy all` | Unlock all shop items and enable all active skills |
+| `nrg` / `energy` | Instantly refill Stamina energy to 100% |
+| `score <Amount>` | Add points directly to the current game score (e.g. `score 1000`) |
+| `help` | Display list of all available console commands |
 
 ---
 
-## 🎬 8. Hệ Thống Credits Phong Cách Điện Ảnh (Movie Roll)
+## 🎬 8. Cinematic Movie Roll Credits
 
-Truy cập mục **CREDITS** từ Menu chính để trải nghiệm hệ thống cuộn thông tin tri ân phong cách phim chiếu rạp:
-- **Tự động cuộn mượt mà:** Trình bày thông tin Trường ĐH KHTN (HCMUS), Bộ môn OOP, Chân dung thành viên, Chi tiết module phụ trách và Lời cảm ơn.
-- **Điều khiển tiện lợi:**
-  - `Space` hoặc nút trên màn hình: Chuyển đổi tốc độ cuộn **1X / 3X**.
-  - `P`: Tạm dừng / Tiếp tục cuộn (Pause / Resume).
-  - `R`: Khởi động cuộn lại từ đầu (Restart).
-  - `Cuộn chuột` hoặc `W`/`S` (`↑`/`↓`): Kéo xem vị trí bất kỳ tùy ý.
-  - `ESC`: Trở về Main Menu.
+Select **CREDITS** from the Main Menu to view the cinematic rolling credits sequence:
+- **Smooth Auto-Scroll:** Features university credentials, OOP faculty acknowledgments, development team portraits, module breakdowns, and special thanks.
+- **Interactive Controls:**
+  - `Space` or on-screen button: Toggle scroll speed between **1X / 3X**.
+  - `P`: Pause / Resume scrolling.
+  - `R`: Restart credits roll from the beginning.
+  - `Mouse Scroll` or `W`/`S` (`↑`/`↓`): Manual position scrolling.
+  - `ESC`: Return to Main Menu.
 
 ---
 
-## 🏗️ 9. Kiến Trúc Hướng Đối Tượng (OOP & Project Architecture)
+## 🏗️ 9. Software Architecture & OOP Design
 
-### Cấu Trúc Mã Nguồn Chuẩn Hóa
+### Project Directory Structure
 ```text
 Crossing Street/
-├── CMakeLists.txt              # Cấu hình biên dịch CMake đa nền tảng
-├── build.sh                    # Kịch bản tự động build & run trên macOS
-├── build.bat                   # Kịch bản tự động build & run trên Windows
-├── assets/                     # Tài nguyên hình ảnh, âm thanh, font chữ
-│   ├── background/             # Hình nền 5 màn chơi
-│   ├── credits/                # Ảnh chân dung thành viên nhóm
-│   ├── font/                   # Pixel Operator font
-│   ├── hazards/                # Sprite sheet hoạt ảnh thảm họa 12 frames
-│   ├── shop/                   # Icon và animation hiệu ứng shop & kỹ năng
-│   ├── sounds/                 # Âm nhạc BGM và âm thanh SFX cho từng thời kỳ
-│   ├── sprites/                # Nhân vật, xe cộ, thú và vật thể bay
-│   └── ui/                     # Nút bấm, khung thoại, HUD, pop-up
-├── saves/                      # Thư mục chứa file lưu game & kỷ lục High Score
-└── src/                        # Toàn bộ mã nguồn C++
-    ├── main.cpp                # Điểm khởi chạy chương trình (Entry point)
-    ├── ai/                     # Trí tuệ nhân tạo
-    │   ├── BotAI.h/.cpp        # Thuật toán Spatio-Temporal A* & né tránh va chạm
-    ├── core/                   # Hạt nhân động cơ game
-    │   ├── CGAME.h/.cpp        # Vòng lặp chính, quản lý State, render, phím bấm, dev console
-    │   ├── SaveData.h/.cpp     # Đọc/ghi tuần tự hóa file lưu trữ (Slot 1-3)
-    │   ├── SoundManager.h/.cpp # Động cơ âm thanh, BGM ducking, SFX mixer
-    │   └── TextureManager.h/.cpp # Bộ nhớ đệm tài nguyên hình ảnh (Texture Cache)
-    ├── cutscenes/              # Hệ thống hoạt họa & chuyển cảnh
-    │   ├── Animation.h/.cpp    # Bộ điều khiển cắt frame Sprite Sheet
-    │   ├── ElevatorCutscene.h/.cpp # Chuyển cảnh thang máy thời gian
-    │   ├── DeathCutscene.h/.cpp    # 5 hoạt ảnh tử vong đặc thù từng kỷ nguyên
-    │   └── CollisionEffect.h/.cpp  # Hiệu ứng nổ hạt khi xảy ra va chạm
-    ├── entities/               # Thực thể trò chơi
-    │   ├── base/               # Lớp cơ sở (CPEOPLE, CANIMAL, CVEHICLE, CTRAFFICLIGHT, PlayerStats)
-    │   ├── EntityManager.h/.cpp# Quản lý vòng đời làn đường, spawn & kiểm tra va chạm
-    │   ├── CoinManager.h/.cpp  # Phân phối tiền vàng & cơ chế hút nam châm
-    │   ├── PowerUpManager.h/.cpp # Quản lý buff nhặt trong làn đường & đếm giờ hiệu ứng
-    │   └── obstacles/          # Lớp kế thừa chướng ngại vật theo từng kỷ nguyên (lv1 -> lv5)
-    ├── hazards/                # Thảm họa môi trường động
+├── CMakeLists.txt              # Cross-platform CMake build configuration
+├── build.sh                    # Automated build & launch script for macOS
+├── build.bat                   # Automated build & launch script for Windows
+├── assets/                     # Game textures, audio, fonts, and UI assets
+│   ├── background/             # 5 Era background images
+│   ├── credits/                # Team member avatar portraits
+│   ├── font/                   # Pixel Operator font family
+│   ├── hazards/                # 12-frame animated hazard spritesheets
+│   ├── shop/                   # Shop icons, skill VFX animations
+│   ├── sounds/                 # Era-specific BGM tracks and SFX clips
+│   ├── sprites/                # Characters, vehicles, animals, and airborne obstacles
+│   └── ui/                     # Buttons, dialog boxes, HUD textures
+├── saves/                      # Persistent save slots & high score storage
+└── src/                        # C++ Source and Header Files
+    ├── main.cpp                # Application entry point
+    ├── ai/                     # Artificial Intelligence
+    │   ├── BotAI.h/.cpp        # Spatio-Temporal A* pathfinding & hazard lookahead
+    ├── core/                   # Game Engine Core
+    │   ├── CGAME.h/.cpp        # Main game loop, state machine, rendering, dev console
+    │   ├── SaveData.h/.cpp     # Save/load file serialization (Slots 1-3)
+    │   ├── SoundManager.h/.cpp # Multi-channel audio engine with dynamic ducking
+    │   └── TextureManager.h/.cpp # Texture resource cache and memory manager
+    ├── cutscenes/              # Cinematic Sequences & Animations
+    │   ├── Animation.h/.cpp    # Spritesheet frame animation controller
+    │   ├── ElevatorCutscene.h/.cpp # Mechanical time elevator transitions
+    │   ├── DeathCutscene.h/.cpp    # 5 era-tailored animated death cutscenes
+    │   └── CollisionEffect.h/.cpp  # Particle explosion effects upon collision
+    ├── entities/               # Entity Model Hierarchy
+    │   ├── base/               # Base classes (CPEOPLE, CANIMAL, CVEHICLE, CTRAFFICLIGHT, PlayerStats)
+    │   ├── EntityManager.h/.cpp# Lane lifecycle, entity spawning & collision detection
+    │   ├── CoinManager.h/.cpp  # Coin distribution & magnetic suction physics
+    │   ├── PowerUpManager.h/.cpp # Lane collectibles & active buff timers
+    │   └── obstacles/          # Era-specific derived entity classes (lv1 -> lv5)
+    ├── hazards/                # Catastrophic Dynamic Hazards
     │   └── HazardManager.h/.cpp# Stampede, Sandstorm, Arrow Rain, Thunderstorm, Black Hole
-    ├── levels/                 # Cấu hình dữ liệu màn chơi
-    │   └── LevelConfig.h/.cpp  # Tham số tốc độ, số làn, texture, audio từng thời kỳ
-    ├── ui/                     # Giao diện người dùng
-    │   ├── HUD.h/.cpp          # Thanh máu, thể lực, điểm số, thời gian, bot telemetry
-    │   ├── Menu.h/.cpp         # Main menu, Pause, Challenges, Shop, Settings, Credits
-    │   ├── MenuButton.h        # Nút bấm UI với hiệu ứng phóng to hover động
-    │   └── UIText.h            # Tiện ích định dạng và căn chỉnh văn bản
-    └── utils/                  # Tiện ích bổ trợ
-        ├── HighScore.h/.cpp    # Quản lý điểm kỷ lục vĩnh viễn
-        ├── ShopData.h/.cpp     # Quản lý tài chính, giao dịch và trạng thái túi đồ
-        └── Utils.h             # Hằng số toàn cục, kích thước cửa sổ & cấu hình thời gian
+    ├── levels/                 # Level Configuration
+    │   └── LevelConfig.h/.cpp  # Per-era parameters, speeds, lane setups, and audio
+    ├── ui/                     # User Interface
+    │   ├── HUD.h/.cpp          # Dual telemetry HUD, health, stamina, timers, scores
+    │   ├── Menu.h/.cpp         # Main menu, pause, challenges, shop, settings, credits
+    │   ├── MenuButton.h        # Interactive UI buttons with hover scaling
+    │   └── UIText.h            # Styled text helpers and alignment utilities
+    └── utils/                  # Utility Services
+        ├── HighScore.h/.cpp    # High score file I/O persistence
+        ├── ShopData.h/.cpp     # Economic state, purchases, and slot persistence
+        └── Utils.h             # Global constants, window dimensions & timing
 ```
 
-### Các Nguyên Lý & Mẫu Thiết Kế OOP Được Áp Dụng:
-1. **Encapsulation (Đóng Gói):** Toàn bộ trạng thái nội bộ của nhân vật (`CPEOPLE`), động cơ âm thanh (`SoundManager`), các thực thể (`CANIMAL`, `CVEHICLE`) và cửa hàng (`ShopData`) được bảo vệ bằng phạm vi `private`, chỉ tương tác qua các phương thức giao tiếp rõ ràng.
-2. **Inheritance (Kế Thừa):** Hệ thống chướng ngại vật phong phú kế thừa chặt chẽ từ hai lớp cơ sở trừu tượng `CANIMAL` và `CVEHICLE`.
-3. **Polymorphism (Đa Hình):** Cơ chế gọi hàm ảo (`virtual void Draw()`, `virtual void Move()`, `virtual void update()`) cho phép `EntityManager` xử lý đồng nhất hàng chục loại vật thể khác nhau trên cùng một danh sách làn xe.
-4. **Abstraction (Trừu Tượng Hóa):** `CGAME` được giải phóng hoàn toàn khỏi logic chi tiết nhờ các bộ quản lý độc lập (`HazardManager`, `PowerUpManager`, `CoinManager`, `EntityManager`).
+### Applied OOP Principles & Design Patterns:
+1. **Encapsulation:** Internal properties of characters (`CPEOPLE`), audio engines (`SoundManager`), entities (`CANIMAL`, `CVEHICLE`), and shop state (`ShopData`) are strictly protected via private members with controlled public interfaces.
+2. **Inheritance:** Derived obstacles across all 5 eras inherit from abstract base classes `CANIMAL` and `CVEHICLE`.
+3. **Polymorphism:** Dynamic virtual dispatch (`virtual void Draw()`, `virtual void Move()`, `virtual void update()`) enables `EntityManager` to uniformly process dozens of heterogeneous entities within shared lane structures.
+4. **Abstraction & Decoupling:** `CGAME` is decoupled from low-level subsystem logic through specialized managers (`HazardManager`, `PowerUpManager`, `CoinManager`, `EntityManager`).
 5. **Design Patterns:**
-   - **Singleton Pattern:** Quản lý chia sẻ bộ nhớ đệm hình ảnh tập trung (`TextureManager`).
-   - **Factory Pattern:** Tự động khởi tạo cấu hình màn chơi, vật cản và môi trường tương ứng theo từng kỷ nguyên từ `LevelConfig`.
-   - **State Machine Pattern:** Chuyển đổi mượt mà giữa các trạng thái game: Menu chính, Đang chơi, Tạm dừng, Xem Cửa hàng, Chuyển cảnh Thang máy, Tử vong, Chiến thắng, Credits.
+   - **Singleton Pattern:** Global resource management via `TextureManager`.
+   - **Factory Pattern:** Dynamic instantiation of era-specific obstacles and configurations via `LevelConfig`.
+   - **State Machine Pattern:** Smooth transitions across states: Main Menu, In-Game, Paused, Shop, Elevator Cutscene, Dying, Victory, and Credits.
 
 ---
 
-## 💻 10. Hướng Dẫn Biên Dịch & Chạy Game (Build & Run)
+## 💻 10. Build & Run Instructions
 
-### 🍎 Dành cho macOS
+### 🍎 macOS
 
-**Yêu cầu môi trường:** Đã cài đặt `cmake`, `clang` và thư viện `sfml@2` qua Homebrew.
+**Prerequisites:** `cmake`, `clang`, and `sfml@2` installed via Homebrew.
 
 ```bash
-# 1. Cài đặt thư viện SFML qua Homebrew (nếu chưa có)
+# 1. Install prerequisites via Homebrew (if not already installed)
 brew install sfml@2 cmake
 
-# 2. Cấp quyền thực thi cho kịch bản biên dịch
+# 2. Grant execution permissions to build script
 chmod +x build.sh
 
-# 3. Biên dịch và tự động khởi chạy game
+# 3. Build and launch the game
 ./build.sh run
 ```
 
-*Tùy chọn lệnh hỗ trợ:*
-- `./build.sh` : Chỉ biên dịch dự án.
-- `./build.sh clean` : Dọn dẹp thư mục build cũ.
-- `./build.sh clean run` : Dọn dẹp sạch sẽ, biên dịch lại từ đầu và khởi chạy.
+*Useful build options:*
+- `./build.sh` : Compile project only.
+- `./build.sh clean` : Remove previous build artifacts.
+- `./build.sh clean run` : Perform clean rebuild and run.
 
 ---
 
-### 🪟 Dành cho Windows
+### 🪟 Windows
 
-**Yêu cầu môi trường:** Visual Studio 2022 (với gói *Desktop development with C++*), CMake 3.16+ và bộ thư viện SFML 2.6.2 (đặt tại `C:\SFML-2.6.2` hoặc thiết lập biến môi trường `SFML_DIR`).
+**Prerequisites:** Visual Studio 2022 (with *Desktop development with C++* workload), CMake 3.16+, and SFML 2.6.2 (located at `C:\SFML-2.6.2` or referenced by the `SFML_DIR` environment variable).
 
 ```cmd
-:: 1. Chạy kịch bản tự động cấu hình CMake, biên dịch Release và copy DLLs
+:: 1. Run automated CMake configuration, Release build, and DLL deployment
 build.bat run
 ```
 
-*Tùy chọn lệnh hỗ trợ:*
-- `build.bat` : Biên dịch dự án ra file `build_win/Release/CrossingGame.exe`.
-- `build.bat clean run` : Xóa bản build cũ, cấu hình và chạy lại.
+*Useful build options:*
+- `build.bat` : Build project binary to `build_win/Release/CrossingGame.exe`.
+- `build.bat clean run` : Clean previous build, reconfigure, and run.
 
 ---
 
-## 🏫 11. Thông Tin Môn Học (Course Information)
+## 🏫 11. Academic Course Information
 
-- **Môn học:** Lập Trình Hướng Đối Tượng (Object-Oriented Programming - OOP)
-- **Đơn vị đào tạo:** Khoa Công Nghệ Thông Tin (Faculty of Information Technology)
-- **Trường:** Trường Đại học Khoa học Tự nhiên — Đại học Quốc gia TP. Hồ Chí Minh (HCMUS)
-- **Năm thực hiện:** 2026
+- **Course:** Object-Oriented Programming (OOP)
+- **Department:** Faculty of Information Technology
+- **Institution:** Ho Chi Minh City University of Science, VNU-HCM (HCMUS)
+- **Academic Year:** 2026
 
 ---
 
 <div align="center">
-  <sub>Được thiết kế và phát triển với trọn vẹn tâm huyết bởi <b>Nhóm Đồ Án Crossing Street — HCMUS</b>. Chúc bạn có những giờ phút trải nghiệm game tuyệt vời!</sub>
+  <sub>Engineered with passion by the <b>Crossing Street Project Team — HCMUS</b>. Enjoy the timeline journey!</sub>
 </div>
